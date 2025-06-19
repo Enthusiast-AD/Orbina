@@ -1,0 +1,1 @@
+## To acces the evironment variable in vite we have to give the name to environment variable name starting from VITE_NAME and then to access we have to weite import.meta.env.VITE_NAME and this is different for every framework like for creat-react-app it is different you can use documentation of particular to read more 
