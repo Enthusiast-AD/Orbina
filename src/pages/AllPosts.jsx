@@ -33,7 +33,7 @@ function AllPosts() {
   }
 
   return (
-    <div className='w-full py-8'>
+    <div className='w-full py-8 min-h-screen'>
       <Container>
         <div className='flex flex-wrap'>
           {filteredPosts.length > 0 ? (

@@ -33,11 +33,11 @@ function Home() {
 
   if (filteredPosts.length === 0) {
     return (
-      <div className="w-full py-8 mt-4 text-center">
+      <div className=" flex w-full py-8 mt-4 items-center justify-center min-h-[75vh]">
         <Container>
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap ">
             <div className="p-2 w-full">
-              <h1 className="text-2xl font-bold text-gray-400">
+              <h1 className="text-3xl font-bold text-gray-400">
                 {posts.length === 0
                   ? 'Login to read posts'
                   : 'No posts match your search'}
@@ -50,7 +50,7 @@ function Home() {
   }
 
   return (
-    <div className='w-full py-8'>
+    <div className='w-full py-8 min-h-screen'>
       <Container>
         <div className='flex flex-wrap'>
           {filteredPosts.map((post) => (
