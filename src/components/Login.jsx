@@ -51,6 +51,7 @@ function Login() {
               label="Email: "
               placeholder="Enter your email"
               type="email"
+              className="focus:bg-gray-50 bg-white"
               {...register("email", {
                 required: true,
                 validate: {
@@ -63,6 +64,7 @@ function Login() {
               label="Password: "
               type="password"
               placeholder="Enter your password"
+              className="focus:bg-gray-50 bg-white"
               {...register("password", {
                 required: true,
               })}

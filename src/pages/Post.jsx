@@ -40,32 +40,32 @@ export default function Post() {
     return post ? (
         <div className="py-8">
             <Container>
-                <div className="w-full flex justify-center mb-4 relative border rounded-xl p-2">
+                <div className="w-full flex justify-between mb-4 relative border-0 rounded-xl p-2">
                     <img
                         src={appwriteService.getFileView(post.featuredImage)}
                         alt={post.title}
-                        className="rounded-xl"
+                        className="w-150  object-cover rounded-xl shadow-lg"
                     />
 
                     {isAuthor && (
                         <div className="absolute right-6 top-6">
                             <Link to={`/edit-post/${post.$id}`}>
-                                <Button bgColor="bg-green-500" className="mr-3">
+                                <Button bgColor="bg-green-500" className="mr-3 hover:bg-green-600 active:bg-green-700 cursor-pointer">
                                     Edit
                                 </Button>
                             </Link>
-                            <Button bgColor="bg-red-500" onClick={deletePost}>
+                            <Button bgColor="bg-red-500" onClick={deletePost} className="hover:bg-red-600 active:bg-red-700 cursor-pointer">
                                 Delete
                             </Button>
                         </div>
                     )}
-                </div>
-                <div className="w-full mb-6">
+                <div className="w-full mb-6 ml-6 bg-gray-800 text-white p-4 rounded-xl ">
                     <h1 className="text-2xl font-bold">{post.title}</h1>
-                </div>
-                <div className="browser-css">
+                <div className="browser-css mt-4">
                     {parse(post.content)}
-                    </div>
+                </div>
+                </div>
+                </div>
             </Container>
         </div>
     ) : null;

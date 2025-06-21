@@ -41,7 +41,11 @@ export default function PostForm({ post }) {
             if (file) {
                 const fileId = file.$id;
                 data.featuredImage = fileId;
-                const dbPost = await appwriteService.createPost({ ...data, userId: userData.$id });
+                const dbPost = await appwriteService.createPost({ 
+                    ...data, 
+                    userId: userData.$id, 
+                    userName: userData.name 
+                });
 
                 if (dbPost) {
                     navigate(`/post/${dbPost.$id}`);
@@ -76,14 +80,16 @@ export default function PostForm({ post }) {
             <div className="w-2/3 px-2">
                 <Input
                     label="Title :"
+                    labelClassName="text-white font-semibold text-2xl"
                     placeholder="Title"
-                    className="mb-4"
+                    className="mb-4 bg-gray-700 focus:bg-gray-600 text-white"
                     {...register("title", { required: true })}
                 />
                 <Input
                     label="Slug :"
+                    labelClassName="text-white "
                     placeholder="Slug"
-                    className="mb-4"
+                    className="mb-4 bg-gray-700 focus:bg-gray-600 text-white"
                     {...register("slug", { required: true })}
                     onInput={(e) => {
                         setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true });
@@ -94,8 +100,9 @@ export default function PostForm({ post }) {
             <div className="w-1/3 px-2">
                 <Input
                     label="Featured Image :"
+                    labelClassName="text-white text-2xl font-semibold"
                     type="file"
-                    className="mb-4"
+                    className="mb-4 bg-gray-700 focus:bg-gray-600 text-gray-400"
                     accept="image/png, image/jpg, image/jpeg, image/gif"
                     {...register("image", { required: !post })}
                 />
@@ -111,7 +118,7 @@ export default function PostForm({ post }) {
                 <Select
                     options={["active", "inactive"]}
                     label="Status"
-                    className="mb-4"
+                    className="mb-4 bg-gray-700 focus:bg-gray-600 text-white"
                     {...register("status", { required: true })}
                 />
                 <Button type="submit" bgColor={post ? "bg-green-500" : undefined} className="w-full">
