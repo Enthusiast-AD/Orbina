@@ -65,7 +65,7 @@ function Login() {
               required: true,
             })}
           />
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 cursor-pointer active:bg-blue-800 focus-visible:ring-blue-500">
             Sign In
           </Button>
         </form>

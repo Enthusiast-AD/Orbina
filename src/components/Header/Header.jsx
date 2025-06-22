@@ -1,29 +1,25 @@
-import React from 'react'
-import { Container, Logo, LogoutBtn } from '../index'
-import { Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import Search from './Search'
+"use client"
+
+import { useState } from "react"
+import { Container, LogoutBtn } from "../index"
+import { Link } from "react-router-dom"
+import { useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
+import {  Menu, X, User } from "lucide-react"
+import Search  from "./Search"
 
 function Header() {
   const authStatus = useSelector((state) => state.auth.status)
+  const userData = useSelector((state) => state.auth.userData)
   const navigate = useNavigate()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const navItems = [
     {
-      name: 'Home',
+      name: "Home",
       slug: "/",
-      active: true
-    },
-    {
-      name: "Login",
-      slug: "/login",
-      active: !authStatus,
-    },
-    {
-      name: "Signup",
-      slug: "/signup",
-      active: !authStatus,
+      active: true,
     },
     {
       name: "All Posts",
@@ -37,39 +33,184 @@ function Header() {
     },
   ]
 
+  const authItems = [
+    {
+      name: "Login",
+      slug: "/login",
+      active: !authStatus,
+    },
+    {
+      name: "Signup",
+      slug: "/signup",
+      active: !authStatus,
+    },
+  ]
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      // Implement search functionality
+      console.log("Searching for:", searchQuery)
+      // navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
+    }
+  }
 
   return (
-    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 transition-colors duration-300">
+    <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 sticky top-0 z-50">
       <Container>
-        <nav className='flex items-center justify-between h-16'>
-          <div className='flex items-center space-x-8'>
-            <div className='flex items-center space-x-2'>
-              <Link to='/'>
-                <Logo />
-              </Link>
-            </div>
-            <ul className='hidden md:flex space-x-6'>
+        <nav className="flex items-center justify-between h-16">
+          {/* Left Section - Logo & Navigation */}
+          <div className="flex items-center space-x-8">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="text-2xl font-bold text-white">Blogger</div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <ul className="hidden md:flex items-center space-x-6">
               {navItems.map((item) =>
                 item.active ? (
                   <li key={item.name}>
                     <button
                       onClick={() => navigate(item.slug)}
-                      className='text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 font-medium transition-colors cursor-pointer'
-                    >{item.name}</button>
+                      className="text-slate-300 hover:text-white font-medium transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-slate-800/50 cursor-pointer active:bg-slate-800/50"
+                    >
+                      {item.name}
+                    </button>
                   </li>
-                ) : null
+                ) : null,
               )}
             </ul>
           </div>
-          <div className='flex items-center space-x-4'>
-            <Search />
-            <div className='flex items-center space-x-2'>
-            {authStatus && (
-              <LogoutBtn />
-            )}
+
+          {/* Center Section - Search */}
+          <div className="hidden md:flex flex-1 max-w-md mx-8">
+            
+              <div className="relative">
+                <Search/>
+              </div>
+            
+          </div>
+
+          {/* Right Section - Auth & Profile */}
+          <div className="flex items-center space-x-4">
+            {/* Desktop Auth Section */}
+            <div className="hidden md:flex items-center space-x-3">
+              {authStatus ? (
+                <>
+                  <button
+                    onClick={() => navigate("/profile")}
+                    className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200 cursor-pointer active:bg-slate-800/50"
+                  >
+                    <User className="w-4 h-4 " />
+                    <span >Profile</span>
+                  </button>
+                  <LogoutBtn />
+                </>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  {authItems.map((item) =>
+                    item.active ? (
+                      <button
+                        key={item.name}
+                        onClick={() => navigate(item.slug)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer ${
+                          item.name === "Signup"
+                            ? "bg-blue-600 hover:bg-blue-700 text-white"
+                            : "text-slate-300 hover:text-white hover:bg-slate-800/50"
+                        }`}
+                      >
+                        {item.name}
+                      </button>
+                    ) : null,
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </nav>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-700/50 bg-slate-900/95 backdrop-blur-md">
+            <div className="px-4 py-4 space-y-4">
+              {/* Mobile Search */}
+              
+                <div className="relative">
+                  <Search />
+                </div>
+              
+
+              {/* Mobile Navigation */}
+              <div className="space-y-2">
+                {navItems.map((item) =>
+                  item.active ? (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        navigate(item.slug)
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="block w-full text-left px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+                    >
+                      {item.name}
+                    </button>
+                  ) : null,
+                )}
+              </div>
+
+              {/* Mobile Auth Section */}
+              <div className="pt-4 border-t border-slate-700/50 space-y-2">
+                {authStatus ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        navigate("/profile")
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="flex items-center space-x-2 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Profile</span>
+                    </button>
+                    <div className="px-3">
+                      <LogoutBtn />
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    {authItems.map((item) =>
+                      item.active ? (
+                        <button
+                          key={item.name}
+                          onClick={() => {
+                            navigate(item.slug)
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className={`block w-full px-3 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                            item.name === "Signup"
+                              ? "bg-purple-600 hover:bg-purple-700 text-white text-center"
+                              : "text-slate-300 hover:text-white hover:bg-slate-800/50 text-left"
+                          }`}
+                        >
+                          {item.name}
+                        </button>
+                      ) : null,
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </Container>
     </header>
   )

@@ -12,6 +12,8 @@ import PostForm from "./post-form/PostForm"
 import PostCard from "./PostCard"
 import AuthLayout from "./AuthLayout"
 import Select from "./Select"
+import Profile from "./Profile";
+import EditProfile from "./EditProfile";
 
 
 export {
@@ -29,4 +31,6 @@ export {
     PostCard,
     AuthLayout,
     Select,
+    Profile,
+    EditProfile, 
 }
