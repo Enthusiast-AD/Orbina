@@ -6,17 +6,18 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
-  User,
   Edit3,
   Trash2,
   Share2,
   Bookmark,
   Heart,
-  MessageCircle,
   Eye,
   ChevronUp,
+  MapPin,
+  ExternalLink,
 } from "lucide-react"
 import appwriteService from "../appwrite/config"
+import profileService from "../appwrite/profile"
 import { Button, Container } from "../components"
 import parse from "html-react-parser"
 import { useSelector } from "react-redux"
@@ -29,6 +30,8 @@ export default function Post() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
+  const [authorProfile, setAuthorProfile] = useState(null)
+  const [authorImageError, setAuthorImageError] = useState(false)
 
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -43,6 +46,10 @@ export default function Post() {
         .then((post) => {
           if (post) {
             setPost(post)
+            // Fetch author profile after getting post
+            if (post.userId) {
+              fetchAuthorProfile(post.userId)
+            }
           } else {
             navigate("/")
           }
@@ -53,6 +60,18 @@ export default function Post() {
       navigate("/")
     }
   }, [slug, navigate])
+
+  // Fetch author profile data
+  const fetchAuthorProfile = async (userId) => {
+    try {
+      const profile = await profileService.getProfile(userId)
+      if (profile) {
+        setAuthorProfile(profile)
+      }
+    } catch (error) {
+      console.error("Error fetching author profile:", error)
+    }
+  }
 
   // Reading progress tracker
   useEffect(() => {
@@ -116,9 +135,25 @@ export default function Post() {
     }
   }
 
+  // Get author display name (prioritize profile userName over post userName)
+  const getAuthorName = () => {
+    return authorProfile?.userName || post?.userName || "Anonymous"
+  }
+
+  // Get author initials for fallback avatar
+  const getAuthorInitials = (name) => {
+    if (!name || name === "Anonymous") return "A"
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
   if (isLoading) {
     return (
-      <div className="min-h-screen  flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
       </div>
     )
@@ -127,7 +162,7 @@ export default function Post() {
   if (!post) return null
 
   return (
-    <div className="min-h-screen 0">
+    <div className="min-h-screen ">
       {/* Reading Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-1 bg-slate-800 z-50">
         <div
@@ -152,6 +187,7 @@ export default function Post() {
               <button
                 onClick={handleShare}
                 className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors"
+                title="Share this post"
               >
                 <Share2 className="w-4 h-4" />
               </button>
@@ -159,11 +195,12 @@ export default function Post() {
                 onClick={() => setIsBookmarked(!isBookmarked)}
                 className={`p-2 rounded-lg transition-colors ${
                   isBookmarked
-                    ? "bg-purple-600 text-white"
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/25"
                     : "bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white"
                 }`}
+                title={isBookmarked ? "Remove bookmark" : "Bookmark this post"}
               >
-                <Bookmark className="w-4 h-4" />
+                <Bookmark className={`w-4 h-4 ${isBookmarked ? "fill-current" : ""}`} />
               </button>
             </div>
           </div>
@@ -212,19 +249,41 @@ export default function Post() {
 
           {/* Post Header */}
           <header className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">{post.title}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+              {post.title}
+            </h1>
 
             {/* Post Meta */}
             <div className="flex flex-wrap items-center gap-6 text-slate-400 mb-6">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
+              <Link
+                to={`/profile/${post.userId}`}
+                className="flex items-center gap-3 group hover:bg-slate-800/30 p-2 rounded-lg transition-all duration-200"
+              >
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-purple-400 transition-colors duration-200">
+                  {!authorImageError && authorProfile?.profileImage ? (
+                    <img
+                      src={
+                        profileService.getFileView
+                          ? profileService.getFileView(authorProfile.profileImage)
+                          : profileService.getProfileImageView?.(authorProfile.profileImage) || "/placeholder.svg"
+                      }
+                      alt={`${getAuthorName()}'s profile`}
+                      className="w-full h-full object-cover"
+                      onError={() => setAuthorImageError(true)}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                      <span className="text-white font-medium">{getAuthorInitials(getAuthorName())}</span>
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <p className="text-white font-medium">{post.userName || "Anonymous"}</p>
+                  <p className="text-white font-semibold group-hover:text-purple-300 transition-colors duration-200">
+                    {getAuthorName()}
+                  </p>
                   <p className="text-sm text-slate-400">Author</p>
                 </div>
-              </div>
+              </Link>
 
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
@@ -241,53 +300,120 @@ export default function Post() {
             <div className="flex items-center gap-4 p-4 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50">
               <button
                 onClick={() => setIsLiked(!isLiked)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
                   isLiked
-                    ? "bg-red-500/20 text-red-400"
+                    ? "bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10"
                     : "bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700"
                 }`}
               >
                 <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-                <span className="text-sm">Like</span>
-              </button>
-
-              <button className="flex items-center gap-2 px-3 py-2 bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
-                <MessageCircle className="w-4 h-4" />
-                <span className="text-sm">Comment</span>
+                <span className="text-sm font-medium">Like</span>
               </button>
 
               <button
                 onClick={handleShare}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200"
               >
                 <Share2 className="w-4 h-4" />
-                <span className="text-sm">Share</span>
+                <span className="text-sm font-medium">Share</span>
               </button>
             </div>
           </header>
 
           {/* Post Content */}
-          <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50">
-            <div className="prose prose-invert prose-purple max-w-none">
+          <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 shadow-xl">
+            <div className="prose prose-invert prose-purple max-w-none prose-headings:text-white prose-p:text-slate-200 prose-strong:text-white prose-code:text-purple-300 prose-code:bg-slate-700 prose-pre:bg-slate-800 prose-blockquote:border-purple-500 prose-blockquote:text-slate-300">
               <div className="text-slate-200 leading-relaxed text-lg">{parse(post.content)}</div>
             </div>
           </div>
 
+          {/* Author Profile Section */}
+          {authorProfile && (
+            <div className="mt-12 p-6 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50">
+              <h3 className="text-xl font-semibold text-white mb-4">About the Author</h3>
+              <div className="flex items-start gap-4">
+                <Link to={`/profile/${post.userId}`} className="flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-purple-500/30 hover:border-purple-400 transition-colors duration-200">
+                    {!authorImageError && authorProfile.profileImage ? (
+                      <img
+                        src={
+                          profileService.getFileView
+                            ? profileService.getFileView(authorProfile.profileImage)
+                            : profileService.getProfileImageView?.(authorProfile.profileImage) || "/placeholder.svg"
+                        }
+                        alt={`${getAuthorName()}'s profile`}
+                        className="w-full h-full object-cover"
+                        onError={() => setAuthorImageError(true)}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <span className="text-white font-medium text-lg">{getAuthorInitials(getAuthorName())}</span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
+
+                <div className="flex-1">
+                  <Link
+                    to={`/profile/${post.userId}`}
+                    className="text-xl font-semibold text-white hover:text-purple-300 transition-colors duration-200"
+                  >
+                    {getAuthorName()}
+                  </Link>
+                  {authorProfile.location && (
+                    <div className="flex items-center gap-1 text-slate-400 mt-1">
+                      <MapPin className="w-4 h-4" />
+                      <span>{authorProfile.location}</span>
+                    </div>
+                  )}
+                  {authorProfile.bio && <p className="text-slate-300 mt-2 leading-relaxed">{authorProfile.bio}</p>}
+
+                  {/* Author Social Links */}
+                  {(authorProfile.website ||
+                    authorProfile.twitter ||
+                    authorProfile.github ||
+                    authorProfile.linkedin) && (
+                    <div className="flex items-center gap-3 mt-4">
+                      {authorProfile.website && (
+                        <a
+                          href={
+                            authorProfile.website.startsWith("http")
+                              ? authorProfile.website
+                              : `https://${authorProfile.website}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-slate-400 hover:text-purple-400 transition-colors duration-200"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                      {/* Add other social links as needed */}
+                    </div>
+                  )}
+
+                  <Link
+                    to={`/profile/${post.userId}`}
+                    className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 text-sm mt-3 transition-colors duration-200 pl-1"
+                  >
+                    View Profile
+                    <ArrowLeft className="w-3 h-3 rotate-180" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Post Footer */}
           <footer className="mt-12 pt-8 border-t border-slate-700/50">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              {/* Author Info */}
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-white font-semibold">{post.userName || "Anonymous"}</h3>
-                  <p className="text-slate-400 text-sm">Published on {formatDate(post.$createdAt)}</p>
-                </div>
+              {/* Publication Info */}
+              <div className="text-slate-400">
+                <p className="text-sm">Published on {formatDate(post.$createdAt)}</p>
+                <p className="text-xs mt-1">Last updated: {formatDate(post.$updatedAt || post.$createdAt)}</p>
               </div>
 
-              {/* Tags/Categories placeholder */}
+              {/* Tags/Categories */}
               <div className="flex flex-wrap gap-2">
                 <span className="px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full text-sm border border-purple-500/30">
                   Article
@@ -305,7 +431,7 @@ export default function Post() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 p-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-300 z-40"
+          className="fixed bottom-8 right-8 p-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-300 z-40 hover:scale-110"
         >
           <ChevronUp className="w-5 h-5" />
         </button>

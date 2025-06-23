@@ -24,7 +24,7 @@ function AllPosts() {
 
   if (loading) {
     return (
-      <div className="w-full h-[50vh] flex items-center justify-center">
+      <div className="w-full h-[50vh] flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         {/* 🌀 Cute Emoji Loader or Spinner */}
         <div className="w-12 h-12 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
 
@@ -33,7 +33,7 @@ function AllPosts() {
   }
 
   return (
-    <div className='w-full py-8 min-h-screen'>
+    <div className='w-full py-8 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'>
       <Container>
         <div className='flex flex-wrap'>
           {filteredPosts.length > 0 ? (

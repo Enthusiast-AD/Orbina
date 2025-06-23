@@ -27,7 +27,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black px-4 text-white">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 px-4 text-white">
       <div className="backdrop-blur-md  bg-white/10 shadow-xl rounded-2xl p-10 w-full max-w-md border border-white/10">
 
         <h2 className="text-center text-3xl font-bold text-white">

@@ -20,7 +20,7 @@ function EditPost() {
         }
     }, [slug, navigate])
   return post ? (
-    <div className='py-8'>
+    <div className='py-8 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'>
         <Container>
             <PostForm post={post} />
         </Container>

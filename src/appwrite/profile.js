@@ -29,11 +29,11 @@ export class Profile{
                     userId,
                     twitter,
                     github,
-                    linkedIn
+                    linkedIn,
                 }
             )
         } catch (error) {
-            console.log("Appwrite serive :: createProfile :: error", error);
+            console.log("Appwrite service :: createProfile :: error", error);
         }
     }
 
@@ -52,11 +52,11 @@ export class Profile{
                     userId,
                     twitter,
                     github,
-                    linkedIn
+                    linkedIn,
                 }
             )
         } catch (error) {
-            console.log("Appwrite serive :: updateProfile :: error", error);
+            console.log("Appwrite service :: updateProfile :: error", error);
         }
     }
 
@@ -69,7 +69,7 @@ export class Profile{
     //         )
     //         return true
     //     } catch (error) {
-    //         console.log("Appwrite serive :: deleteProfile :: error", error);
+    //         console.log("Appwrite service :: deleteProfile :: error", error);
     //         return false
     //     }
     // }
@@ -83,7 +83,7 @@ export class Profile{
 
             )
         } catch (error) {
-            console.log("Appwrite serive :: getProfile :: error", error);
+            console.log("Appwrite service :: getProfile :: error", error);
             return false
         }
     }
@@ -98,7 +98,7 @@ export class Profile{
 
     //         )
     //     } catch (error) {
-    //         console.log("Appwrite serive :: getPosts :: error", error);
+    //         console.log("Appwrite service :: getPosts :: error", error);
     //         return false
     //     }
     // }
@@ -113,7 +113,7 @@ export class Profile{
                 file
             )
         } catch (error) {
-            console.log("Appwrite serive :: uploadFile :: error", error);
+            console.log("Appwrite service :: uploadFile :: error", error);
             return false
         }
     }

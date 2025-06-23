@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import {
@@ -19,57 +19,109 @@ import {
 } from "lucide-react"
 import profileService from "../appwrite/profile"
 import { setProfile } from "../store/profileSlice"
+import Draft from "./Draft"
+import YourPosts from "./YourPosts"
 
 export default function Profile() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const profileData = useSelector((state) => state.profile.profileData)
   const userData = useSelector((state) => state.auth.userData)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
+  const [profileFetched, setProfileFetched] = useState(false)
+  const [activeTab, setActiveTab] = useState("profile")
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (userData?.$id) {
-        try {
-          const profile = await profileService.getProfile(userData.$id)
-          if (profile) {
-            dispatch(setProfile(profile))
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error)
-        } finally {
-          setIsLoading(false)
-        }
-      }
+  // Memoize profile image URL to prevent unnecessary re-renders
+  const profileImageUrl = useMemo(() => {
+    if (!profileData?.profileImage) return null
+    try {
+      const imageUrl = profileService.getProfileImageView(profileData.profileImage)
+      return imageUrl
+    } catch (error) {
+      console.error("Error getting profile image URL:", error)
+      return null
+    }
+  }, [profileData?.profileImage])
+
+  const fetchProfile = useCallback(async () => {
+    if (!userData?.$id) {
+      console.log("No user ID available")
+      return
     }
 
-    fetchProfile()
-  }, [userData, dispatch])
+    // Prevent multiple simultaneous fetches
+    if (isLoading) return
 
-  const getSocialIcon = (platform) => {
+    setIsLoading(true)
+    try {
+      console.log("Fetching profile for user:", userData.$id)
+      const profile = await profileService.getProfile(userData.$id)
+      if (profile) {
+        console.log("Profile fetched successfully:", profile)
+        dispatch(setProfile(profile))
+        setProfileFetched(true)
+      } else {
+        console.log("No profile found for user")
+        setProfileFetched(true)
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error)
+      setProfileFetched(true)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [userData?.$id, dispatch, isLoading])
+
+  // Fetch profile when component mounts or user changes
+  useEffect(() => {
+    if (userData?.$id && !profileFetched) {
+      fetchProfile()
+    }
+  }, [userData?.$id, profileFetched, fetchProfile])
+
+  // Reset states when user changes
+  useEffect(() => {
+    setProfileFetched(false)
+    setImageLoaded(false)
+    setImageError(false)
+  }, [userData?.$id])
+
+  // Reset image states when profile image URL changes
+  useEffect(() => {
+    if (profileImageUrl) {
+      setImageLoaded(false)
+      setImageError(false)
+    }
+  }, [profileImageUrl])
+
+  const getSocialIcon = useCallback((platform) => {
     const icons = {
       website: Globe,
       twitter: Twitter,
       github: Github,
-      linkedin: Linkedin,
+      linkedIn: Linkedin,
     }
     return icons[platform] || Globe
-  }
+  }, [])
 
-  const formatSocialLink = (platform, value) => {
+  const formatSocialLink = useCallback((platform, value) => {
     if (!value) return null
 
     const baseUrls = {
       website: value.startsWith("http") ? value : `https://${value}`,
       twitter: `https://twitter.com/${value.replace("@", "")}`,
       github: `https://github.com/${value}`,
-      linkedin: `https://linkedin.com/in/${value}`,
+      linkedIn: `https://linkedin.com/in/${value}`,
     }
 
     return baseUrls[platform] || value
-  }
+  }, [])
 
-  const calculateProfileCompletion = () => {
+  const calculateProfileCompletion = useCallback(() => {
+    if (!profileData) return 0
+
     const fields = {
       userName: profileData?.userName,
       bio: profileData?.bio,
@@ -80,18 +132,45 @@ export default function Profile() {
 
     const filledFields = Object.values(fields).filter(Boolean).length
     return Math.round((filledFields / 5) * 100)
+  }, [profileData])
+
+  const handleImageLoad = useCallback(() => {
+    console.log("Profile image loaded successfully")
+    setImageLoaded(true)
+    setImageError(false)
+  }, [])
+
+  const handleImageError = useCallback((error) => {
+    console.error("Profile image failed to load:", error)
+    setImageError(true)
+    setImageLoaded(false)
+  }, [])
+
+  // Show loading when we don't have user data or when fetching profile
+  if (!userData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading user data...</p>
+        </div>
+      </div>
+    )
   }
 
-  if (isLoading) {
+  if (isLoading && !profileFetched) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading your profile...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Header */}
       <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-6">
@@ -111,201 +190,239 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile Tab */}
+      {/* Profile Tabs */}
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex space-x-1">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-purple-600/20 text-purple-300 border border-purple-500/30">
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === "profile"
+                ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
+                : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
+            }`}
+          >
             <User className="w-4 h-4" />
             Profile
+          </button>
+          <button
+            onClick={() => setActiveTab("posts")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === "posts"
+                ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
+                : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
+            }`}
+          >
+            <BookOpen className="w-4 h-4" />
+            Your Posts
+          </button>
+          <button
+            onClick={() => setActiveTab("drafts")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === "drafts"
+                ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
+                : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
+            }`}
+          >
+            <Edit3 className="w-4 h-4" />
+            Drafts
           </button>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 pb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Profile Info */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Profile Header Card */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-              <div className="flex items-start gap-6">
-                <div className="relative">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-purple-500/30 bg-slate-700">
-                    {profileData?.profileImage ? (
-                      <img
-                        src={
-                          profileService.getFileView
-                            ? profileService.getFileView(profileData.profileImage)
-                            : profileService.getProfileImageView(profileData.profileImage)
-                        }
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = "none"
-                          e.target.nextSibling.style.display = "flex"
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className="w-full h-full flex items-center justify-center text-slate-400"
-                      style={{ display: profileData?.profileImage ? "none" : "flex" }}
-                    >
-                      <User className="w-8 h-8" />
-                    </div>
-                  </div>
-                  {/* Online indicator */}
-                  <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-800"></div>
-                </div>
-
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-white mb-1">
-                    {profileData?.userName || userData?.name || "User"}
-                  </h2>
-                  <div className="flex items-center gap-2 text-slate-400 mb-3">
-                    <Mail className="w-4 h-4" />
-                    <span>{userData?.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <Calendar className="w-4 h-4" />
-                    <span>Joined {new Date(userData?.$createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bio Section */}
-            {profileData?.bio && (
+        {activeTab === "profile" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Profile Info */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Profile Header Card */}
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white mb-3">About</h3>
-                <p className="text-slate-300 leading-relaxed">{profileData.bio}</p>
-              </div>
-            )}
-
-            {/* Details Section */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white mb-4">Details</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-slate-400">Display Name</span>
-                  <span className="text-white font-medium">{profileData?.userName || "Not set"}</span>
-                </div>
-                {profileData?.location && (
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-slate-400 flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      Location
-                    </span>
-                    <span className="text-white font-medium">{profileData.location}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Social Links */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white mb-4">Social Links</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {["website", "twitter", "github", "linkedin"].map((platform) => {
-                  const value = profileData?.[platform]
-                  const Icon = getSocialIcon(platform)
-                  const link = formatSocialLink(platform, value)
-
-                  return (
-                    <div key={platform} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Icon className="w-5 h-5 text-slate-400" />
-                        <span className="text-slate-300 capitalize">{platform}</span>
-                      </div>
-                      {value ? (
-                        <a
-                          href={link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
-                        >
-                          <span className="text-sm truncate max-w-32">{value}</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                <div className="flex items-start gap-6">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-purple-500/30 bg-slate-700">
+                      {profileImageUrl && !imageError ? (
+                        <div className="relative w-full h-full">
+                          <img
+                            src={typeof profileImageUrl === "string" ? profileImageUrl : profileImageUrl.href}
+                            alt="Profile"
+                            className={`w-full h-full object-cover transition-opacity duration-300 ${
+                              imageLoaded ? "opacity-100" : "opacity-0"
+                            }`}
+                            onLoad={handleImageLoad}
+                            onError={handleImageError}
+                            loading="eager"
+                          />
+                          {!imageLoaded && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-slate-700">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+                            </div>
+                          )}
+                        </div>
                       ) : (
-                        <span className="text-slate-500 text-sm">Not set</span>
+                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                          <User className="w-8 h-8" />
+                        </div>
                       )}
                     </div>
-                  )
-                })}
+                    {/* Online indicator */}
+                    <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-800"></div>
+                  </div>
+
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-white mb-1">
+                      {profileData?.userName || userData?.name || "User"}
+                    </h2>
+                    <div className="flex items-center gap-2 text-slate-400 mb-3">
+                      <Mail className="w-4 h-4" />
+                      <span>{userData?.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <Calendar className="w-4 h-4" />
+                      <span>Joined {new Date(userData?.$createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio Section */}
+              {profileData?.bio && (
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                  <h3 className="text-lg font-semibold text-white mb-3">About</h3>
+                  <p className="text-slate-300 leading-relaxed">{profileData.bio}</p>
+                </div>
+              )}
+
+              {/* Details Section */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-lg font-semibold text-white mb-4">Details</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-slate-400">Display Name</span>
+                    <span className="text-white font-medium">{profileData?.userName || "Not set"}</span>
+                  </div>
+                  {profileData?.location && (
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-slate-400 flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        Location
+                      </span>
+                      <span className="text-white font-medium">{profileData.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Social Links */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-lg font-semibold text-white mb-4">Social Links</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {["website", "twitter", "github", "linkedIn"].map((platform) => {
+                    const value = profileData?.[platform]
+                    const Icon = getSocialIcon(platform)
+                    const link = formatSocialLink(platform, value)
+
+                    return (
+                      <div key={platform} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Icon className="w-5 h-5 text-slate-400" />
+                          <span className="text-slate-300 capitalize">
+                            {platform === "linkedIn" ? "LinkedIn" : platform}
+                          </span>
+                        </div>
+                        {value ? (
+                          <a
+                            href={link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
+                          >
+                            <span className="text-sm truncate max-w-32">{value}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ) : (
+                          <span className="text-slate-500 text-sm">Not set</span>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Stats & Activity */}
+            <div className="space-y-6">
+              {/* Stats Cards */}
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-purple-600/30 rounded-lg">
+                      <BookOpen className="w-6 h-6 text-purple-300" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-white">0</div>
+                      <div className="text-purple-300 text-sm">Articles Published</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-sm rounded-xl p-6 border border-blue-500/30">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-600/30 rounded-lg">
+                      <Bookmark className="w-6 h-6 text-blue-300" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-white">0</div>
+                      <div className="text-blue-300 text-sm">Articles Bookmarked</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile Completion */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-lg font-semibold text-white mb-4">Profile Completion</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">Progress</span>
+                    <span className="text-white font-medium">{calculateProfileCompletion()}%</span>
+                  </div>
+                  <div className="w-full bg-slate-700 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${calculateProfileCompletion()}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-slate-400">Complete your profile to get better visibility</p>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => navigate("/edit-profile")}
+                    className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    Edit Profile
+                  </button>
+                  <button className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors">
+                    <BookOpen className="w-4 h-4" />
+                    My Articles
+                  </button>
+                  <button className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors">
+                    <Bookmark className="w-4 h-4" />
+                    Bookmarks
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Right Column - Stats & Activity */}
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="space-y-4">
-              <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-purple-600/30 rounded-lg">
-                    <BookOpen className="w-6 h-6 text-purple-300" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-white">0</div>
-                    <div className="text-purple-300 text-sm">Articles Published</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-sm rounded-xl p-6 border border-blue-500/30">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-blue-600/30 rounded-lg">
-                    <Bookmark className="w-6 h-6 text-blue-300" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-white">0</div>
-                    <div className="text-blue-300 text-sm">Articles Bookmarked</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Profile Completion */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white mb-4">Profile Completion</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Progress</span>
-                  <span className="text-white font-medium">{calculateProfileCompletion()}%</span>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${calculateProfileCompletion()}%` }}
-                  ></div>
-                </div>
-                <p className="text-xs text-slate-400">Complete your profile to get better visibility</p>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <button
-                  onClick={() => navigate("/edit-profile")}
-                  className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
-                >
-                  <Edit3 className="w-4 h-4" />
-                  Edit Profile
-                </button>
-                <button className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors">
-                  <BookOpen className="w-4 h-4" />
-                  My Articles
-                </button>
-                <button className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors">
-                  <Bookmark className="w-4 h-4" />
-                  Bookmarks
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {activeTab === "posts" && <YourPosts />}
+        {activeTab === "drafts" && <Draft />}
       </div>
     </div>
   )

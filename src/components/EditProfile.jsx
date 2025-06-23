@@ -21,7 +21,7 @@ export default function EditProfile({ profileData }) {
       website: profileData?.website || "",
       twitter: profileData?.twitter || "",
       github: profileData?.github || "",
-      linkedin: profileData?.linkedin || "",
+      linkedIn: profileData?.linkedIn || "",
     },
   })
 
@@ -70,7 +70,7 @@ export default function EditProfile({ profileData }) {
         userId: userData.$id,
         twitter: data.twitter,
         github: data.github,
-        linkedin: data.linkedin,
+        linkedIn: data.linkedIn,
       }
 
       const existingProfile = await profileService.getProfile(userData.$id)
@@ -109,7 +109,7 @@ export default function EditProfile({ profileData }) {
   }
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Header */}
       <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4">
@@ -263,7 +263,7 @@ export default function EditProfile({ profileData }) {
                   type="text"
                   placeholder="linkedinusername"
                   className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  {...register("linkedin")}
+                  {...register("linkedIn")}
                 />
               </div>
             </div>

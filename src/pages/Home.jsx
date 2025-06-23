@@ -24,7 +24,7 @@ function Home() {
 
   if (loading) {
     return (
-      <div className="w-full h-[50vh] flex items-center justify-center">
+      <div className="w-full h-[50vh] flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         {/* 🔄 CSS Spinner */}
         <div className="w-12 h-12 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
       </div>
@@ -33,7 +33,7 @@ function Home() {
 
   if (filteredPosts.length === 0) {
     return (
-      <div className=" flex w-full py-8 mt-4 items-center justify-center min-h-[75vh]">
+      <div className=" flex w-full py-8 mt-4 items-center justify-center min-h-[75vh] bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         <Container>
           <div className="flex flex-wrap ">
             <div className="p-2 w-full">
@@ -50,7 +50,7 @@ function Home() {
   }
 
   return (
-    <div className='w-full py-8 min-h-screen'>
+    <div className='w-full py-8 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'>
       <Container>
         <div className='flex flex-wrap'>
           {filteredPosts.map((post) => (

@@ -13,7 +13,6 @@ function Header() {
   const userData = useSelector((state) => state.auth.userData)
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
 
   const navItems = [
     {
@@ -46,14 +45,7 @@ function Header() {
     },
   ]
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      // Implement search functionality
-      console.log("Searching for:", searchQuery)
-      // navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
-    }
-  }
+  
 
   return (
     <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 sticky top-0 z-50">
