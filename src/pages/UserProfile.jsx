@@ -11,15 +11,16 @@ import {
   Github,
   Linkedin,
   BookOpen,
-  Bookmark,
   ExternalLink,
   ArrowLeft,
   MessageCircle,
   UserPlus,
   UserCheck,
+  Heart,
 } from "lucide-react"
 import profileService from "../appwrite/profile"
 import appwriteService from "../appwrite/config"
+import likesService from "../appwrite/likes"
 import PostCard from "../components/PostCard"
 
 export default function UserProfile() {
@@ -34,6 +35,7 @@ export default function UserProfile() {
   const [imageError, setImageError] = useState(false)
   const [isFollowing, setIsFollowing] = useState(false)
   const [activeTab, setActiveTab] = useState("posts")
+  const [totalLikes, setTotalLikes] = useState(0)
 
   const isOwnProfile = currentUser?.$id === userId
 
@@ -50,7 +52,6 @@ export default function UserProfile() {
       if (profile) {
         setUserProfile(profile)
       } else {
-        // If no profile found, redirect to 404
         navigate("/404")
       }
     } catch (error) {
@@ -63,14 +64,21 @@ export default function UserProfile() {
 
   const fetchUserPosts = async () => {
     try {
-      // Fetch posts by this user
-      const posts = await appwriteService.getPosts([
-        // Add query to filter by userId if your service supports it
-      ])
-
-      // Filter posts by userId (if not done in service)
+      const posts = await appwriteService.getPosts()
       const userSpecificPosts = posts?.documents?.filter((post) => post.userId === userId) || []
       setUserPosts(userSpecificPosts)
+
+      // Calculate total likes received by this user
+      let totalLikesCount = 0
+      for (const post of userSpecificPosts) {
+        try {
+          const postLikes = await likesService.getLikesCount(post.$id)
+          totalLikesCount += postLikes
+        } catch (error) {
+          console.error("Error fetching likes for post:", post.$id, error)
+        }
+      }
+      setTotalLikes(totalLikesCount)
     } catch (error) {
       console.error("Error fetching user posts:", error)
     } finally {
@@ -112,13 +120,11 @@ export default function UserProfile() {
   }
 
   const handleFollowToggle = () => {
-    // Implement follow/unfollow logic here
     setIsFollowing(!isFollowing)
   }
 
   const handleMessage = () => {
-    // Implement messaging logic here
-    console.log("Message user:", userProfile.userName)
+    console.log("Handle Message Testing")
   }
 
   if (isLoading) {
@@ -212,7 +218,6 @@ export default function UserProfile() {
                       </div>
                     )}
                   </div>
-                  {/* Online indicator */}
                   <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-800"></div>
                 </div>
 
@@ -240,9 +245,9 @@ export default function UserProfile() {
                 <div className="text-2xl font-bold text-white">{userPosts.length}</div>
                 <div className="text-purple-300 text-sm">Posts</div>
               </div>
-              <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-sm rounded-xl p-4 border border-blue-500/30 text-center">
-                <div className="text-2xl font-bold text-white">0</div>
-                <div className="text-blue-300 text-sm">Followers</div>
+              <div className="bg-gradient-to-r from-red-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-4 border border-red-500/30 text-center">
+                <div className="text-2xl font-bold text-white">{totalLikes}</div>
+                <div className="text-red-300 text-sm">Likes Received</div>
               </div>
             </div>
 
@@ -293,17 +298,6 @@ export default function UserProfile() {
                   <BookOpen className="w-4 h-4" />
                   Posts ({userPosts.length})
                 </button>
-                <button
-                  onClick={() => setActiveTab("bookmarks")}
-                  className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
-                    activeTab === "bookmarks"
-                      ? "text-purple-400 border-b-2 border-purple-400"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <Bookmark className="w-4 h-4" />
-                  Bookmarks
-                </button>
               </div>
 
               <div className="p-6">
@@ -330,14 +324,6 @@ export default function UserProfile() {
                         </p>
                       </div>
                     )}
-                  </div>
-                )}
-
-                {activeTab === "bookmarks" && (
-                  <div className="text-center py-12">
-                    <Bookmark className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-white mb-2">No bookmarks</h3>
-                    <p className="text-slate-400">Bookmarked posts will appear here.</p>
                   </div>
                 )}
               </div>

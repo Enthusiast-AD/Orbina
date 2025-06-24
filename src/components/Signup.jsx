@@ -5,6 +5,7 @@ import { login } from '../store/authSlice';
 import { Button, Input, Logo } from './index';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 function SignUp() {
   const navigate = useNavigate();
@@ -17,12 +18,17 @@ function SignUp() {
     try {
       const account = await authService.createAccount(data);
       if (account) {
+        // Automatically fetch user data after signup
         const userData = await authService.getCurrentUser();
-        if (userData) dispatch(login(userData));
-        navigate("/");
+        if (userData) {
+          dispatch(login({ userData }));
+          toast.success('Account created successfully!');
+          navigate("/");
+        }
       }
     } catch (error) {
       setError(error.message);
+      toast.error('Signup failed');
     }
   };
 

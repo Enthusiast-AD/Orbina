@@ -18,9 +18,12 @@ import {
   Mail,
 } from "lucide-react"
 import profileService from "../appwrite/profile"
+import appwriteService from "../appwrite/config"
+import bookmarksService from "../appwrite/bookmarks"
 import { setProfile } from "../store/profileSlice"
 import Draft from "./Draft"
 import YourPosts from "./YourPosts"
+import BookmarkedPosts from "./BookmarkedPosts"
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -32,8 +35,9 @@ export default function Profile() {
   const [imageError, setImageError] = useState(false)
   const [profileFetched, setProfileFetched] = useState(false)
   const [activeTab, setActiveTab] = useState("profile")
+  const [publishedCount, setPublishedCount] = useState(0)
+  const [bookmarksCount, setBookmarksCount] = useState(0)
 
-  // Memoize profile image URL to prevent unnecessary re-renders
   const profileImageUrl = useMemo(() => {
     if (!profileData?.profileImage) return null
     try {
@@ -46,26 +50,15 @@ export default function Profile() {
   }, [profileData?.profileImage])
 
   const fetchProfile = useCallback(async () => {
-    if (!userData?.$id) {
-      console.log("No user ID available")
-      return
-    }
-
-    // Prevent multiple simultaneous fetches
-    if (isLoading) return
+    if (!userData?.$id || isLoading) return
 
     setIsLoading(true)
     try {
-      console.log("Fetching profile for user:", userData.$id)
       const profile = await profileService.getProfile(userData.$id)
       if (profile) {
-        console.log("Profile fetched successfully:", profile)
         dispatch(setProfile(profile))
-        setProfileFetched(true)
-      } else {
-        console.log("No profile found for user")
-        setProfileFetched(true)
       }
+      setProfileFetched(true)
     } catch (error) {
       console.error("Error fetching profile:", error)
       setProfileFetched(true)
@@ -74,21 +67,40 @@ export default function Profile() {
     }
   }, [userData?.$id, dispatch, isLoading])
 
-  // Fetch profile when component mounts or user changes
+  const fetchStats = useCallback(async () => {
+    if (!userData?.$id) return
+    
+    try {
+      // Get published posts count
+      const posts = await appwriteService.getPosts()
+      const userPublishedPosts = posts?.documents?.filter(
+        (post) => post.userId === userData.$id && post.status === "active"
+      ) || []
+      setPublishedCount(userPublishedPosts.length)
+
+      // Get bookmarks count
+      const userBookmarks = await bookmarksService.getUserBookmarks(userData.$id)
+      setBookmarksCount(userBookmarks.length)
+    } catch (error) {
+      console.error("Error fetching stats:", error)
+      setPublishedCount(0)
+      setBookmarksCount(0)
+    }
+  }, [userData?.$id])
+
   useEffect(() => {
     if (userData?.$id && !profileFetched) {
       fetchProfile()
+      fetchStats()
     }
-  }, [userData?.$id, profileFetched, fetchProfile])
+  }, [userData?.$id, profileFetched, fetchProfile, fetchStats])
 
-  // Reset states when user changes
   useEffect(() => {
     setProfileFetched(false)
     setImageLoaded(false)
     setImageError(false)
   }, [userData?.$id])
 
-  // Reset image states when profile image URL changes
   useEffect(() => {
     if (profileImageUrl) {
       setImageLoaded(false)
@@ -135,18 +147,15 @@ export default function Profile() {
   }, [profileData])
 
   const handleImageLoad = useCallback(() => {
-    console.log("Profile image loaded successfully")
     setImageLoaded(true)
     setImageError(false)
   }, [])
 
-  const handleImageError = useCallback((error) => {
-    console.error("Profile image failed to load:", error)
+  const handleImageError = useCallback(() => {
     setImageError(true)
     setImageLoaded(false)
   }, [])
 
-  // Show loading when we don't have user data or when fetching profile
   if (!userData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
@@ -216,6 +225,17 @@ export default function Profile() {
             Your Posts
           </button>
           <button
+            onClick={() => setActiveTab("bookmarks")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === "bookmarks"
+                ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
+                : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
+            }`}
+          >
+            <Bookmark className="w-4 h-4" />
+            Bookmarks
+          </button>
+          <button
             onClick={() => setActiveTab("drafts")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === "drafts"
@@ -264,7 +284,6 @@ export default function Profile() {
                         </div>
                       )}
                     </div>
-                    {/* Online indicator */}
                     <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-800"></div>
                   </div>
 
@@ -359,7 +378,7 @@ export default function Profile() {
                       <BookOpen className="w-6 h-6 text-purple-300" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-white">0</div>
+                      <div className="text-2xl font-bold text-white">{publishedCount}</div>
                       <div className="text-purple-300 text-sm">Articles Published</div>
                     </div>
                   </div>
@@ -371,7 +390,7 @@ export default function Profile() {
                       <Bookmark className="w-6 h-6 text-blue-300" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-white">0</div>
+                      <div className="text-2xl font-bold text-white">{bookmarksCount}</div>
                       <div className="text-blue-300 text-sm">Articles Bookmarked</div>
                     </div>
                   </div>
@@ -407,11 +426,17 @@ export default function Profile() {
                     <Edit3 className="w-4 h-4" />
                     Edit Profile
                   </button>
-                  <button className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => setActiveTab("posts")}
+                    className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+                  >
                     <BookOpen className="w-4 h-4" />
                     My Articles
                   </button>
-                  <button className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => setActiveTab("bookmarks")}
+                    className="w-full flex items-center gap-3 p-3 text-left text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+                  >
                     <Bookmark className="w-4 h-4" />
                     Bookmarks
                   </button>
@@ -422,6 +447,7 @@ export default function Profile() {
         )}
 
         {activeTab === "posts" && <YourPosts />}
+        {activeTab === "bookmarks" && <BookmarkedPosts />}
         {activeTab === "drafts" && <Draft />}
       </div>
     </div>

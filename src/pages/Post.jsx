@@ -18,9 +18,12 @@ import {
 } from "lucide-react"
 import appwriteService from "../appwrite/config"
 import profileService from "../appwrite/profile"
+import likesService from "../appwrite/likes"
+import bookmarksService from "../appwrite/bookmarks"
 import { Button, Container } from "../components"
 import parse from "html-react-parser"
 import { useSelector } from "react-redux"
+import toast from "react-hot-toast"
 
 export default function Post() {
   const [post, setPost] = useState(null)
@@ -30,6 +33,7 @@ export default function Post() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
   const [authorProfile, setAuthorProfile] = useState(null)
   const [authorImageError, setAuthorImageError] = useState(false)
 
@@ -41,27 +45,52 @@ export default function Post() {
 
   useEffect(() => {
     if (slug) {
-      appwriteService
-        .getPost(slug)
-        .then((post) => {
-          if (post) {
-            setPost(post)
-            // Fetch author profile after getting post
-            if (post.userId) {
-              fetchAuthorProfile(post.userId)
-            }
-          } else {
-            navigate("/")
-          }
-        })
-        .catch(() => navigate("/"))
-        .finally(() => setIsLoading(false))
+      fetchPost()
     } else {
       navigate("/")
     }
-  }, [slug, navigate])
+  }, [slug])
 
-  // Fetch author profile data
+  useEffect(() => {
+    if (post && userData) {
+      fetchLikeBookmarkData()
+    }
+  }, [post, userData])
+
+  const fetchPost = async () => {
+    try {
+      const postData = await appwriteService.getPost(slug)
+      if (postData) {
+        setPost(postData)
+        if (postData.userId) {
+          fetchAuthorProfile(postData.userId)
+        }
+      } else {
+        navigate("/")
+      }
+    } catch (error) {
+      navigate("/")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const fetchLikeBookmarkData = async () => {
+    try {
+      const [likeData, bookmarkData, likeCountData] = await Promise.all([
+        likesService.getLike({ postId: post.$id, userId: userData.$id }),
+        bookmarksService.getBookmark({ postId: post.$id, userId: userData.$id }),
+        likesService.getLikesCount(post.$id)
+      ])
+      
+      setIsLiked(!!likeData)
+      setIsBookmarked(!!bookmarkData)
+      setLikeCount(likeCountData)
+    } catch (error) {
+      console.error("Error fetching like/bookmark data:", error)
+    }
+  }
+
   const fetchAuthorProfile = async (userId) => {
     try {
       const profile = await profileService.getProfile(userId)
@@ -85,6 +114,48 @@ export default function Post() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  const handleLike = async () => {
+    if (!userData) {
+      toast.error("Please login to like posts")
+      return
+    }
+
+    try {
+      if (isLiked) {
+        await likesService.unlikePost({ postId: post.$id, userId: userData.$id })
+        setIsLiked(false)
+        setLikeCount(prev => prev - 1)
+      } else {
+        await likesService.likePost({ postId: post.$id, userId: userData.$id })
+        setIsLiked(true)
+        setLikeCount(prev => prev + 1)
+      }
+    } catch (error) {
+      toast.error("Failed to update like")
+    }
+  }
+
+  const handleBookmark = async () => {
+    if (!userData) {
+      toast.error("Please login to bookmark posts")
+      return
+    }
+
+    try {
+      if (isBookmarked) {
+        await bookmarksService.unbookmarkPost({ postId: post.$id, userId: userData.$id })
+        setIsBookmarked(false)
+        toast.success("Removed from bookmarks")
+      } else {
+        await bookmarksService.bookmarkPost({ postId: post.$id, userId: userData.$id })
+        setIsBookmarked(true)
+        toast.success("Added to bookmarks")
+      }
+    } catch (error) {
+      toast.error("Failed to update bookmark")
+    }
+  }
 
   const deletePost = () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
@@ -129,18 +200,15 @@ export default function Post() {
         console.log("Error sharing:", error)
       }
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href)
-      alert("Link copied to clipboard!")
+      toast.success("Link copied to clipboard!")
     }
   }
 
-  // Get author display name (prioritize profile userName over post userName)
   const getAuthorName = () => {
     return authorProfile?.userName || post?.userName || "Anonymous"
   }
 
-  // Get author initials for fallback avatar
   const getAuthorInitials = (name) => {
     if (!name || name === "Anonymous") return "A"
     return name
@@ -162,11 +230,11 @@ export default function Post() {
   if (!post) return null
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Reading Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-1 bg-slate-800 z-50">
         <div
-          className="h-full bg-gradient-to-r from-purple-500 to-gray-500 transition-all duration-150"
+          className="h-full bg-gradient-to-r from-blue-500 to-gray-500 transition-all duration-150"
           style={{ width: `${readingProgress}%` }}
         />
       </div>
@@ -192,7 +260,7 @@ export default function Post() {
                 <Share2 className="w-4 h-4" />
               </button>
               <button
-                onClick={() => setIsBookmarked(!isBookmarked)}
+                onClick={handleBookmark}
                 className={`p-2 rounded-lg transition-colors ${
                   isBookmarked
                     ? "bg-purple-600 text-white shadow-lg shadow-purple-500/25"
@@ -299,7 +367,7 @@ export default function Post() {
             {/* Engagement Bar */}
             <div className="flex items-center gap-4 p-4 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50">
               <button
-                onClick={() => setIsLiked(!isLiked)}
+                onClick={handleLike}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
                   isLiked
                     ? "bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10"
@@ -307,7 +375,7 @@ export default function Post() {
                 }`}
               >
                 <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-                <span className="text-sm font-medium">Like</span>
+                <span className="text-sm font-medium">Like ({likeCount})</span>
               </button>
 
               <button
@@ -388,7 +456,6 @@ export default function Post() {
                           <ExternalLink className="w-4 h-4" />
                         </a>
                       )}
-                      {/* Add other social links as needed */}
                     </div>
                   )}
 
