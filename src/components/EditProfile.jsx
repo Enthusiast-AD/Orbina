@@ -10,6 +10,7 @@ import { Button } from "../components"
 import { setProfile } from "../store/profileSlice"
 import { updateUserName } from "../store/authSlice"
 import { updateProfileUserName } from "../store/profileSlice"
+import { profileCacheUtils } from "../utils/profileCache" // Add this import
 import toast from "react-hot-toast"
 
 export default function EditProfile({ profileData }) {
@@ -26,7 +27,7 @@ export default function EditProfile({ profileData }) {
   })
 
   const [previewUrl, setPreviewUrl] = useState(
-    profileData?.profileImage ? profileService.getFileView(profileData.profileImage) : null,
+    profileData?.profileImage ? profileService.getProfileImageView(profileData.profileImage) : null,
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -86,6 +87,11 @@ export default function EditProfile({ profileData }) {
         dispatch(setProfile(result))
         dispatch(updateProfileUserName(result.userName))
         dispatch(updateUserName(result.userName))
+        
+        // Clear failed attempts for this user (Step 4 code)
+        profileService.removeFromFailedAttempts(userData.$id)
+        profileCacheUtils.clearSpecificProfile(userData.$id)
+        
         toast.success("Profile saved successfully!")
         navigate("/profile")
       } else {
@@ -94,6 +100,7 @@ export default function EditProfile({ profileData }) {
     } catch (error) {
       console.error("Profile save error:", error)
       toast.error("Something went wrong.")
+    } finally {
       setIsSubmitting(false)
     }
   }

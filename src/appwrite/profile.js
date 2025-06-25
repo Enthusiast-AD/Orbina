@@ -34,6 +34,7 @@ export class Profile{
             )
         } catch (error) {
             console.log("Appwrite service :: createProfile :: error", error);
+            throw error;
         }
     }
 
@@ -57,54 +58,71 @@ export class Profile{
             )
         } catch (error) {
             console.log("Appwrite service :: updateProfile :: error", error);
+            throw error;
         }
     }
-
-    // async deleteProfile(userId){
-    //     try {
-    //         await this.databases.deleteDocument(
-    //             conf.appwriteDatabaseId,
-    //             conf.appwriteCollectionId,
-    //             userId
-    //         )
-    //         return true
-    //     } catch (error) {
-    //         console.log("Appwrite service :: deleteProfile :: error", error);
-    //         return false
-    //     }
-    // }
 
     async getProfile(userId){
         try {
-            return await this.databases.getDocument(
+            // console.log("🔍 Getting profile with userId:", userId);
+            // console.log("📦 Database ID:", conf.appwriteDatabaseId);
+            // console.log("📦 Collection ID:", conf.appwriteProfileCollectionId);
+            
+            const profile = await this.databases.getDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
                 userId
-
-            )
+            );
+            
+            // console.log("✅ Profile fetch successful:", profile);
+            return profile;
         } catch (error) {
-            console.log("Appwrite service :: getProfile :: error", error);
-            return false
+            console.log("❌ Appwrite service :: getProfile :: error", error);
+            // console.log("🔍 Error details:", {
+            //     code: error.code,
+            //     type: error.type,
+            //     message: error.message
+            // });
+            
+            // Don't throw the error, return null for 404s
+            if (error.code === 404) {
+                return null;
+            }
+            throw error;
         }
     }
 
-    // async getPosts(queries = [Query.equal("status", "active")]){
-    //     try {
-    //         return await this.databases.listDocuments(
-    //             conf.appwriteDatabaseId,
-    //             conf.appwriteCollectionId,
-    //             queries,
-                
+    // Helper methods to track failed attempts (keep these but don't use them for debugging right now)
+    getFailedAttempts() {
+        const stored = localStorage.getItem('profileFailedAttempts');
+        return stored ? JSON.parse(stored) : [];
+    }
 
-    //         )
-    //     } catch (error) {
-    //         console.log("Appwrite service :: getPosts :: error", error);
-    //         return false
-    //     }
-    // }
+    addToFailedAttempts(userId) {
+        const failed = this.getFailedAttempts();
+        if (!failed.includes(userId)) {
+            failed.push(userId);
+            if (failed.length > 100) {
+                failed.splice(0, failed.length - 100);
+            }
+            localStorage.setItem('profileFailedAttempts', JSON.stringify(failed));
+        }
+    }
+
+    removeFromFailedAttempts(userId) {
+        const failed = this.getFailedAttempts();
+        const index = failed.indexOf(userId);
+        if (index > -1) {
+            failed.splice(index, 1);
+            localStorage.setItem('profileFailedAttempts', JSON.stringify(failed));
+        }
+    }
+
+    clearFailedAttempts() {
+        localStorage.removeItem('profileFailedAttempts');
+    }
 
     // file upload service
-
     async uploadProfileImage(file){
         try {
             return await this.bucket.createFile(
@@ -130,25 +148,7 @@ export class Profile{
             return false
         }
     }
-    // async getFile(fileId){
-    //     try {
-    //         await this.bucket.getFile(
-    //             conf.appwriteBucketId,
-    //             fileId
-    //         )
-    //         return true
-    //     } catch (error) {
-    //         console.log("Appwrite service :: getFile :: error", error);
-    //         return false
-    //     }
-    // }
 
-    // getFilePreview(fileId){
-    //     return this.bucket.getFilePreview(
-    //         conf.appwriteBucketId,
-    //         fileId
-    //     )
-    // }
     getProfileImageView(fileId){
         return this.bucket.getFileView(
             conf.appwriteBucketId,
@@ -156,7 +156,6 @@ export class Profile{
         )
     }
 }
-
 
 const profile = new Profile()
 export default profile

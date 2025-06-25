@@ -15,8 +15,8 @@ import AllPosts from "./pages/AllPosts"
 import Profile from "./pages/Profile.jsx"
 import EditProfile from "./pages/EditProfile.jsx"
 import UserProfile from "./pages/UserProfile.jsx"
+import Messages from "./pages/Messages.jsx"
 import NotFound from "./pages/NotFound.jsx"
-// import Search from "./pages/Search.jsx"
 
 const router = createBrowserRouter([
   {
@@ -92,10 +92,22 @@ const router = createBrowserRouter([
           </AuthLayout>
         ),
       },
-    //   {
-    //     path: "/search",
-    //     element: <Search />,
-    //   },
+      {
+        path: "/messages",
+        element: (
+          <AuthLayout authentication>
+            <Messages />
+          </AuthLayout>
+        ),
+      },
+      {
+        path: "/messages/:userId",
+        element: (
+          <AuthLayout authentication>
+            <Messages />
+          </AuthLayout>
+        ),
+      },
       {
         path: "*",
         element: <NotFound />,

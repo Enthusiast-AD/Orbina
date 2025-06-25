@@ -1,0 +1,261 @@
+import conf from '../conf/conf.js';
+import { Client, ID, Databases, Query } from "appwrite";
+
+export class MessagesService {
+    client = new Client();
+    databases;
+
+    constructor() {
+        this.client
+            .setEndpoint(conf.appwriteUrl)
+            .setProject(conf.appwriteProjectId);
+        this.databases = new Databases(this.client);
+    }
+
+    async sendMessage({ senderId, receiverId, message }) {
+        try {
+            // console.log("Sending message:", { senderId, receiverId, message });
+            
+            const result = await this.databases.createDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteMessagesCollectionId,
+                ID.unique(),
+                { 
+                    senderId: senderId,
+                    receiverId: receiverId,
+                    message: message,
+                    isRead: false
+                }
+            );
+            // console.log("Message sent successfully:", result);
+            return result;
+        } catch (error) {
+            console.error("Error sending message:", error);
+            throw error;
+        }
+    }
+
+    async getConversation({ userId1, userId2, limit = 50, offset = 0 }) {
+        try {
+            // console.log("Fetching conversation between:", { userId1, userId2 });
+            
+            const result = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteMessagesCollectionId,
+                [
+                    Query.or([
+                        Query.and([
+                            Query.equal("senderId", userId1),
+                            Query.equal("receiverId", userId2)
+                        ]),
+                        Query.and([
+                            Query.equal("senderId", userId2),
+                            Query.equal("receiverId", userId1)
+                        ])
+                    ]),
+                    Query.orderDesc("$createdAt"),
+                    Query.limit(limit),
+                    Query.offset(offset)
+                ]
+            );
+            
+            // Reverse to show oldest first
+            return {
+                ...result,
+                documents: result.documents.reverse()
+            };
+        } catch (error) {
+            console.error("Error fetching conversation:", error);
+            return { documents: [] };
+        }
+    }
+
+    async getConversationsList(userId, limit = 20) {
+        try {
+            // console.log("Fetching conversations list for user:", userId);
+            
+            // Get all messages where user is sender or receiver
+            const result = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteMessagesCollectionId,
+                [
+                    Query.or([
+                        Query.equal("senderId", userId),
+                        Query.equal("receiverId", userId)
+                    ]),
+                    Query.orderDesc("$createdAt"),
+                    Query.limit(200) // Get more to process conversations
+                ]
+            );
+
+            // Group messages by conversation partner
+            const conversationsMap = new Map();
+            
+            result.documents.forEach(message => {
+                const partnerId = message.senderId === userId ? message.receiverId : message.senderId;
+                
+                if (!conversationsMap.has(partnerId)) {
+                    conversationsMap.set(partnerId, {
+                        partnerId,
+                        lastMessage: message,
+                        unreadCount: 0
+                    });
+                }
+                
+                // Count unread messages (where current user is receiver and message is unread)
+                if (message.receiverId === userId && !message.isRead) {
+                    conversationsMap.get(partnerId).unreadCount++;
+                }
+            });
+
+            // Convert to array and sort by last message time
+            const conversations = Array.from(conversationsMap.values()).sort(
+                (a, b) => new Date(b.lastMessage.$createdAt) - new Date(a.lastMessage.$createdAt)
+            );
+
+            return conversations.slice(0, limit);
+        } catch (error) {
+            console.error("Error fetching conversations list:", error);
+            return [];
+        }
+    }
+
+    async markAsRead({ messageId }) {
+        try {
+            // console.log("Marking message as read:", messageId);
+            
+            const result = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteMessagesCollectionId,
+                messageId,
+                { isRead: true }
+            );
+            // console.log("Message marked as read:", result);
+            return result;
+        } catch (error) {
+            console.error("Error marking message as read:", error);
+            throw error;
+        }
+    }
+
+    async markConversationAsRead({ senderId, receiverId }) {
+        try {
+            // console.log("Marking conversation as read:", { senderId, receiverId });
+            
+            // Get unread messages in this conversation where current user is receiver
+            const unreadMessages = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteMessagesCollectionId,
+                [
+                    Query.equal("senderId", senderId),
+                    Query.equal("receiverId", receiverId),
+                    Query.equal("isRead", false)
+                ]
+            );
+
+            // Mark each unread message as read
+            const updatePromises = unreadMessages.documents.map(message =>
+                this.markAsRead({ messageId: message.$id })
+            );
+
+            await Promise.all(updatePromises);
+            // console.log(`Marked ${unreadMessages.documents.length} messages as read`);
+            return unreadMessages.documents.length;
+        } catch (error) {
+            console.error("Error marking conversation as read:", error);
+            throw error;
+        }
+    }
+
+    async getUnreadCount(userId) {
+        try {
+            const result = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteMessagesCollectionId,
+                [
+                    Query.equal("receiverId", userId),
+                    Query.equal("isRead", false)
+                ]
+            );
+            return result.documents.length;
+        } catch (error) {
+            console.error("Error getting unread count:", error);
+            return 0;
+        }
+    }
+
+    async deleteMessage(messageId) {
+        try {
+            // console.log("Deleting message:", messageId);
+            
+            await this.databases.deleteDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteMessagesCollectionId,
+                messageId
+            );
+            // console.log("Message deleted successfully");
+            return true;
+        } catch (error) {
+            console.error("Error deleting message:", error);
+            throw error;
+        }
+    }
+
+    async searchMessages({ userId, searchTerm, limit = 50 }) {
+        try {
+            console.log("Searching messages for:", { userId, searchTerm });
+            
+            const result = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteMessagesCollectionId,
+                [
+                    Query.or([
+                        Query.equal("senderId", userId),
+                        Query.equal("receiverId", userId)
+                    ]),
+                    Query.search("message", searchTerm),
+                    Query.orderDesc("$createdAt"),
+                    Query.limit(limit)
+                ]
+            );
+            
+            return result.documents;
+        } catch (error) {
+            console.error("Error searching messages:", error);
+            return [];
+        }
+    }
+
+    // Real-time subscription helper
+    subscribeToConversation({ userId1, userId2, callback }) {
+        try {
+            const channel = `databases.${conf.appwriteDatabaseId}.collections.${conf.appwriteMessagesCollectionId}.documents`;
+            
+            return this.client.subscribe(channel, callback);
+        } catch (error) {
+            console.error("Error subscribing to conversation:", error);
+            return null;
+        }
+    }
+
+    // Real-time subscription for user's messages
+    subscribeToUserMessages({ userId, callback }) {
+        try {
+            const channel = `databases.${conf.appwriteDatabaseId}.collections.${conf.appwriteMessagesCollectionId}.documents`;
+            
+            return this.client.subscribe(channel, (response) => {
+                const payload = response.payload;
+                // Filter messages for this user
+                if (payload.senderId === userId || payload.receiverId === userId) {
+                    callback(response);
+                }
+            });
+        } catch (error) {
+            console.error("Error subscribing to user messages:", error);
+            return null;
+        }
+    }
+}
+
+const messagesService = new MessagesService();
+export default messagesService;

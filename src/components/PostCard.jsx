@@ -1,96 +1,239 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { Calendar, Clock, ArrowRight, Eye } from "lucide-react"
 import appwriteService from "../appwrite/config"
 import profileService from "../appwrite/profile"
 
-function PostCard({ $id, title, featuredImage, content, userName, userId, $createdAt, status = "active" }) {
+// Create a cache for profiles to avoid repeated requests
+const profileCache = new Map();
+const failedProfiles = new Set();
+
+function PostCard({ $id, title, featuredImage, content, userName, userId, $createdAt, status = "active", viewMode = "grid" }) {
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [authorProfile, setAuthorProfile] = useState(null)
   const [authorImageError, setAuthorImageError] = useState(false)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const hasFetchedProfile = useRef(false)
 
-  // Fetch author profile data
+  // Fetch author profile data with caching and error handling
   useEffect(() => {
     const fetchAuthorProfile = async () => {
-      if (userId) {
-        try {
-          const profile = await profileService.getProfile(userId)
-          if (profile) {
-            setAuthorProfile(profile)
-          }
-        } catch (error) {
-          console.error("Error fetching author profile:", error)
+      if (!userId || hasFetchedProfile.current || profileLoading) return;
+      
+      // Check if this profile already failed
+      if (failedProfiles.has(userId)) {
+        setAuthorProfile(null);
+        return;
+      }
+
+      // Check cache first
+      if (profileCache.has(userId)) {
+        setAuthorProfile(profileCache.get(userId));
+        return;
+      }
+
+      hasFetchedProfile.current = true;
+      setProfileLoading(true);
+
+      try {
+        const profile = await profileService.getProfile(userId);
+        if (profile) {
+          setAuthorProfile(profile);
+          profileCache.set(userId, profile); // Cache successful result
+        } else {
+          setAuthorProfile(null);
+          failedProfiles.add(userId); // Mark as failed to avoid retries
+          profileCache.set(userId, null); // Cache null result
         }
+      } catch (error) {
+        console.error(`Failed to fetch profile for user ${userId}:`, error.message);
+        setAuthorProfile(null);
+        failedProfiles.add(userId); // Mark as failed
+        profileCache.set(userId, null); // Cache null result
+      } finally {
+        setProfileLoading(false);
       }
     }
 
-    fetchAuthorProfile()
-  }, [userId])
+    fetchAuthorProfile();
+  }, [userId, profileLoading]);
 
   // Extract plain text from HTML content for preview
   const getPlainTextPreview = (htmlContent, maxLength = 120) => {
-    if (!htmlContent) return "No preview available..."
+    if (!htmlContent) return "No preview available...";
 
-    // Create a temporary div to extract text content
-    const tempDiv = document.createElement("div")
-    tempDiv.innerHTML = htmlContent
-    const plainText = tempDiv.textContent || tempDiv.innerText || ""
-
-    return plainText.length > maxLength ? plainText.substring(0, maxLength) + "..." : plainText
-  }
+    try {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = htmlContent;
+      const plainText = tempDiv.textContent || tempDiv.innerText || "";
+      return plainText.length > maxLength ? plainText.substring(0, maxLength) + "..." : plainText;
+    } catch (error) {
+      return "Preview unavailable...";
+    }
+  };
 
   // Calculate estimated reading time
   const calculateReadingTime = (content) => {
-    if (!content) return 1
-    const wordsPerMinute = 200
-    const textLength = content.replace(/<[^>]*>/g, "").split(" ").length
-    const readingTime = Math.ceil(textLength / wordsPerMinute)
-    return readingTime < 1 ? 1 : readingTime
-  }
+    if (!content) return 1;
+    try {
+      const wordsPerMinute = 200;
+      const textLength = content.replace(/<[^>]*>/g, "").split(" ").length;
+      const readingTime = Math.ceil(textLength / wordsPerMinute);
+      return readingTime < 1 ? 1 : readingTime;
+    } catch (error) {
+      return 1;
+    }
+  };
 
   // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return "Recently"
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffTime = Math.abs(now - date)
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    if (!dateString) return "Recently";
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 1) return "Yesterday"
-    if (diffDays < 7) return `${diffDays} days ago`
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
+      if (diffDays === 1) return "Yesterday";
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch (error) {
+      return "Recently";
+    }
+  };
 
-  // Get author display name (prioritize profile userName over post userName)
+  // Get author display name with fallback
   const getAuthorName = () => {
-    return authorProfile?.userName || userName || "Anonymous"
-  }
+    if (authorProfile?.userName) return authorProfile.userName;
+    if (userName) return userName;
+    return "Anonymous Author";
+  };
 
   // Get author initials for fallback avatar
   const getAuthorInitials = (name) => {
-    if (!name || name === "Anonymous") return "A"
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-  }
+    if (!name || name === "Anonymous Author") return "AA";
+    try {
+      return name
+        .split(" ")
+        .map((word) => word.charAt(0))
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    } catch (error) {
+      return "AA";
+    }
+  };
 
   // Handle author click - prevent event bubbling to post link
   const handleAuthorClick = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  // Get safe image URL
+  const getImageUrl = (imageId) => {
+    if (!imageId) return null;
+    try {
+      return appwriteService.getFileView(imageId);
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // Get safe profile image URL
+  const getProfileImageUrl = (imageId) => {
+    if (!imageId) return null;
+    try {
+      if (profileService.getProfileImageView) {
+        return profileService.getProfileImageView(imageId);
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // List view layout
+  if (viewMode === "list") {
+    return (
+      <Link to={`/post/${$id}`} className="block group">
+        <article className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/10">
+          <div className="flex gap-6">
+            {/* Featured Image */}
+            <div className="w-48 h-32 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0">
+              {!imageError && featuredImage ? (
+                <img
+                  src={getImageUrl(featuredImage) || "/placeholder.svg"}
+                  alt={title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={() => setImageError(true)}
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-slate-700">
+                  <Eye className="w-8 h-8 text-slate-400" />
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-purple-300 transition-colors">
+                {title}
+              </h3>
+              
+              <p className="text-slate-400 mb-4 line-clamp-2 leading-relaxed">
+                {getPlainTextPreview(content, 200)}
+              </p>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {/* Author Avatar */}
+                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-transparent flex-shrink-0">
+                    {!authorImageError && authorProfile?.profileImage ? (
+                      <img
+                        src={getProfileImageUrl(authorProfile.profileImage) || "/placeholder.svg"}
+                        alt={`${getAuthorName()}'s profile`}
+                        className="w-full h-full object-cover"
+                        onError={() => setAuthorImageError(true)}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <span className="text-white text-xs font-medium">{getAuthorInitials(getAuthorName())}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-white truncate">{getAuthorName()}</div>
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <Calendar className="w-3 h-3" />
+                      <span>{formatDate($createdAt)}</span>
+                      <span>•</span>
+                      <Clock className="w-3 h-3" />
+                      <span>{calculateReadingTime(content)} min read</span>
+                    </div>
+                  </div>
+                </div>
+
+                <ArrowRight className="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+              </div>
+            </div>
+          </div>
+        </article>
+      </Link>
+    );
   }
 
+  // Grid view layout (default)
   return (
     <Link to={`/post/${$id}`} className="block group">
       <article
@@ -102,7 +245,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
         <div className="relative overflow-hidden h-48 bg-slate-700">
           {!imageError && featuredImage ? (
             <img
-              src={appwriteService.getFileView(featuredImage) || "/placeholder.svg"}
+              src={getImageUrl(featuredImage) || "/placeholder.svg"}
               alt={title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               onError={() => setImageError(true)}
@@ -158,22 +301,18 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
 
           {/* Author and Date */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               {/* Author Avatar */}
               <Link
                 to={`/profile/${userId}`}
                 onClick={handleAuthorClick}
-                className="relative group/avatar"
+                className="relative group/avatar flex-shrink-0"
                 title={`View ${getAuthorName()}'s profile`}
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-transparent group-hover/avatar:border-purple-400 transition-colors duration-200">
                   {!authorImageError && authorProfile?.profileImage ? (
                     <img
-                      src={
-                        profileService.getFileView
-                          ? profileService.getFileView(authorProfile.profileImage)
-                          : profileService.getProfileImageView?.(authorProfile.profileImage) || "/placeholder.svg"
-                      }
+                      src={getProfileImageUrl(authorProfile.profileImage) || "/placeholder.svg"}
                       alt={`${getAuthorName()}'s profile`}
                       className="w-full h-full object-cover"
                       onError={() => setAuthorImageError(true)}
@@ -184,17 +323,14 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
                     </div>
                   )}
                 </div>
-
-                {/* Hover indicator */}
-                <div className="absolute inset-0 rounded-full bg-purple-500/20 opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200" />
               </Link>
 
               {/* Author Info */}
-              <div>
+              <div className="min-w-0 flex-1">
                 <Link
                   to={`/profile/${userId}`}
                   onClick={handleAuthorClick}
-                  className="text-sm font-medium text-white hover:text-purple-300 transition-colors duration-200 cursor-pointer"
+                  className="text-sm font-medium text-white hover:text-purple-300 transition-colors duration-200 cursor-pointer block truncate"
                   title={`View ${getAuthorName()}'s profile`}
                 >
                   {getAuthorName()}
@@ -208,7 +344,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
 
             {/* Read More Arrow */}
             <div
-              className={`flex items-center gap-1 text-purple-400 transition-all duration-300 ${
+              className={`flex items-center gap-1 text-purple-400 transition-all duration-300 flex-shrink-0 ${
                 isHovered ? "translate-x-1" : ""
               }`}
             >
@@ -217,46 +353,9 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
             </div>
           </div>
         </div>
-
-        {/* Author Profile Preview Tooltip */}
-        {authorProfile && (
-          <div className="absolute bottom-full left-6 mb-2 w-64 bg-slate-800 border border-slate-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 pointer-events-none">
-            <div className="p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden">
-                  {!authorImageError && authorProfile.profileImage ? (
-                    <img
-                      src={
-                        profileService.getFileView
-                          ? profileService.getFileView(authorProfile.profileImage)
-                          : profileService.getProfileImageView?.(authorProfile.profileImage) || "/placeholder.svg"
-                      }
-                      alt={`${getAuthorName()}'s profile`}
-                      className="w-full h-full object-cover"
-                      onError={() => setAuthorImageError(true)}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">{getAuthorInitials(getAuthorName())}</span>
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold">{getAuthorName()}</h4>
-                  {authorProfile.location && <p className="text-slate-400 text-sm">{authorProfile.location}</p>}
-                </div>
-              </div>
-              {authorProfile.bio && <p className="text-slate-300 text-sm line-clamp-2">{authorProfile.bio}</p>}
-              <div className="mt-2 text-xs text-purple-400">Click to view profile →</div>
-            </div>
-          </div>
-        )}
-
-        {/* Hover Effect Border */}
-        {/* <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" /> */}
       </article>
     </Link>
-  )
+  );
 }
 
-export default PostCard
+export default PostCard;

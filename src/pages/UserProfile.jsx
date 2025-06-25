@@ -124,7 +124,8 @@ export default function UserProfile() {
   }
 
   const handleMessage = () => {
-    console.log("Handle Message Testing")
+    // Navigate to messages page with this user
+    navigate(`/messages/${userId}`)
   }
 
   if (isLoading) {
