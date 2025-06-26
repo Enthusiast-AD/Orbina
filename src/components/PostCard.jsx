@@ -5,6 +5,7 @@ import { Link } from "react-router-dom"
 import { Calendar, Clock, ArrowRight, Eye } from "lucide-react"
 import appwriteService from "../appwrite/config"
 import profileService from "../appwrite/profile"
+import { cleanDisplayContent } from '../utils/contentParser'
 
 // Create a cache for profiles to avoid repeated requests
 const profileCache = new Map();
@@ -62,18 +63,30 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
   }, [userId, profileLoading]);
 
   // Extract plain text from HTML content for preview
-  const getPlainTextPreview = (htmlContent, maxLength = 120) => {
-    if (!htmlContent) return "No preview available...";
+const getPlainTextPreview = (htmlContent, maxLength = 120) => {
+  if (!htmlContent) return "No preview available...";
 
-    try {
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = htmlContent;
-      const plainText = tempDiv.textContent || tempDiv.innerText || "";
-      return plainText.length > maxLength ? plainText.substring(0, maxLength) + "..." : plainText;
-    } catch (error) {
-      return "Preview unavailable...";
-    }
-  };
+  try {
+    // Parse and clean the content first
+    const parsedContent = cleanDisplayContent(htmlContent);
+    
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = parsedContent;
+    const plainText = tempDiv.textContent || tempDiv.innerText || "";
+    
+    // Clean up any remaining HTML entities
+    const cleanText = plainText
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    return cleanText.length > maxLength ? cleanText.substring(0, maxLength) + "..." : cleanText;
+  } catch (error) {
+    return "Preview unavailable...";
+  }
+};
 
   // Calculate estimated reading time
   const calculateReadingTime = (content) => {

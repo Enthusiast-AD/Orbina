@@ -19,7 +19,9 @@ import {
   ChevronRight,
   Sparkles,
   Timer,
-  Target
+  Target,
+  TrophyIcon,
+  Grid3X3,
 } from 'lucide-react';
 import appwriteService from "../appwrite/config";
 import messagesService from "../appwrite/messages";
@@ -409,8 +411,8 @@ function HomeContent() {
                          new Date().getHours() < 18 ? 'Good Afternoon' : 'Good Evening'}
                       </span>
                     </div>
-                    <h1 className="text-2xl font-bold text-white mb-2">
-                      Welcome back, {userData.name}! 🚀
+                    <h1 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                      Welcome back, {userData.name}! <TrophyIcon className="w-7 h-7 text-amber-400" />
                     </h1>
                     <p className="text-slate-400">
                       Ready to discover amazing stories and share your thoughts?
@@ -420,7 +422,7 @@ function HomeContent() {
                     {/* Messages Button with Animation */}
                     <button
                       onClick={() => navigate('/messages')}
-                      className="relative p-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-lg transition-all duration-300 transform hover:scale-110 shadow-lg"
+                      className="relative p-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-300 transform hover:scale-110 shadow-lg"
                       title="Messages"
                     >
                       <MessageCircle className="w-5 h-5 text-white" />
@@ -506,19 +508,19 @@ function HomeContent() {
               <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 mb-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <Target className="w-5 h-5 text-blue-400" />
+                    <Grid3X3 className="w-6 h-6 text-blue-400" />
                     <span className="text-white font-medium">Quick Actions</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => navigate('/all-posts')}
-                      className="px-3 py-1 text-sm bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                      className="px-3 py-2 text-sm  hover:bg-slate-600 text-white rounded-lg transition-colors cursor-pointer"
                     >
                       Explore All
                     </button>
                     <button
                       onClick={() => navigate('/profile')}
-                      className="px-3 py-1 text-sm bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                      className="px-3 py-2 text-sm  hover:bg-slate-600 text-white rounded-lg transition-colors cursor-pointer"
                     >
                       My Profile
                     </button>
@@ -532,7 +534,11 @@ function HomeContent() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-bold text-white">
-                {authStatus ? '🔥 Trending Stories' : '✨ Featured Stories'}
+                {authStatus ? <div className="flex items-center gap-3">
+            {/* Professional alternatives for fire/trending icon */}
+            <TrendingUp className="w-6 h-6 text-emerald-400" /> {/* Trending Up */}
+            
+          </div> : '✨ Featured Stories'}
               </h2>
               
               {!authStatus && (
