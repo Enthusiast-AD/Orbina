@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import orbina from '../../assets/orbina.svg';
 import { 
   Heart, 
   Globe, 
@@ -43,8 +44,8 @@ function Footer() {
             {/* Brand Section */}
             <div className="lg:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-white" />
+                <div className="w-8 h-8  flex items-center justify-center">
+                  <img src={orbina} alt="Orbina Logo" width={40} height={40} />
                 </div>
                 <span className="text-2xl font-bold text-white">Orbina</span>
               </div>

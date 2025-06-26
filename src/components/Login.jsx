@@ -5,6 +5,7 @@ import { Button, Input, Logo } from './index';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import authService from '../appwrite/auth';
+import orbina from '../assets/orbina.svg';
 import toast from 'react-hot-toast';
 
 function Login() {
@@ -36,7 +37,8 @@ function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 px-4 text-white">
       <div className="backdrop-blur-md bg-white/10 shadow-xl rounded-2xl p-10 w-full max-w-md border border-white/10">
         <div className="flex justify-center mb-2">
-          <span className="inline-block w-full max-w-[100px]">
+          <span className="w-full max-w-[100px] flex justify-center gap-0.5 items-center">
+            <img src={orbina} alt="Orbina Logo"  height={40} width={40}/>
             <Logo width="100%" />
           </span>
         </div>

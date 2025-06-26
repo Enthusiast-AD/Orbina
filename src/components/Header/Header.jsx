@@ -6,6 +6,7 @@ import { Link } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import {  Menu, X, User } from "lucide-react"
+import orbina from "../../assets/orbina.svg"
 import Search  from "./Search"
 
 function Header() {
@@ -53,8 +54,8 @@ function Header() {
         <nav className="flex items-center justify-between h-16">
           {/* Left Section - Logo & Navigation */}
           <div className="flex items-center space-x-8">
-            {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
+              <img src={orbina} alt="Orbina Logo" height={40} width={40}/>
               <div className="text-2xl font-bold text-white">Orbina</div>
             </Link>
 
