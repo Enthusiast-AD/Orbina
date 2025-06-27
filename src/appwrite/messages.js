@@ -12,10 +12,8 @@ export class MessagesService {
         this.databases = new Databases(this.client);
     }
 
-    async sendMessage({ senderId, receiverId, message }) {
+    async sendMessage({ senderId, receiverId, message, fileId = null, fileName = null, fileSize = null, fileType = null }) {
         try {
-            // console.log("Sending message:", { senderId, receiverId, message });
-            
             const result = await this.databases.createDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteMessagesCollectionId,
@@ -24,10 +22,13 @@ export class MessagesService {
                     senderId: senderId,
                     receiverId: receiverId,
                     message: message,
-                    isRead: false
+                    isRead: false,
+                    fileId: fileId,
+                    fileName: fileName,
+                    fileSize: fileSize,
+                    fileType: fileType
                 }
             );
-            // console.log("Message sent successfully:", result);
             return result;
         } catch (error) {
             console.error("Error sending message:", error);
@@ -37,8 +38,6 @@ export class MessagesService {
 
     async getConversation({ userId1, userId2, limit = 50, offset = 0 }) {
         try {
-            // console.log("Fetching conversation between:", { userId1, userId2 });
-            
             const result = await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteMessagesCollectionId,
@@ -72,8 +71,6 @@ export class MessagesService {
 
     async getConversationsList(userId, limit = 20) {
         try {
-            // console.log("Fetching conversations list for user:", userId);
-            
             // Get all messages where user is sender or receiver
             const result = await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
@@ -122,15 +119,12 @@ export class MessagesService {
 
     async markAsRead({ messageId }) {
         try {
-            // console.log("Marking message as read:", messageId);
-            
             const result = await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteMessagesCollectionId,
                 messageId,
                 { isRead: true }
             );
-            // console.log("Message marked as read:", result);
             return result;
         } catch (error) {
             console.error("Error marking message as read:", error);
@@ -140,8 +134,6 @@ export class MessagesService {
 
     async markConversationAsRead({ senderId, receiverId }) {
         try {
-            // console.log("Marking conversation as read:", { senderId, receiverId });
-            
             // Get unread messages in this conversation where current user is receiver
             const unreadMessages = await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
@@ -159,7 +151,6 @@ export class MessagesService {
             );
 
             await Promise.all(updatePromises);
-            // console.log(`Marked ${unreadMessages.documents.length} messages as read`);
             return unreadMessages.documents.length;
         } catch (error) {
             console.error("Error marking conversation as read:", error);
@@ -186,14 +177,11 @@ export class MessagesService {
 
     async deleteMessage(messageId) {
         try {
-            // console.log("Deleting message:", messageId);
-            
             await this.databases.deleteDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteMessagesCollectionId,
                 messageId
             );
-            // console.log("Message deleted successfully");
             return true;
         } catch (error) {
             console.error("Error deleting message:", error);

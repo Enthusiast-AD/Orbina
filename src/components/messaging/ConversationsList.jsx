@@ -1,18 +1,22 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSelector } from "react-redux"
-import { Search, MessageCircle, Plus } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { Search, MessageCircle } from "lucide-react"
 import messagesService from "../../appwrite/messages"
 import profileService from "../../appwrite/profile"
 import { formatDistanceToNow } from "date-fns"
 
 export default function ConversationsList({ onSelectConversation, selectedPartnerId }) {
+  const navigate = useNavigate()
   const currentUser = useSelector((state) => state.auth.userData)
   const [conversations, setConversations] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [partnersProfiles, setPartnersProfiles] = useState({})
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const lastUpdateRef = useRef(0)
 
   useEffect(() => {
     if (currentUser) {
@@ -20,7 +24,7 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
     }
   }, [currentUser])
 
-  // Real-time updates for new messages
+  // Optimized real-time updates - debounced refresh
   useEffect(() => {
     if (!currentUser) return
 
@@ -28,7 +32,16 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
       userId: currentUser.$id,
       callback: (response) => {
         if (response.events.includes("databases.*.collections.*.documents.*.create")) {
-          fetchConversations() // Refresh conversations list
+          // Debounce the refresh to prevent excessive updates
+          const now = Date.now()
+          if (now - lastUpdateRef.current > 1000) { // Only refresh once per second
+            lastUpdateRef.current = now
+            setTimeout(() => {
+              if (!isRefreshing) {
+                fetchConversationsOptimized()
+              }
+            }, 500)
+          }
         }
       },
     })
@@ -38,7 +51,7 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
         unsubscribe()
       }
     }
-  }, [currentUser])
+  }, [currentUser, isRefreshing])
 
   const fetchConversations = async () => {
     setIsLoading(true)
@@ -64,6 +77,46 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
       console.error("Error fetching conversations:", error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Optimized refresh that doesn't show loading state
+  const fetchConversationsOptimized = async () => {
+    if (isRefreshing) return
+    
+    setIsRefreshing(true)
+    try {
+      const conversationsList = await messagesService.getConversationsList(currentUser.$id)
+      
+      // Only update if there are actual changes
+      const hasChanges = JSON.stringify(conversationsList) !== JSON.stringify(conversations)
+      if (hasChanges) {
+        setConversations(conversationsList)
+        
+        // Only fetch new profiles if needed
+        const newPartnerIds = conversationsList
+          .map(conv => conv.partnerId)
+          .filter(id => !partnersProfiles[id])
+        
+        if (newPartnerIds.length > 0) {
+          const profilePromises = newPartnerIds.map(async (partnerId) => {
+            try {
+              const profile = await profileService.getProfile(partnerId)
+              return { [partnerId]: profile }
+            } catch (error) {
+              return { [partnerId]: null }
+            }
+          })
+
+          const newProfiles = await Promise.all(profilePromises)
+          const newProfilesMap = newProfiles.reduce((acc, profile) => ({ ...acc, ...profile }), {})
+          setPartnersProfiles(prev => ({ ...prev, ...newProfilesMap }))
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching conversations:", error)
+    } finally {
+      setIsRefreshing(false)
     }
   }
 
@@ -123,9 +176,9 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
       <div className="p-4 border-b border-slate-700">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white">Messages</h2>
-          <button className="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="New Message">
-            <Plus className="w-4 h-4 text-slate-400" />
-          </button>
+          {isRefreshing && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
+          )}
         </div>
 
         {/* Search */}
@@ -168,7 +221,7 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    {/* Avatar */}
+                    {/* Avatar - No longer clickable */}
                     <div className="relative">
                       <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-600 bg-slate-700 flex-shrink-0">
                         {partnersProfiles[conversation.partnerId]?.profileImage ? (
