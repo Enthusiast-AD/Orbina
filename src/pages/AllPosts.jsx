@@ -50,7 +50,7 @@ const PostSkeleton = () => (
 );
 
 function AllPostsContent() {
-  const [posts, setPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]); // Store all posts for filtering
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -65,11 +65,11 @@ function AllPostsContent() {
 
   // Memoized filtered and sorted posts
   const processedPosts = useMemo(() => {
-    let filtered = posts;
+    let filtered = [...allPosts];
     
     // Apply search filter
     if (searchTerm) {
-      filtered = posts.filter((post) =>
+      filtered = allPosts.filter((post) =>
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (post.userName && post.userName.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -87,29 +87,40 @@ function AllPostsContent() {
       case 'author':
         return filtered.sort((a, b) => (a.userName || '').localeCompare(b.userName || ''));
       default:
-        return filtered;
+        return filtered.sort((a, b) => new Date(b.$createdAt) - new Date(a.$createdAt));
     }
-  }, [posts, searchTerm, sortBy]);
+  }, [allPosts, searchTerm, sortBy]);
 
-  // Fetch posts with pagination
-  const fetchPosts = useCallback(async (page = 0, reset = false) => {
+  // Get posts to display based on pagination
+  const displayPosts = useMemo(() => {
+    const endIndex = (currentPage + 1) * POSTS_PER_PAGE;
+    return processedPosts.slice(0, endIndex);
+  }, [processedPosts, currentPage, POSTS_PER_PAGE]);
+
+  // Fetch all posts with proper sorting
+  const fetchAllPosts = useCallback(async (reset = false) => {
     try {
-      if (page === 0) setLoading(true);
-      else setLoadingMore(true);
-
-      const allPosts = await appwriteService.getPosts();
-      const startIndex = page * POSTS_PER_PAGE;
-      const endIndex = startIndex + POSTS_PER_PAGE;
-      const paginatedPosts = allPosts.documents.slice(startIndex, endIndex);
-
-      if (reset || page === 0) {
-        setPosts(paginatedPosts);
-      } else {
-        setPosts(prev => [...prev, ...paginatedPosts]);
+      if (reset) {
+        setLoading(true);
+        setCurrentPage(0);
       }
 
-      setHasMore(endIndex < allPosts.documents.length);
-      setCurrentPage(page);
+      // Fetch all posts and sort by creation date (newest first)
+      const response = await appwriteService.getPosts();
+      if (response && response.documents) {
+        // Sort by creation date descending (newest first)
+        const sortedPosts = response.documents.sort((a, b) => 
+          new Date(b.$createdAt) - new Date(a.$createdAt)
+        );
+        
+        setAllPosts(sortedPosts);
+        
+        // Check if there are more posts to load
+        const totalFilteredPosts = sortedPosts.length;
+        const currentDisplayCount = (currentPage + 1) * POSTS_PER_PAGE;
+        setHasMore(currentDisplayCount < totalFilteredPosts);
+      }
+      
       setError(null);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -119,25 +130,45 @@ function AllPostsContent() {
       setLoadingMore(false);
       setRefreshing(false);
     }
-  }, [POSTS_PER_PAGE]);
+  }, [currentPage, POSTS_PER_PAGE]);
 
   // Load more posts
   const handleLoadMore = useCallback(() => {
     if (!loadingMore && hasMore) {
-      fetchPosts(currentPage + 1);
+      setLoadingMore(true);
+      setCurrentPage(prev => prev + 1);
+      
+      // Check if we have more posts after incrementing page
+      const newPage = currentPage + 1;
+      const totalDisplayAfterLoad = (newPage + 1) * POSTS_PER_PAGE;
+      setHasMore(totalDisplayAfterLoad < processedPosts.length);
+      setLoadingMore(false);
     }
-  }, [fetchPosts, currentPage, loadingMore, hasMore]);
+  }, [currentPage, loadingMore, hasMore, processedPosts.length, POSTS_PER_PAGE]);
 
   // Refresh posts
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     setCurrentPage(0);
-    fetchPosts(0, true);
-  }, [fetchPosts]);
+    fetchAllPosts(true);
+  }, [fetchAllPosts]);
 
+  // Handle sort change
+  const handleSortChange = useCallback((newSort) => {
+    setSortBy(newSort);
+    setCurrentPage(0); // Reset pagination when sort changes
+  }, []);
+
+  // Initial load
   useEffect(() => {
-    fetchPosts(0, true);
-  }, [fetchPosts]);
+    fetchAllPosts(true);
+  }, []);
+
+  // Update hasMore when processedPosts changes
+  useEffect(() => {
+    const totalDisplayAfterLoad = (currentPage + 1) * POSTS_PER_PAGE;
+    setHasMore(totalDisplayAfterLoad < processedPosts.length);
+  }, [processedPosts.length, currentPage, POSTS_PER_PAGE]);
 
   if (error) {
     return (
@@ -151,7 +182,7 @@ function AllPostsContent() {
               <button 
                 onClick={() => {
                   setError(null);
-                  fetchPosts(0, true);
+                  fetchAllPosts(true);
                 }} 
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
@@ -180,8 +211,8 @@ function AllPostsContent() {
               <h1 className="text-3xl font-bold text-white mb-2">All Stories</h1>
               <p className="text-slate-400">
                 Discover amazing content from our community of writers
-                {processedPosts.length > 0 && (
-                  <span className="ml-2">• {processedPosts.length} stories found</span>
+                {displayPosts.length > 0 && (
+                  <span className="ml-2">• {displayPosts.length} of {processedPosts.length} stories shown</span>
                 )}
               </p>
             </div>
@@ -204,7 +235,7 @@ function AllPostsContent() {
                 <SortAsc className="w-4 h-4 text-slate-400" />
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
+                  onChange={(e) => handleSortChange(e.target.value)}
                   className="bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="newest">Newest First</option>
@@ -267,7 +298,7 @@ function AllPostsContent() {
         {/* Posts Display */}
         {!loading && (
           <>
-            {processedPosts.length === 0 ? (
+            {displayPosts.length === 0 ? (
               <div className="flex w-full py-16 items-center justify-center">
                 <div className="text-center max-w-md">
                   <div className="w-20 h-20 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -287,7 +318,7 @@ function AllPostsContent() {
                     {searchTerm ? (
                       <button
                         onClick={() => {
-                          // Clear search (you might need to dispatch an action here)
+                          // Refresh the page to clear search
                           window.location.reload();
                         }}
                         className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
@@ -312,11 +343,11 @@ function AllPostsContent() {
                     ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                     : 'grid-cols-1 max-w-4xl mx-auto'
                 }`}>
-                  {processedPosts.map((post) => (
+                  {displayPosts.map((post) => (
                     <div 
                       key={post.$id} 
                       className={`transform hover:scale-105 transition-transform duration-200 ${
-                        viewMode === 'list' ? 'hover:scale-102' : ''
+                        viewMode === 'list' ? 'hover:scale-[1.02]' : ''
                       }`}
                     >
                       <PostCard {...post} viewMode={viewMode} />
@@ -346,7 +377,11 @@ function AllPostsContent() {
 
                 {/* Load More Progress */}
                 {loadingMore && (
-                  <div className="grid gap-6 mt-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className={`grid gap-6 mt-6 ${
+                    viewMode === 'grid' 
+                      ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                      : 'grid-cols-1 max-w-4xl mx-auto'
+                  }`}>
                     {Array.from({ length: 4 }).map((_, index) => (
                       <PostSkeleton key={`loading-${index}`} />
                     ))}
@@ -358,13 +393,19 @@ function AllPostsContent() {
         )}
 
         {/* Stats Footer */}
-        {!loading && processedPosts.length > 0 && (
+        {!loading && displayPosts.length > 0 && (
           <div className="mt-12 pt-8 border-t border-slate-800">
             <div className="text-center text-slate-400">
               <p className="text-sm">
-                Showing {processedPosts.length} of {posts.length} stories
+                Showing {displayPosts.length} of {processedPosts.length} stories
                 {searchTerm && ` matching "${searchTerm}"`}
+                {allPosts.length !== processedPosts.length && ` (${allPosts.length} total stories)`}
               </p>
+              {hasMore && (
+                <p className="text-xs mt-1">
+                  Scroll down or click "Load More" to see additional stories
+                </p>
+              )}
             </div>
           </div>
         )}

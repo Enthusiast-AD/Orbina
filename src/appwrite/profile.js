@@ -1,49 +1,63 @@
 import conf from '../conf/conf.js';
 import { Client, ID, Databases, Storage, Query } from "appwrite";
 
-export class Profile{
+export class ProfileService {
     client = new Client();
     databases;
     bucket;
     
     constructor(){
         this.client
-        .setEndpoint(conf.appwriteUrl)
-        .setProject(conf.appwriteProjectId);
+            .setEndpoint(conf.appwriteUrl)
+            .setProject(conf.appwriteProjectId);
         this.databases = new Databases(this.client);
         this.bucket = new Storage(this.client);
     }
 
-    async createProfile({userName,bio,location,website,profileImage,userId,twitter,github,linkedIn}){
+    // Create Profile
+    async createProfile({userName, bio = "", location = "", website = "", profileImage = null, userId, twitter = "", github = "", linkedIn = ""}) {
         try {
+            console.log("Creating profile for user:", userId);
+            
             return await this.databases.createDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
-                userId, // using userId as slug
+                ID.unique(), // ✅ Let Appwrite generate unique ID
                 {
                     userName,
                     bio,
                     location,
                     website,
                     profileImage,
-                    userId,
+                    userId, // Store userId as a field, not as document ID
                     twitter,
                     github,
                     linkedIn,
                 }
-            )
+            );
         } catch (error) {
             console.log("Appwrite service :: createProfile :: error", error);
             throw error;
         }
     }
 
-    async updateProfile({userName,bio,location,website,profileImage,userId,twitter,github,linkedIn}){
+    // Update Profile
+    async updateProfile({userName, bio = "", location = "", website = "", profileImage = null, userId, twitter = "", github = "", linkedIn = ""}) {
         try {
+            console.log("Updating profile for user:", userId);
+            
+            // First, find the profile document by userId
+            const existingProfile = await this.getProfile(userId);
+            
+            if (!existingProfile) {
+                console.log("Profile not found, creating new one");
+                return await this.createProfile({userName, bio, location, website, profileImage, userId, twitter, github, linkedIn});
+            }
+
             return await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
-                userId,
+                existingProfile.$id, // Use the actual document ID
                 {
                     userName,
                     bio,
@@ -55,107 +69,108 @@ export class Profile{
                     github,
                     linkedIn,
                 }
-            )
+            );
         } catch (error) {
             console.log("Appwrite service :: updateProfile :: error", error);
             throw error;
         }
     }
 
-    async getProfile(userId){
+    // Get Profile by userId
+    async getProfile(userId) {
         try {
-            // console.log("🔍 Getting profile with userId:", userId);
-            // console.log("📦 Database ID:", conf.appwriteDatabaseId);
-            // console.log("📦 Collection ID:", conf.appwriteProfileCollectionId);
+            console.log("Fetching profile for user:", userId);
             
-            const profile = await this.databases.getDocument(
+            const result = await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
-                userId
+                [Query.equal("userId", userId)]
             );
+
+            if (result.documents && result.documents.length > 0) {
+                return result.documents[0]; // Return the first (should be only) match
+            }
             
-            // console.log("✅ Profile fetch successful:", profile);
-            return profile;
+            return null; // No profile found
         } catch (error) {
             console.log("❌ Appwrite service :: getProfile :: error", error);
-            // console.log("🔍 Error details:", {
-            //     code: error.code,
-            //     type: error.type,
-            //     message: error.message
-            // });
-            
-            // Don't throw the error, return null for 404s
-            if (error.code === 404) {
-                return null;
-            }
+            return null;
+        }
+    }
+
+    // Upload Profile Image
+    async uploadProfileImage(file) {
+        try {
+            return await this.bucket.createFile(
+                conf.appwriteProfileImageBucketId,
+                ID.unique(),
+                file
+            );
+        } catch (error) {
+            console.log("Appwrite service :: uploadProfileImage :: error", error);
             throw error;
         }
     }
 
-    // Helper methods to track failed attempts (keep these but don't use them for debugging right now)
-    getFailedAttempts() {
-        const stored = localStorage.getItem('profileFailedAttempts');
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    addToFailedAttempts(userId) {
-        const failed = this.getFailedAttempts();
-        if (!failed.includes(userId)) {
-            failed.push(userId);
-            if (failed.length > 100) {
-                failed.splice(0, failed.length - 100);
-            }
-            localStorage.setItem('profileFailedAttempts', JSON.stringify(failed));
-        }
-    }
-
-    removeFromFailedAttempts(userId) {
-        const failed = this.getFailedAttempts();
-        const index = failed.indexOf(userId);
-        if (index > -1) {
-            failed.splice(index, 1);
-            localStorage.setItem('profileFailedAttempts', JSON.stringify(failed));
-        }
-    }
-
-    clearFailedAttempts() {
-        localStorage.removeItem('profileFailedAttempts');
-    }
-
-    // file upload service
-    async uploadProfileImage(file){
-        try {
-            return await this.bucket.createFile(
-                conf.appwriteBucketId,
-                ID.unique(),
-                file
-            )
-        } catch (error) {
-            console.log("Appwrite service :: uploadFile :: error", error);
-            return false
-        }
-    }
-
-    async deleteProfileImage(fileId){
+    // Delete Profile Image
+    async deleteProfileImage(fileId) {
         try {
             await this.bucket.deleteFile(
-                conf.appwriteBucketId,
+                conf.appwriteProfileImageBucketId,
                 fileId
-            )
-            return true
+            );
+            return true;
         } catch (error) {
-            console.log("Appwrite service :: deleteFile :: error", error);
-            return false
+            console.log("Appwrite service :: deleteProfileImage :: error", error);
+            return false;
         }
     }
 
-    getProfileImageView(fileId){
-        return this.bucket.getFileView(
-            conf.appwriteBucketId,
-            fileId
-        )
+    // Temporary fallback in getProfileImageView method:
+getProfileImageView(fileId) {
+    try {
+        const bucketId = conf.appwriteProfileImageBucketId || conf.appwriteBucketId;
+        
+        if (!bucketId) {
+            console.log("No bucket ID configured");
+            return null;
+        }
+
+        if (!fileId) {
+            console.log("No fileId provided for profile image");
+            return null;
+        }
+
+        return this.bucket.getFileView(bucketId, fileId);
+    } catch (error) {
+        console.log("Appwrite service :: getProfileImageView :: error", error);
+        return null;
     }
 }
 
-const profile = new Profile()
-export default profile
+    // Clean up failed attempts tracking
+    removeFromFailedAttempts(userId) {
+        try {
+            if (typeof window !== 'undefined') {
+                const failed = JSON.parse(localStorage.getItem('profileFailedAttempts') || '[]');
+                const filtered = failed.filter(id => id !== userId);
+                localStorage.setItem('profileFailedAttempts', JSON.stringify(filtered));
+            }
+        } catch (error) {
+            console.log("Error cleaning failed attempts:", error);
+        }
+    }
+
+    // Check if profile exists
+    async profileExists(userId) {
+        try {
+            const profile = await this.getProfile(userId);
+            return profile !== null;
+        } catch (error) {
+            return false;
+        }
+    }
+}
+
+const profileService = new ProfileService();
+export default profileService;

@@ -3,8 +3,10 @@
 import { useEffect, useState, useCallback } from "react"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { Edit3, Calendar, Clock, Trash2, Eye, FileText, Plus, Search } from "lucide-react"
-import appwriteService from "../appwrite/config" // Updated import path
+import { Edit3, Calendar, Clock, Trash2, Eye, FileText, Plus, Search, RefreshCw, Send, Heart } from "lucide-react"
+import appwriteService from "../appwrite/config"
+import { cleanDisplayContent } from '../utils/contentParser'
+import toast from "react-hot-toast"
 
 export default function Draft() {
   const navigate = useNavigate()
@@ -19,13 +21,42 @@ export default function Draft() {
 
     setIsLoading(true)
     try {
-      // Get all posts by user and filter for drafts (inactive status)
-      const allPosts = await appwriteService.getPosts()
-      const userDrafts =
-        allPosts.documents?.filter((post) => post.userId === userData.$id && post.status === "inactive") || []
-      setDrafts(userDrafts)
+      // Fetch ALL posts with batch loading to ensure no pagination limits
+      let allPostsData = []
+      let hasMore = true
+      let offset = 0
+      const limit = 100
+      
+      while (hasMore) {
+        const response = await appwriteService.getPosts([], limit, offset)
+        
+        if (!response || !response.documents || response.documents.length === 0) {
+          hasMore = false
+          break
+        }
+        
+        allPostsData = [...allPostsData, ...response.documents]
+        offset += limit
+        
+        if (response.documents.length < limit) {
+          hasMore = false
+        }
+      }
+
+      // Filter for user's draft posts (inactive status)
+      const userDrafts = allPostsData.filter(post => 
+        post.userId === userData.$id && post.status === "inactive"
+      )
+      
+      // Sort by updated date (most recent first)
+      const sortedDrafts = userDrafts.sort((a, b) => 
+        new Date(b.$updatedAt || b.$createdAt) - new Date(a.$updatedAt || a.$createdAt)
+      )
+      
+      setDrafts(sortedDrafts)
     } catch (error) {
       console.error("Error fetching drafts:", error)
+      toast.error("Failed to load drafts")
     } finally {
       setIsLoading(false)
     }
@@ -36,11 +67,11 @@ export default function Draft() {
   }, [fetchDrafts])
 
   useEffect(() => {
-    const filtered = drafts.filter(
-      (draft) =>
-        draft.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        draft.content?.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
+    const filtered = drafts.filter((draft) => {
+      const titleMatch = draft.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      const contentMatch = draft.content?.toLowerCase().includes(searchTerm.toLowerCase())
+      return titleMatch || contentMatch
+    })
     setFilteredDrafts(filtered)
   }, [drafts, searchTerm])
 
@@ -51,16 +82,52 @@ export default function Draft() {
   const handleDeleteDraft = async (draftId) => {
     if (window.confirm("Are you sure you want to delete this draft?")) {
       try {
-        await appwriteService.deletePost(draftId) // Updated service call
+        const post = drafts.find(d => d.$id === draftId)
+        
+        await appwriteService.deletePost(draftId)
+        
+        if (post?.featuredImage) {
+          try {
+            await appwriteService.deleteFile(post.featuredImage)
+          } catch (imageError) {
+            console.warn("Could not delete associated image:", imageError)
+          }
+        }
+        
         setDrafts(drafts.filter((draft) => draft.$id !== draftId))
+        toast.success("Draft deleted successfully")
       } catch (error) {
         console.error("Error deleting draft:", error)
+        toast.error("Failed to delete draft")
       }
     }
   }
 
   const handlePreviewDraft = (draftId) => {
-    navigate(`/post/${draftId}`) // Updated navigation path
+    navigate(`/post/${draftId}`)
+  }
+
+  const handlePublishDraft = async (draftId) => {
+    if (window.confirm("Are you sure you want to publish this draft?")) {
+      try {
+        const draft = drafts.find(d => d.$id === draftId)
+        if (!draft) return
+
+        await appwriteService.updatePost(draftId, {
+          title: draft.title,
+          content: draft.content,
+          featuredImage: draft.featuredImage,
+          status: "active"
+        })
+
+        setDrafts(drafts.filter((draft) => draft.$id !== draftId))
+        toast.success("Draft published successfully!")
+        navigate(`/post/${draftId}`)
+      } catch (error) {
+        console.error("Error publishing draft:", error)
+        toast.error("Failed to publish draft")
+      }
+    }
   }
 
   const formatDate = (dateString) => {
@@ -73,7 +140,17 @@ export default function Draft() {
 
   const truncateContent = (content, maxLength = 150) => {
     if (!content) return ""
-    return content.length > maxLength ? content.substring(0, maxLength) + "..." : content
+    
+    try {
+      const cleanContent = cleanDisplayContent(content)
+      const tempDiv = document.createElement("div")
+      tempDiv.innerHTML = cleanContent
+      const plainText = tempDiv.textContent || tempDiv.innerText || ""
+      
+      return plainText.length > maxLength ? plainText.substring(0, maxLength) + "..." : plainText
+    } catch (error) {
+      return "Content preview unavailable"
+    }
   }
 
   if (isLoading) {
@@ -149,7 +226,12 @@ export default function Draft() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-xl font-semibold text-white mb-2 truncate">{draft.title || "Untitled Draft"}</h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-xl font-semibold text-white truncate">{draft.title || "Untitled Draft"}</h3>
+                    <span className="px-2 py-1 text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-full">
+                      Draft
+                    </span>
+                  </div>
 
                   <p className="text-slate-300 mb-4 leading-relaxed">{truncateContent(draft.content)}</p>
 
@@ -179,6 +261,13 @@ export default function Draft() {
                     title="Edit"
                   >
                     <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handlePublishDraft(draft.$id)}
+                    className="p-2 text-slate-400 hover:text-green-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                    title="Publish"
+                  >
+                    <Send className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteDraft(draft.$id)}

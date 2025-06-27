@@ -4,32 +4,34 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { useForm } from "react-hook-form"
-import { ArrowLeft, Upload, X } from "lucide-react"
+import { ArrowLeft, Upload, X, Save, Loader2 } from "lucide-react"
 import profileService from "../appwrite/profile"
 import { Button } from "../components"
 import { setProfile } from "../store/profileSlice"
 import { updateUserName } from "../store/authSlice"
 import { updateProfileUserName } from "../store/profileSlice"
-import { profileCacheUtils } from "../utils/profileCache" // Add this import
+import { profileCacheUtils } from "../utils/profileCache"
 import toast from "react-hot-toast"
 
-export default function EditProfile({ profileData }) {
-  const { register, handleSubmit, setValue, watch, reset } = useForm({
+export default function EditProfile() {
+  const { register, handleSubmit, setValue, watch, reset, formState: { isDirty, dirtyFields } } = useForm({
     defaultValues: {
-      userName: profileData?.userName || "",
-      bio: profileData?.bio || "",
-      location: profileData?.location || "",
-      website: profileData?.website || "",
-      twitter: profileData?.twitter || "",
-      github: profileData?.github || "",
-      linkedIn: profileData?.linkedIn || "",
+      userName: "",
+      bio: "",
+      location: "",
+      website: "",
+      twitter: "",
+      github: "",
+      linkedIn: "",
     },
   })
 
-  const [previewUrl, setPreviewUrl] = useState(
-    profileData?.profileImage ? profileService.getProfileImageView(profileData.profileImage) : null,
-  )
+  const [previewUrl, setPreviewUrl] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isImageChanged, setIsImageChanged] = useState(false)
+  const [initialData, setInitialData] = useState(null)
+  const [profileData, setProfileData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -37,83 +39,195 @@ export default function EditProfile({ profileData }) {
 
   const imageFile = watch("image")
 
+  // Fetch existing profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!userData?.$id) return;
+      
+      setIsLoading(true);
+      try {
+        console.log("Fetching profile for user:", userData.$id);
+        const existingProfile = await profileService.getProfile(userData.$id);
+        console.log("Fetched profile:", existingProfile);
+        
+        if (existingProfile) {
+          setProfileData(existingProfile);
+          
+          const formData = {
+            userName: existingProfile.userName || "",
+            bio: existingProfile.bio || "",
+            location: existingProfile.location || "",
+            website: existingProfile.website || "",
+            twitter: existingProfile.twitter || "",
+            github: existingProfile.github || "",
+            linkedIn: existingProfile.linkedIn || "",
+          };
+          
+          setInitialData(formData);
+          
+          // Set form values
+          Object.keys(formData).forEach(key => {
+            setValue(key, formData[key]);
+          });
+
+          // Set preview image if exists
+          if (existingProfile.profileImage) {
+            setPreviewUrl(profileService.getProfileImageView(existingProfile.profileImage));
+          }
+        } else {
+          console.log("No existing profile found, will create new one");
+          // Set default values for new profile
+          const defaultData = {
+            userName: userData.name || "",
+            bio: "",
+            location: "",
+            website: "",
+            twitter: "",
+            github: "",
+            linkedIn: "",
+          };
+          
+          setInitialData(defaultData);
+          Object.keys(defaultData).forEach(key => {
+            setValue(key, defaultData[key]);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        toast.error("Failed to load profile data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [userData, setValue]);
+
+  // Handle image preview
   useEffect(() => {
     if (imageFile && imageFile[0]) {
       const fileReader = new FileReader()
       fileReader.onload = () => {
         setPreviewUrl(fileReader.result)
+        setIsImageChanged(true)
       }
       fileReader.readAsDataURL(imageFile[0])
     }
   }, [imageFile])
 
   const submit = async (data) => {
-    setIsSubmitting(true)
-    let imageId = profileData?.profileImage
+    if (!userData?.$id) {
+      toast.error("User information not available");
+      return;
+    }
 
+    setIsSubmitting(true)
+    
     try {
-      if (data.image && data.image[0]) {
-        const file = await profileService.uploadProfileImage(data.image[0])
-        if (file) {
-          if (imageId) {
-            await profileService.deleteProfileImage(imageId)
+      console.log("Submitting profile update:", data);
+      
+      // Handle image upload only if changed
+      let imageId = profileData?.profileImage // Keep existing image by default
+      
+      if (isImageChanged) {
+        if (data.image && data.image[0]) {
+          try {
+            console.log("Uploading new image");
+            const file = await profileService.uploadProfileImage(data.image[0])
+            if (file) {
+              // Delete old image if it exists and upload was successful
+              if (profileData?.profileImage) {
+                await profileService.deleteProfileImage(profileData.profileImage)
+              }
+              imageId = file.$id
+            }
+          } catch (imageError) {
+            console.error("Error uploading image:", imageError)
+            toast.error("Failed to upload image. Other changes will still be saved.")
           }
-          imageId = file.$id
+        } else {
+          // User wants to remove image
+          if (profileData?.profileImage) {
+            await profileService.deleteProfileImage(profileData.profileImage)
+          }
+          imageId = null
         }
       }
 
+      // Prepare payload
       const payload = {
-        userName: data.userName,
-        bio: data.bio,
-        location: data.location,
-        website: data.website,
-        profileImage: imageId,
         userId: userData.$id,
-        twitter: data.twitter,
-        github: data.github,
-        linkedIn: data.linkedIn,
+        userName: data.userName || "",
+        bio: data.bio || "",
+        location: data.location || "",
+        website: data.website || "",
+        twitter: data.twitter || "",
+        github: data.github || "",
+        linkedIn: data.linkedIn || "",
+        profileImage: imageId,
       }
 
-      const existingProfile = await profileService.getProfile(userData.$id)
+      console.log("Profile payload:", payload);
 
-      let result
-      if (existingProfile) {
-        result = await profileService.updateProfile(payload)
+      // Update or create profile
+      let result;
+      if (profileData) {
+        console.log("Updating existing profile");
+        result = await profileService.updateProfile(payload);
       } else {
-        result = await profileService.createProfile(payload)
+        console.log("Creating new profile");
+        result = await profileService.createProfile(payload);
       }
 
       if (result) {
+        console.log("Profile saved successfully:", result);
+        
+        // Update Redux store
         dispatch(setProfile(result))
         dispatch(updateProfileUserName(result.userName))
         dispatch(updateUserName(result.userName))
         
-        // Clear failed attempts for this user (Step 4 code)
+        // Clear cache
         profileService.removeFromFailedAttempts(userData.$id)
         profileCacheUtils.clearSpecificProfile(userData.$id)
         
-        toast.success("Profile saved successfully!")
+        toast.success("Profile updated successfully!")
         navigate("/profile")
       } else {
         throw new Error("Unable to save profile.")
       }
     } catch (error) {
       console.error("Profile save error:", error)
-      toast.error("Something went wrong.")
+      toast.error(`Failed to update profile: ${error.message || 'Unknown error'}`)
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleCancel = () => {
-    reset()
     navigate("/profile")
   }
 
   const removeImage = () => {
     setPreviewUrl(null)
     setValue("image", null)
+    setIsImageChanged(true) // Mark as changed to remove existing image
   }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500 mx-auto mb-4" />
+          <p className="text-slate-400">Loading profile data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Check if anything has changed
+  const hasChanges = isDirty || isImageChanged
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
@@ -130,7 +244,9 @@ export default function EditProfile({ profileData }) {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-white">Edit Profile</h1>
-                <p className="text-slate-400">Update your profile information</p>
+                <p className="text-slate-400">
+                  {hasChanges ? "You have unsaved changes" : "Update your profile information"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -144,9 +260,19 @@ export default function EditProfile({ profileData }) {
               <Button
                 onClick={handleSubmit(submit)}
                 disabled={isSubmitting}
-                className="bg-purple-600 hover:bg-purple-700 text-white border-0"
+                className="bg-purple-600 hover:bg-purple-700 text-white border-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </div>
+                )}
               </Button>
             </div>
           </div>
@@ -164,7 +290,7 @@ export default function EditProfile({ profileData }) {
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-purple-500/30 bg-slate-700">
                   {previewUrl ? (
                     <img
-                      src={previewUrl || "/placeholder.svg"}
+                      src={previewUrl}
                       alt="Profile preview"
                       className="w-full h-full object-cover"
                     />
@@ -179,6 +305,7 @@ export default function EditProfile({ profileData }) {
                     type="button"
                     onClick={removeImage}
                     className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                    title="Remove image"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -186,7 +313,9 @@ export default function EditProfile({ profileData }) {
               </div>
               <div className="flex-1">
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-300 mb-2 block">Upload New Image</span>
+                  <span className="text-sm font-medium text-slate-300 mb-2 block">
+                    {previewUrl ? "Change Image" : "Upload New Image"}
+                  </span>
                   <input
                     type="file"
                     accept="image/*"
@@ -194,7 +323,9 @@ export default function EditProfile({ profileData }) {
                     {...register("image")}
                   />
                 </label>
-                <p className="text-xs text-slate-400 mt-2">Recommended: Square image, at least 400x400px</p>
+                <p className="text-xs text-slate-400 mt-2">
+                  Recommended: Square image, at least 400x400px. JPG, PNG, or GIF (max 5MB)
+                </p>
               </div>
             </div>
           </div>

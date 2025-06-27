@@ -120,6 +120,7 @@ const PostsGrid = React.memo(({ posts, isLoading, hasMore, onLoadMore, showLoadM
 function HomeContent() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]); // Store all posts for filtering
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -140,36 +141,68 @@ function HomeContent() {
 
   const POSTS_PER_PAGE = authStatus ? 12 : 4;
 
-  // Memoized filtered posts
+  // Memoized filtered posts with proper sorting and filtering
   const filteredPosts = useMemo(() => {
-    if (!searchTerm) return posts;
-    return posts.filter((post) =>
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.userName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [posts, searchTerm]);
+    let postsToFilter = [...allPosts];
+    
+    // Apply search filter first
+    if (searchTerm) {
+      postsToFilter = postsToFilter.filter((post) =>
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.userName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
 
-  // Fetch posts with pagination
-  const fetchPosts = useCallback(async (page = 0, reset = false) => {
+    // Apply category filter
+    if (filter === 'trending') {
+      // Sort by creation date (newest first) for trending
+      postsToFilter = postsToFilter
+        .filter(post => {
+          // Show posts from last 7 days as "trending"
+          const postDate = new Date(post.$createdAt);
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          return postDate >= sevenDaysAgo;
+        })
+        .sort((a, b) => new Date(b.$createdAt) - new Date(a.$createdAt));
+    } else {
+      // For 'all', sort by creation date (newest first)
+      postsToFilter = postsToFilter.sort((a, b) => new Date(b.$createdAt) - new Date(a.$createdAt));
+    }
+
+    return postsToFilter;
+  }, [allPosts, searchTerm, filter]);
+
+  // Get posts to display based on pagination
+  const displayPosts = useMemo(() => {
+    const endIndex = (currentPage + 1) * POSTS_PER_PAGE;
+    return filteredPosts.slice(0, endIndex);
+  }, [filteredPosts, currentPage, POSTS_PER_PAGE]);
+
+  // Fetch posts with proper sorting
+  const fetchPosts = useCallback(async (reset = false) => {
     try {
-      if (page === 0) setLoading(true);
-      else setLoadingMore(true);
-
-      // Simulate server-side pagination (replace with actual Appwrite pagination)
-      const allPosts = await appwriteService.getPosts();
-      const startIndex = page * POSTS_PER_PAGE;
-      const endIndex = startIndex + POSTS_PER_PAGE;
-      const paginatedPosts = allPosts.documents.slice(startIndex, endIndex);
-
-      if (reset || page === 0) {
-        setPosts(paginatedPosts);
-      } else {
-        setPosts(prev => [...prev, ...paginatedPosts]);
+      if (reset) {
+        setLoading(true);
+        setCurrentPage(0);
       }
 
-      setHasMore(endIndex < allPosts.documents.length);
-      setCurrentPage(page);
+      // Fetch all posts and sort by creation date (newest first)
+      const allPostsData = await appwriteService.getPosts();
+      if (allPostsData && allPostsData.documents) {
+        // Sort by creation date descending (newest first)
+        const sortedPosts = allPostsData.documents.sort((a, b) => 
+          new Date(b.$createdAt) - new Date(a.$createdAt)
+        );
+        
+        setAllPosts(sortedPosts);
+        
+        // Check if there are more posts to load
+        const totalFilteredPosts = sortedPosts.length;
+        const currentDisplayCount = (currentPage + 1) * POSTS_PER_PAGE;
+        setHasMore(currentDisplayCount < totalFilteredPosts);
+      }
     } catch (error) {
       console.error('Error fetching posts:', error);
       setError('Failed to load posts. Please try again.');
@@ -177,14 +210,27 @@ function HomeContent() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [POSTS_PER_PAGE]);
+  }, [currentPage, POSTS_PER_PAGE]);
 
   // Load more posts
   const handleLoadMore = useCallback(() => {
     if (!loadingMore && hasMore) {
-      fetchPosts(currentPage + 1);
+      setLoadingMore(true);
+      setCurrentPage(prev => prev + 1);
+      
+      // Check if we have more posts after incrementing page
+      const newPage = currentPage + 1;
+      const totalDisplayAfterLoad = (newPage + 1) * POSTS_PER_PAGE;
+      setHasMore(totalDisplayAfterLoad < filteredPosts.length);
+      setLoadingMore(false);
     }
-  }, [fetchPosts, currentPage, loadingMore, hasMore]);
+  }, [currentPage, loadingMore, hasMore, filteredPosts.length, POSTS_PER_PAGE]);
+
+  // Handle filter change
+  const handleFilterChange = useCallback((newFilter) => {
+    setFilter(newFilter);
+    setCurrentPage(0); // Reset pagination when filter changes
+  }, []);
 
   // Fetch user statistics with caching
   const fetchUserStats = useCallback(async () => {
@@ -251,14 +297,29 @@ function HomeContent() {
 
   // Initial load
   useEffect(() => {
-    fetchPosts(0, true);
-  }, [fetchPosts]);
+    fetchPosts(true);
+  }, []);
 
   // Fetch user stats
   useEffect(() => {
     if (authStatus && userData) {
       fetchUserStats();
     }
+  }, [authStatus, userData, fetchUserStats]);
+
+  // Listen for message read events
+  useEffect(() => {
+    const handleMessagesRead = () => {
+      if (authStatus && userData) {
+        fetchUserStats();
+      }
+    };
+
+    window.addEventListener('messagesRead', handleMessagesRead);
+    
+    return () => {
+      window.removeEventListener('messagesRead', handleMessagesRead);
+    };
   }, [authStatus, userData, fetchUserStats]);
 
   if (error) {
@@ -274,7 +335,7 @@ function HomeContent() {
             <button 
               onClick={() => {
                 setError(null);
-                fetchPosts(0, true);
+                fetchPosts(true);
               }} 
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
@@ -534,11 +595,12 @@ function HomeContent() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-bold text-white">
-                {authStatus ? <div className="flex items-center gap-3">
-            {/* Professional alternatives for fire/trending icon */}
-            <TrendingUp className="w-6 h-6 text-emerald-400" /> {/* Trending Up */}
-            
-          </div> : '✨ Featured Stories'}
+                {authStatus ? (
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="w-6 h-6 text-emerald-400" />
+                    Latest Stories
+                  </div>
+                ) : '✨ Featured Stories'}
               </h2>
               
               {!authStatus && (
@@ -551,7 +613,7 @@ function HomeContent() {
               {authStatus && (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setFilter('all')}
+                    onClick={() => handleFilterChange('all')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       filter === 'all'
                         ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
@@ -561,7 +623,7 @@ function HomeContent() {
                     All Stories
                   </button>
                   <button
-                    onClick={() => setFilter('trending')}
+                    onClick={() => handleFilterChange('trending')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       filter === 'trending'
                         ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
@@ -587,17 +649,17 @@ function HomeContent() {
           </div>
 
           {/* Enhanced Posts Display */}
-          {filteredPosts.length === 0 && !loading ? (
+          {displayPosts.length === 0 && !loading ? (
             <div className="flex w-full py-16 items-center justify-center">
               <div className="text-center max-w-md">
                 <div className="w-20 h-20 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Search className="w-10 h-10 text-purple-400" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">
-                  {posts.length === 0 ? 'No stories yet' : 'No matches found'}
+                  {allPosts.length === 0 ? 'No stories yet' : 'No matches found'}
                 </h3>
                 <p className="text-slate-400 mb-6 leading-relaxed">
-                  {posts.length === 0
+                  {allPosts.length === 0
                     ? 'Be the first to share your story with our community!'
                     : 'Try adjusting your search terms or explore different categories.'}
                 </p>
@@ -631,7 +693,7 @@ function HomeContent() {
           ) : (
             <>
               <PostsGrid 
-                posts={filteredPosts}
+                posts={displayPosts}
                 isLoading={loading || loadingMore}
                 hasMore={hasMore}
                 onLoadMore={handleLoadMore}
@@ -639,7 +701,7 @@ function HomeContent() {
               />
 
               {/* Enhanced CTA for non-authenticated users */}
-              {!authStatus && posts.length > 4 && (
+              {!authStatus && allPosts.length > 4 && (
                 <div className="mt-16">
                   <div className="bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-red-600/10 backdrop-blur-sm rounded-3xl p-8 border border-purple-500/20 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-pink-600/5"></div>
@@ -657,7 +719,7 @@ function HomeContent() {
                       </h3>
                       
                       <p className="text-slate-300 mb-6 max-w-2xl mx-auto leading-relaxed">
-                        You've explored just a taste of our {posts.length}+ amazing stories. 
+                        You've explored just a taste of our {allPosts.length}+ amazing stories. 
                         Join our thriving community to access unlimited content, connect with writers, 
                         and share your own stories!
                       </p>
@@ -668,7 +730,7 @@ function HomeContent() {
                           className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-xl"
                         >
                           <Star className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                          Join Free - Read All {posts.length} Stories
+                          Join Free - Read All {allPosts.length} Stories
                           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
                         <button

@@ -25,13 +25,13 @@ import {
   CheckCircle,
   Globe,
   Github,
+  ImageIcon,
 } from "lucide-react"
 import appwriteService from "../appwrite/config"
 import profileService from "../appwrite/profile"
 import likesService from "../appwrite/likes"
 import bookmarksService from "../appwrite/bookmarks"
 import { Button, Container } from "../components"
-import parse from "html-react-parser"
 import { useSelector } from "react-redux"
 import toast from "react-hot-toast"
 
@@ -395,43 +395,62 @@ export default function Post() {
         <article className="max-w-4xl mx-auto py-8">
           {/* Hero Section */}
           <div className="relative mb-12">
-            {/* Featured Image */}
-            <div className="relative mb-8 rounded-2xl overflow-hidden bg-slate-800 shadow-2xl">
+            {/* Featured Image - Fixed aspect ratio */}
+            <div className="relative mb-8 rounded-2xl overflow-hidden">
               {!imageError && post.featuredImage ? (
-                <div className="relative">
+                <div className="aspect-[1.91/1] bg-slate-800 rounded-xl overflow-hidden relative">
                   <img
                     src={appwriteService.getFileView(post.featuredImage)}
                     alt={post.title}
-                    className="w-full h-64 md:h-96 object-cover"
+                    className="w-full h-full object-cover"
+                    loading="eager"
                     onError={() => setImageError(true)}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  
+                  {/* Author Controls Overlay */}
+                  {isAuthor && (
+                    <div className="absolute top-6 right-6 flex gap-3">
+                      <Link to={`/edit-post/${post.$id}`}>
+                        <Button className="bg-green-600/90 hover:bg-green-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105">
+                          <Edit3 className="w-4 h-4" />
+                          Edit
+                        </Button>
+                      </Link>
+                      <Button
+                        onClick={deletePost}
+                        className="bg-red-600/90 hover:bg-red-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="w-full h-64 md:h-96 flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
+                <div className="aspect-[1.91/1] bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl overflow-hidden flex items-center justify-center relative">
                   <div className="text-center">
-                    <Eye className="w-20 h-20 mx-auto mb-4 text-slate-400" />
+                    <ImageIcon className="w-20 h-20 mx-auto mb-4 text-slate-400" />
                     <p className="text-slate-400 text-lg">No featured image</p>
                   </div>
-                </div>
-              )}
-
-              {/* Author Controls Overlay */}
-              {isAuthor && (
-                <div className="absolute top-6 right-6 flex gap-3">
-                  <Link to={`/edit-post/${post.$id}`}>
-                    <Button className="bg-green-600/90 hover:bg-green-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105">
-                      <Edit3 className="w-4 h-4" />
-                      Edit
-                    </Button>
-                  </Link>
-                  <Button
-                    onClick={deletePost}
-                    className="bg-red-600/90 hover:bg-red-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </Button>
+                  
+                  {/* Author Controls Overlay for no-image state */}
+                  {isAuthor && (
+                    <div className="absolute top-6 right-6 flex gap-3">
+                      <Link to={`/edit-post/${post.$id}`}>
+                        <Button className="bg-green-600/90 hover:bg-green-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105">
+                          <Edit3 className="w-4 h-4" />
+                          Edit
+                        </Button>
+                      </Link>
+                      <Button
+                        onClick={deletePost}
+                        className="bg-red-600/90 hover:bg-red-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -684,230 +703,229 @@ export default function Post() {
       )}
 
       {/* Enhanced Content Styles */}
-      {/* Enhanced Content Styles */}
-<style jsx global>{`
-  .article-content {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    line-height: 1.7;
-    color: #e2e8f0;
-  }
-  
-  .article-content p {
-    margin: 1.25rem 0 !important;
-    line-height: 1.7 !important;
-    color: #e2e8f0 !important;
-    font-size: 1.125rem !important;
-    font-weight: 400 !important;
-  }
-  
-  .article-content h1 {
-    font-size: 2.5rem !important;
-    font-weight: 800 !important;
-    color: white !important;
-    margin: 2rem 0 1.5rem 0 !important;
-    line-height: 1.2 !important;
-    letter-spacing: -0.025em !important;
-  }
-  
-  .article-content h2 {
-    font-size: 2rem !important;
-    font-weight: 700 !important;
-    color: white !important;
-    margin: 1.75rem 0 1rem 0 !important;
-    line-height: 1.3 !important;
-    border-bottom: 2px solid #374151 !important;
-    padding-bottom: 0.5rem !important;
-    letter-spacing: -0.025em !important;
-  }
-  
-  .article-content h3 {
-    font-size: 1.5rem !important;
-    font-weight: 600 !important;
-    color: white !important;
-    margin: 1.5rem 0 0.75rem 0 !important;
-    line-height: 1.4 !important;
-  }
-  
-  .article-content strong {
-    font-weight: 700 !important;
-    color: white !important;
-    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
-    background-clip: text !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    font-size: inherit !important;
-  }
-  
-  .article-content em {
-    font-style: italic !important;
-    color: #cbd5e1 !important;
-    font-weight: 500 !important;
-  }
-  
-  .article-content u {
-    text-decoration: underline !important;
-    text-decoration-color: #8b5cf6 !important;
-    text-decoration-thickness: 2px !important;
-    text-underline-offset: 3px !important;
-    color: #e2e8f0 !important;
-  }
-  
-  .article-content del {
-    text-decoration: line-through !important;
-    text-decoration-color: #ef4444 !important;
-    color: #94a3b8 !important;
-    opacity: 0.8 !important;
-  }
-  
-  .article-content code {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.25) 100%) !important;
-    color: #c084fc !important;
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    font-family: 'Fira Code', 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace !important;
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
-    box-shadow: 0 1px 3px rgba(139, 92, 246, 0.1) !important;
-  }
-  
-  .article-content pre {
-    background: linear-gradient(135deg, #000000 0%, #111827 100%) !important;
-    color: #00ff41 !important;
-    padding: 1.5rem !important;
-    border-radius: 0.75rem !important;
-    border: 1px solid #374151 !important;
-    overflow-x: auto !important;
-    margin: 2rem 0 !important;
-    font-family: 'Fira Code', 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace !important;
-    font-size: 0.875rem !important;
-    line-height: 1.6 !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
-  }
-  
-  .article-content pre code {
-    background: transparent !important;
-    color: inherit !important;
-    padding: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    font-size: inherit !important;
-  }
-  
-  .article-content blockquote {
-    border-left: 4px solid #8b5cf6 !important;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.12) 100%) !important;
-    padding: 1.5rem 2rem !important;
-    margin: 2rem 0 !important;
-    border-radius: 0 0.75rem 0.75rem 0 !important;
-    font-style: italic !important;
-    color: #cbd5e1 !important;
-    font-size: 1.1rem !important;
-    position: relative !important;
-    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.1) !important;
-  }
-  
-  .article-content blockquote::before {
-    content: '"' !important;
-    font-size: 3rem !important;
-    color: #8b5cf6 !important;
-    position: absolute !important;
-    top: -0.5rem !important;
-    left: 1rem !important;
-    font-family: serif !important;
-    opacity: 0.3 !important;
-  }
-  
-  .article-content ul, .article-content ol {
-    margin: 1.5rem 0 !important;
-    padding-left: 2rem !important;
-  }
-  
-  .article-content ul {
-    list-style-type: none !important;
-  }
-  
-  .article-content ul li::before {
-    content: '•' !important;
-    color: #8b5cf6 !important;
-    font-weight: bold !important;
-    position: absolute !important;
-    margin-left: -1.5rem !important;
-    font-size: 1.2rem !important;
-  }
-  
-  .article-content ol {
-    list-style-type: decimal !important;
-    list-style-position: outside !important;
-  }
-  
-  .article-content ol li {
-    list-style-type: decimal !important;
-  }
-  
-  .article-content li {
-    margin: 0.75rem 0 !important;
-    line-height: 1.6 !important;
-    color: #e2e8f0 !important;
-    font-size: 1.125rem !important;
-    position: relative !important;
-  }
-  
-  .article-content a {
-    color: #8b5cf6 !important;
-    text-decoration: none !important;
-    font-weight: 500 !important;
-    border-bottom: 2px solid transparent !important;
-    transition: all 0.2s ease !important;
-  }
-  
-  .article-content a:hover {
-    color: #a78bfa !important;
-    border-bottom-color: #a78bfa !important;
-  }
-  
-  .article-content br {
-    margin: 0.5rem 0 !important;
-  }
-  
-  /* Hide any stray HTML tags that might appear */
-  .article-content script,
-  .article-content style {
-    display: none !important;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .article-content h1 {
-      font-size: 2rem !important;
-    }
-    
-    .article-content h2 {
-      font-size: 1.75rem !important;
-    }
-    
-    .article-content h3 {
-      font-size: 1.375rem !important;
-    }
-    
-    .article-content p,
-    .article-content li {
-      font-size: 1rem !important;
-    }
-    
-    .article-content pre {
-      padding: 1rem !important;
-      font-size: 0.8rem !important;
-    }
-    
-    .article-content blockquote {
-      padding: 1rem 1.5rem !important;
-      margin: 1.5rem 0 !important;
-    }
-  }
-`}</style>
+      <style jsx global>{`
+        .article-content {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          line-height: 1.7;
+          color: #e2e8f0;
+        }
+        
+        .article-content p {
+          margin: 1.25rem 0 !important;
+          line-height: 1.7 !important;
+          color: #e2e8f0 !important;
+          font-size: 1.125rem !important;
+          font-weight: 400 !important;
+        }
+        
+        .article-content h1 {
+          font-size: 2.5rem !important;
+          font-weight: 800 !important;
+          color: white !important;
+          margin: 2rem 0 1.5rem 0 !important;
+          line-height: 1.2 !important;
+          letter-spacing: -0.025em !important;
+        }
+        
+        .article-content h2 {
+          font-size: 2rem !important;
+          font-weight: 700 !important;
+          color: white !important;
+          margin: 1.75rem 0 1rem 0 !important;
+          line-height: 1.3 !important;
+          border-bottom: 2px solid #374151 !important;
+          padding-bottom: 0.5rem !important;
+          letter-spacing: -0.025em !important;
+        }
+        
+        .article-content h3 {
+          font-size: 1.5rem !important;
+          font-weight: 600 !important;
+          color: white !important;
+          margin: 1.5rem 0 0.75rem 0 !important;
+          line-height: 1.4 !important;
+        }
+        
+        .article-content strong {
+          font-weight: 700 !important;
+          color: white !important;
+          background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+          background-clip: text !important;
+          -webkit-background-clip: text !important;
+          -webkit-text-fill-color: transparent !important;
+          background-clip: text !important;
+          font-size: inherit !important;
+        }
+        
+        .article-content em {
+          font-style: italic !important;
+          color: #cbd5e1 !important;
+          font-weight: 500 !important;
+        }
+        
+        .article-content u {
+          text-decoration: underline !important;
+          text-decoration-color: #8b5cf6 !important;
+          text-decoration-thickness: 2px !important;
+          text-underline-offset: 3px !important;
+          color: #e2e8f0 !important;
+        }
+        
+        .article-content del {
+          text-decoration: line-through !important;
+          text-decoration-color: #ef4444 !important;
+          color: #94a3b8 !important;
+          opacity: 0.8 !important;
+        }
+        
+        .article-content code {
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.25) 100%) !important;
+          color: #c084fc !important;
+          padding: 0.375rem 0.75rem !important;
+          border-radius: 0.375rem !important;
+          font-family: 'Fira Code', 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace !important;
+          font-size: 0.875rem !important;
+          font-weight: 500 !important;
+          border: 1px solid rgba(139, 92, 246, 0.2) !important;
+          box-shadow: 0 1px 3px rgba(139, 92, 246, 0.1) !important;
+        }
+        
+        .article-content pre {
+          background: linear-gradient(135deg, #000000 0%, #111827 100%) !important;
+          color: #00ff41 !important;
+          padding: 1.5rem !important;
+          border-radius: 0.75rem !important;
+          border: 1px solid #374151 !important;
+          overflow-x: auto !important;
+          margin: 2rem 0 !important;
+          font-family: 'Fira Code', 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace !important;
+          font-size: 0.875rem !important;
+          line-height: 1.6 !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .article-content pre code {
+          background: transparent !important;
+          color: inherit !important;
+          padding: 0 !important;
+          border: none !important;
+          border-radius: 0 !important;
+          box-shadow: none !important;
+          font-size: inherit !important;
+        }
+        
+        .article-content blockquote {
+          border-left: 4px solid #8b5cf6 !important;
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.12) 100%) !important;
+          padding: 1.5rem 2rem !important;
+          margin: 2rem 0 !important;
+          border-radius: 0 0.75rem 0.75rem 0 !important;
+          font-style: italic !important;
+          color: #cbd5e1 !important;
+          font-size: 1.1rem !important;
+          position: relative !important;
+          box-shadow: 0 2px 4px rgba(139, 92, 246, 0.1) !important;
+        }
+        
+        .article-content blockquote::before {
+          content: '"' !important;
+          font-size: 3rem !important;
+          color: #8b5cf6 !important;
+          position: absolute !important;
+          top: -0.5rem !important;
+          left: 1rem !important;
+          font-family: serif !important;
+          opacity: 0.3 !important;
+        }
+        
+        .article-content ul, .article-content ol {
+          margin: 1.5rem 0 !important;
+          padding-left: 2rem !important;
+        }
+        
+        .article-content ul {
+          list-style-type: none !important;
+        }
+        
+        .article-content ul li::before {
+          content: '•' !important;
+          color: #8b5cf6 !important;
+          font-weight: bold !important;
+          position: absolute !important;
+          margin-left: -1.5rem !important;
+          font-size: 1.2rem !important;
+        }
+        
+        .article-content ol {
+          list-style-type: decimal !important;
+          list-style-position: outside !important;
+        }
+        
+        .article-content ol li {
+          list-style-type: decimal !important;
+        }
+        
+        .article-content li {
+          margin: 0.75rem 0 !important;
+          line-height: 1.6 !important;
+          color: #e2e8f0 !important;
+          font-size: 1.125rem !important;
+          position: relative !important;
+        }
+        
+        .article-content a {
+          color: #8b5cf6 !important;
+          text-decoration: none !important;
+          font-weight: 500 !important;
+          border-bottom: 2px solid transparent !important;
+          transition: all 0.2s ease !important;
+        }
+        
+        .article-content a:hover {
+          color: #a78bfa !important;
+          border-bottom-color: #a78bfa !important;
+        }
+        
+        .article-content br {
+          margin: 0.5rem 0 !important;
+        }
+        
+        /* Hide any stray HTML tags that might appear */
+        .article-content script,
+        .article-content style {
+          display: none !important;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+          .article-content h1 {
+            font-size: 2rem !important;
+          }
+          
+          .article-content h2 {
+            font-size: 1.75rem !important;
+          }
+          
+          .article-content h3 {
+            font-size: 1.375rem !important;
+          }
+          
+          .article-content p,
+          .article-content li {
+            font-size: 1rem !important;
+          }
+          
+          .article-content pre {
+            padding: 1rem !important;
+            font-size: 0.8rem !important;
+          }
+          
+          .article-content blockquote {
+            padding: 1rem 1.5rem !important;
+            margin: 1.5rem 0 !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }

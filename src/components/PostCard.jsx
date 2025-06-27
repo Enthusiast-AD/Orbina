@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
-import { Calendar, Clock, ArrowRight, Eye } from "lucide-react"
+import { Calendar, Clock, ArrowRight, Eye, ImageIcon } from "lucide-react"
 import appwriteService from "../appwrite/config"
 import profileService from "../appwrite/profile"
 import { cleanDisplayContent } from '../utils/contentParser'
@@ -63,30 +63,30 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
   }, [userId, profileLoading]);
 
   // Extract plain text from HTML content for preview
-const getPlainTextPreview = (htmlContent, maxLength = 120) => {
-  if (!htmlContent) return "No preview available...";
+  const getPlainTextPreview = (htmlContent, maxLength = 120) => {
+    if (!htmlContent) return "No preview available...";
 
-  try {
-    // Parse and clean the content first
-    const parsedContent = cleanDisplayContent(htmlContent);
-    
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = parsedContent;
-    const plainText = tempDiv.textContent || tempDiv.innerText || "";
-    
-    // Clean up any remaining HTML entities
-    const cleanText = plainText
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    return cleanText.length > maxLength ? cleanText.substring(0, maxLength) + "..." : cleanText;
-  } catch (error) {
-    return "Preview unavailable...";
-  }
-};
+    try {
+      // Parse and clean the content first
+      const parsedContent = cleanDisplayContent(htmlContent);
+      
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = parsedContent;
+      const plainText = tempDiv.textContent || tempDiv.innerText || "";
+      
+      // Clean up any remaining HTML entities
+      const cleanText = plainText
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
+      return cleanText.length > maxLength ? cleanText.substring(0, maxLength) + "..." : cleanText;
+    } catch (error) {
+      return "Preview unavailable...";
+    }
+  };
 
   // Calculate estimated reading time
   const calculateReadingTime = (content) => {
@@ -103,25 +103,41 @@ const getPlainTextPreview = (htmlContent, maxLength = 120) => {
 
   // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return "Recently";
-    try {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (!dateString) return "Recently";
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diffDays === 1) return "Yesterday";
-      if (diffDays < 7) return `${diffDays} days ago`;
-      if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch (error) {
-      return "Recently";
-    }
-  };
+    // Just now (less than 1 minute)
+    if (diffMinutes < 1) return "Just now";
+    
+    // Minutes ago (less than 1 hour)
+    if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes === 1 ? '' : 's'} ago`;
+    
+    // Hours ago (less than 24 hours)
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    
+    // Days ago (less than 7 days)
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    
+    // Weeks ago (less than 30 days)
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} week${Math.ceil(diffDays / 7) === 1 ? '' : 's'} ago`;
+    
+    // More than 30 days - show actual date
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch (error) {
+    return "Recently";
+  }
+};
 
   // Get author display name with fallback
   const getAuthorName = () => {
@@ -180,11 +196,11 @@ const getPlainTextPreview = (htmlContent, maxLength = 120) => {
       <Link to={`/post/${$id}`} className="block group">
         <article className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/10">
           <div className="flex gap-6">
-            {/* Featured Image */}
+            {/* Featured Image - Fixed aspect ratio */}
             <div className="w-48 h-32 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0">
               {!imageError && featuredImage ? (
                 <img
-                  src={getImageUrl(featuredImage) || "/placeholder.svg"}
+                  src={getImageUrl(featuredImage)}
                   alt={title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={() => setImageError(true)}
@@ -192,7 +208,7 @@ const getPlainTextPreview = (htmlContent, maxLength = 120) => {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-slate-700">
-                  <Eye className="w-8 h-8 text-slate-400" />
+                  <ImageIcon className="w-8 h-8 text-slate-400" />
                 </div>
               )}
             </div>
@@ -213,7 +229,7 @@ const getPlainTextPreview = (htmlContent, maxLength = 120) => {
                   <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-transparent flex-shrink-0">
                     {!authorImageError && authorProfile?.profileImage ? (
                       <img
-                        src={getProfileImageUrl(authorProfile.profileImage) || "/placeholder.svg"}
+                        src={getProfileImageUrl(authorProfile.profileImage)}
                         alt={`${getAuthorName()}'s profile`}
                         className="w-full h-full object-cover"
                         onError={() => setAuthorImageError(true)}
@@ -246,7 +262,7 @@ const getPlainTextPreview = (htmlContent, maxLength = 120) => {
     );
   }
 
-  // Grid view layout (default)
+  // Grid view layout (default) - Updated with consistent aspect ratio
   return (
     <Link to={`/post/${$id}`} className="block group">
       <article
@@ -254,11 +270,11 @@ const getPlainTextPreview = (htmlContent, maxLength = 120) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Featured Image */}
-        <div className="relative overflow-hidden h-48 bg-slate-700">
+        {/* Featured Image - Consistent 1.91:1 aspect ratio */}
+        <div className="aspect-[1.91/1] bg-slate-700 overflow-hidden relative">
           {!imageError && featuredImage ? (
             <img
-              src={getImageUrl(featuredImage) || "/placeholder.svg"}
+              src={getImageUrl(featuredImage)}
               alt={title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               onError={() => setImageError(true)}
@@ -268,7 +284,7 @@ const getPlainTextPreview = (htmlContent, maxLength = 120) => {
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-2 bg-slate-600 rounded-full flex items-center justify-center">
-                  <Eye className="w-8 h-8 text-slate-400" />
+                  <ImageIcon className="w-8 h-8 text-slate-400" />
                 </div>
                 <p className="text-slate-400 text-sm">No image</p>
               </div>
@@ -325,7 +341,7 @@ const getPlainTextPreview = (htmlContent, maxLength = 120) => {
                 <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-transparent group-hover/avatar:border-purple-400 transition-colors duration-200">
                   {!authorImageError && authorProfile?.profileImage ? (
                     <img
-                      src={getProfileImageUrl(authorProfile.profileImage) || "/placeholder.svg"}
+                      src={getProfileImageUrl(authorProfile.profileImage)}
                       alt={`${getAuthorName()}'s profile`}
                       className="w-full h-full object-cover"
                       onError={() => setAuthorImageError(true)}
