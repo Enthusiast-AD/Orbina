@@ -68,7 +68,7 @@ export default function UserProfile() {
       const userSpecificPosts = posts?.documents?.filter((post) => post.userId === userId) || []
       setUserPosts(userSpecificPosts)
 
-      // Calculate total likes received by this user
+      
       let totalLikesCount = 0
       for (const post of userSpecificPosts) {
         try {
@@ -124,7 +124,7 @@ export default function UserProfile() {
   }
 
   const handleMessage = () => {
-    // Navigate to messages page with this user
+    
     navigate(`/messages/${userId}`)
   }
 
@@ -155,7 +155,7 @@ export default function UserProfile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Header */}
+     
       <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -195,9 +195,9 @@ export default function UserProfile() {
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Profile Info */}
+          
           <div className="lg:col-span-1 space-y-6">
-            {/* Profile Card */}
+          
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="text-center">
                 <div className="relative inline-block mb-4">
@@ -240,7 +240,7 @@ export default function UserProfile() {
               </div>
             </div>
 
-            {/* Stats */}
+         
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30 text-center">
                 <div className="text-2xl font-bold text-white">{userPosts.length}</div>
@@ -252,7 +252,7 @@ export default function UserProfile() {
               </div>
             </div>
 
-            {/* Social Links */}
+           
             {(userProfile.website || userProfile.twitter || userProfile.github || userProfile.linkedin) && (
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
                 <h3 className="text-lg font-semibold text-white mb-4">Social Links</h3>
@@ -283,9 +283,9 @@ export default function UserProfile() {
             )}
           </div>
 
-          {/* Right Column - Content */}
+         
           <div className="lg:col-span-2 space-y-6">
-            {/* Tabs */}
+            
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50">
               <div className="flex border-b border-slate-700/50">
                 <button

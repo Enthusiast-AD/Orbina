@@ -24,7 +24,6 @@ import appwriteService from "../../appwrite/config"
 import { formatDistanceToNow } from "date-fns"
 import toast from "react-hot-toast"
 
-// Custom Modal Component
 const Modal = ({ isOpen, onClose, title, children, type = "default" }) => {
   if (!isOpen) return null
 
@@ -52,7 +51,7 @@ const Modal = ({ isOpen, onClose, title, children, type = "default" }) => {
   )
 }
 
-// Context Menu Component
+
 const ContextMenu = ({ isOpen, position, onClose, onDelete }) => {
   if (!isOpen) return null
 
@@ -103,7 +102,7 @@ export default function ChatInterface({ partnerId, onClose }) {
   const fileInputRef = useRef(null)
   const searchInputRef = useRef(null)
 
-  // Load theme for this specific chat on component mount
+ 
   useEffect(() => {
     if (partnerId) {
       const savedTheme = localStorage.getItem(`chatTheme_${partnerId}`)
@@ -125,7 +124,6 @@ export default function ChatInterface({ partnerId, onClose }) {
     scrollToBottom()
   }, [filteredMessages])
 
-  // Search functionality
   useEffect(() => {
     if (searchTerm.trim()) {
       const filtered = messages.filter(message => 
@@ -137,7 +135,6 @@ export default function ChatInterface({ partnerId, onClose }) {
     }
   }, [messages, searchTerm])
 
-  // Real-time message subscription
   useEffect(() => {
     if (!partnerId || !currentUser) return
 
@@ -157,8 +154,7 @@ export default function ChatInterface({ partnerId, onClose }) {
             }
           }
         }
-        
-        // Handle message deletion
+
         if (response.events.includes("databases.*.collections.*.documents.*.delete")) {
           const deletedMessageId = response.payload.$id
           setMessages((prev) => prev.filter(msg => msg.$id !== deletedMessageId))
@@ -275,7 +271,6 @@ export default function ChatInterface({ partnerId, onClose }) {
     try {
       const fileUrl = appwriteService.getFileView(fileId)
       
-      // Create a more professional download experience
       const response = await fetch(fileUrl)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
@@ -297,22 +292,20 @@ export default function ChatInterface({ partnerId, onClose }) {
 
   const deleteChat = async () => {
     try {
-      // Get all messages in this conversation
+
       const conversation = await messagesService.getConversation({
         userId1: currentUser.$id,
         userId2: partnerId,
         limit: 1000,
       })
 
-      // Delete all messages
       const deletePromises = conversation.documents.map(message => 
         messagesService.deleteMessage(message.$id)
       )
       
       await Promise.all(deletePromises)
       setMessages([])
-      
-      // Clear theme for this chat
+
       localStorage.removeItem(`chatTheme_${partnerId}`)
       
       toast.success("Chat deleted successfully")
@@ -345,7 +338,6 @@ export default function ChatInterface({ partnerId, onClose }) {
 
   const handleThemeChange = (theme) => {
     setChatTheme(theme)
-    // Save theme for this specific chat
     localStorage.setItem(`chatTheme_${partnerId}`, theme)
     setShowMoreMenu(false)
     toast.success(`Theme changed to ${theme}`)
@@ -519,7 +511,6 @@ export default function ChatInterface({ partnerId, onClose }) {
               <MoreVertical className="w-4 h-4 text-slate-400" />
             </button>
             
-            {/* More Menu Dropdown with Animation */}
             {showMoreMenu && (
               <div className="absolute right-0 top-12 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 animate-in slide-in-from-top-2 duration-200">
                 <button
@@ -699,7 +690,7 @@ export default function ChatInterface({ partnerId, onClose }) {
                     )}
                   </div>
                   
-                  {/* Timestamp */}
+                  
                   <span className="text-xs text-slate-500 mt-1 px-2">
                     {formatMessageTime(message.$createdAt)}
                     {isOwnMessage && (
@@ -716,9 +707,9 @@ export default function ChatInterface({ partnerId, onClose }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input */}
+     
       <div className="p-4 border-t border-slate-700 bg-slate-800/80 backdrop-blur-sm">
-        {/* Emoji Picker */}
+        
         {showEmojiPicker && (
           <div className="mb-3 p-4 bg-slate-700 rounded-lg border border-slate-600 animate-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center justify-between mb-3">
@@ -814,7 +805,6 @@ export default function ChatInterface({ partnerId, onClose }) {
         </form>
       </div>
 
-      {/* Delete Chat Modal */}
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -848,7 +838,7 @@ export default function ChatInterface({ partnerId, onClose }) {
         </div>
       </Modal>
 
-      {/* Context Menu for Message Deletion */}
+      
       <ContextMenu
         isOpen={contextMenu.isOpen}
         position={contextMenu.position}

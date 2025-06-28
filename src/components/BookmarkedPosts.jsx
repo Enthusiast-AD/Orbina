@@ -21,10 +21,10 @@ export default function BookmarkedPosts() {
 
     setIsLoading(true)
     try {
-      // Get user's bookmarks
+      
       const bookmarks = await bookmarksService.getUserBookmarks(userData.$id)
       
-      // Fetch the actual posts and their likes
+      
       const postsData = await Promise.all(
         bookmarks.map(async (bookmark) => {
           try {
@@ -38,7 +38,7 @@ export default function BookmarkedPosts() {
         })
       )
       
-      // Filter out any null posts and sort by bookmark date
+      
       const validPosts = postsData.filter(Boolean).sort(
         (a, b) => new Date(b.bookmarkedAt) - new Date(a.bookmarkedAt)
       )
@@ -102,7 +102,7 @@ export default function BookmarkedPosts() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Bookmarked Posts</h2>
@@ -112,7 +112,7 @@ export default function BookmarkedPosts() {
         </div>
       </div>
 
-      {/* Search */}
+     
       {bookmarkedPosts.length > 0 && (
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -126,7 +126,7 @@ export default function BookmarkedPosts() {
         </div>
       )}
 
-      {/* Posts List */}
+      
       {filteredPosts.length === 0 ? (
         <div className="text-center py-12">
           <Bookmark className="w-16 h-16 text-slate-600 mx-auto mb-4" />

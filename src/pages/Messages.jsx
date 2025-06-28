@@ -10,13 +10,13 @@ import messagesService from "../appwrite/messages"
 
 export default function Messages() {
   const navigate = useNavigate()
-  const { userId } = useParams() // For direct message links
+  const { userId } = useParams() 
   const currentUser = useSelector((state) => state.auth.userData)
   const [selectedPartnerId, setSelectedPartnerId] = useState(userId || null)
   const [isMobile, setIsMobile] = useState(false)
   const [showChat, setShowChat] = useState(false)
 
-  // Check if mobile view
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024)
@@ -26,7 +26,7 @@ export default function Messages() {
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  // Auto-select conversation on mobile if partner is specified
+  
   useEffect(() => {
     if (userId && isMobile) {
       setSelectedPartnerId(userId)
@@ -67,7 +67,7 @@ export default function Messages() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Header */}
+      
       <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
@@ -83,11 +83,11 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* Main Content */}
+     
       <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 overflow-hidden h-[calc(100vh-200px)]">
           <div className="flex h-full">
-            {/* Conversations List - Hidden on mobile when chat is open */}
+            
             <div className={`${isMobile ? (showChat ? "hidden" : "w-full") : "w-80"} border-r border-slate-700 bg-slate-900/50`}>
               <ConversationsList
                 onSelectConversation={handleSelectConversation}
@@ -95,7 +95,7 @@ export default function Messages() {
               />
             </div>
 
-            {/* Chat Interface */}
+           
             <div className={`flex-1 ${isMobile && !showChat ? "hidden" : ""}`}>
               {selectedPartnerId ? (
                 <ChatInterface

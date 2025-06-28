@@ -14,7 +14,6 @@ export class ProfileService {
         this.bucket = new Storage(this.client);
     }
 
-    // Create Profile
     async createProfile({userName, bio = "", location = "", website = "", profileImage = null, userId, twitter = "", github = "", linkedIn = ""}) {
         try {
             console.log("Creating profile for user:", userId);
@@ -22,14 +21,14 @@ export class ProfileService {
             return await this.databases.createDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
-                ID.unique(), // ✅ Let Appwrite generate unique ID
+                ID.unique(), 
                 {
                     userName,
                     bio,
                     location,
                     website,
                     profileImage,
-                    userId, // Store userId as a field, not as document ID
+                    userId, 
                     twitter,
                     github,
                     linkedIn,
@@ -41,12 +40,11 @@ export class ProfileService {
         }
     }
 
-    // Update Profile
+    
     async updateProfile({userName, bio = "", location = "", website = "", profileImage = null, userId, twitter = "", github = "", linkedIn = ""}) {
         try {
             console.log("Updating profile for user:", userId);
             
-            // First, find the profile document by userId
             const existingProfile = await this.getProfile(userId);
             
             if (!existingProfile) {
@@ -57,7 +55,7 @@ export class ProfileService {
             return await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
-                existingProfile.$id, // Use the actual document ID
+                existingProfile.$id,
                 {
                     userName,
                     bio,
@@ -76,7 +74,7 @@ export class ProfileService {
         }
     }
 
-    // Get Profile by userId
+    
     async getProfile(userId) {
         try {
             console.log("Fetching profile for user:", userId);
@@ -88,17 +86,17 @@ export class ProfileService {
             );
 
             if (result.documents && result.documents.length > 0) {
-                return result.documents[0]; // Return the first (should be only) match
+                return result.documents[0]; 
             }
             
-            return null; // No profile found
+            return null;
         } catch (error) {
             console.log("❌ Appwrite service :: getProfile :: error", error);
             return null;
         }
     }
 
-    // Upload Profile Image
+    
     async uploadProfileImage(file) {
         try {
             return await this.bucket.createFile(
@@ -112,7 +110,6 @@ export class ProfileService {
         }
     }
 
-    // Delete Profile Image
     async deleteProfileImage(fileId) {
         try {
             await this.bucket.deleteFile(
@@ -126,7 +123,6 @@ export class ProfileService {
         }
     }
 
-    // Temporary fallback in getProfileImageView method:
 getProfileImageView(fileId) {
     try {
         const bucketId = conf.appwriteProfileImageBucketId || conf.appwriteBucketId;
@@ -148,7 +144,7 @@ getProfileImageView(fileId) {
     }
 }
 
-    // Clean up failed attempts tracking
+    
     removeFromFailedAttempts(userId) {
         try {
             if (typeof window !== 'undefined') {
@@ -161,7 +157,7 @@ getProfileImageView(fileId) {
         }
     }
 
-    // Check if profile exists
+
     async profileExists(userId) {
         try {
             const profile = await this.getProfile(userId);

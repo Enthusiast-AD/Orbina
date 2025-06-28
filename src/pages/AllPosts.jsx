@@ -4,7 +4,7 @@ import { Container, PostCard } from '../components';
 import appwriteService from "../appwrite/config";
 import { Search, Filter, SortAsc, Grid, List, RefreshCw, AlertCircle } from 'lucide-react';
 
-// Error Boundary
+
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -36,7 +36,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Loading skeleton
+
 const PostSkeleton = () => (
   <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 animate-pulse">
     <div className="h-48 bg-slate-700"></div>
@@ -50,7 +50,7 @@ const PostSkeleton = () => (
 );
 
 function AllPostsContent() {
-  const [allPosts, setAllPosts] = useState([]); // Store all posts for filtering
+  const [allPosts, setAllPosts] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -63,11 +63,11 @@ function AllPostsContent() {
   const searchTerm = useSelector((state) => state.search.term);
   const POSTS_PER_PAGE = 12;
 
-  // Memoized filtered and sorted posts
+ 
   const processedPosts = useMemo(() => {
     let filtered = [...allPosts];
     
-    // Apply search filter
+   
     if (searchTerm) {
       filtered = allPosts.filter((post) =>
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,7 +76,7 @@ function AllPostsContent() {
       );
     }
 
-    // Apply sorting
+  
     switch (sortBy) {
       case 'newest':
         return filtered.sort((a, b) => new Date(b.$createdAt) - new Date(a.$createdAt));
@@ -91,13 +91,13 @@ function AllPostsContent() {
     }
   }, [allPosts, searchTerm, sortBy]);
 
-  // Get posts to display based on pagination
+  
   const displayPosts = useMemo(() => {
     const endIndex = (currentPage + 1) * POSTS_PER_PAGE;
     return processedPosts.slice(0, endIndex);
   }, [processedPosts, currentPage, POSTS_PER_PAGE]);
 
-  // Fetch all posts with proper sorting
+ 
   const fetchAllPosts = useCallback(async (reset = false) => {
     try {
       if (reset) {
@@ -105,17 +105,17 @@ function AllPostsContent() {
         setCurrentPage(0);
       }
 
-      // Fetch all posts and sort by creation date (newest first)
+      
       const response = await appwriteService.getPosts();
       if (response && response.documents) {
-        // Sort by creation date descending (newest first)
+        
         const sortedPosts = response.documents.sort((a, b) => 
           new Date(b.$createdAt) - new Date(a.$createdAt)
         );
         
         setAllPosts(sortedPosts);
         
-        // Check if there are more posts to load
+        
         const totalFilteredPosts = sortedPosts.length;
         const currentDisplayCount = (currentPage + 1) * POSTS_PER_PAGE;
         setHasMore(currentDisplayCount < totalFilteredPosts);
@@ -132,13 +132,13 @@ function AllPostsContent() {
     }
   }, [currentPage, POSTS_PER_PAGE]);
 
-  // Load more posts
+  
   const handleLoadMore = useCallback(() => {
     if (!loadingMore && hasMore) {
       setLoadingMore(true);
       setCurrentPage(prev => prev + 1);
       
-      // Check if we have more posts after incrementing page
+     
       const newPage = currentPage + 1;
       const totalDisplayAfterLoad = (newPage + 1) * POSTS_PER_PAGE;
       setHasMore(totalDisplayAfterLoad < processedPosts.length);
@@ -146,25 +146,25 @@ function AllPostsContent() {
     }
   }, [currentPage, loadingMore, hasMore, processedPosts.length, POSTS_PER_PAGE]);
 
-  // Refresh posts
+  
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     setCurrentPage(0);
     fetchAllPosts(true);
   }, [fetchAllPosts]);
 
-  // Handle sort change
+  
   const handleSortChange = useCallback((newSort) => {
     setSortBy(newSort);
-    setCurrentPage(0); // Reset pagination when sort changes
+    setCurrentPage(0); 
   }, []);
 
-  // Initial load
+  
   useEffect(() => {
     fetchAllPosts(true);
   }, []);
 
-  // Update hasMore when processedPosts changes
+ 
   useEffect(() => {
     const totalDisplayAfterLoad = (currentPage + 1) * POSTS_PER_PAGE;
     setHasMore(totalDisplayAfterLoad < processedPosts.length);
@@ -204,7 +204,7 @@ function AllPostsContent() {
   return (
     <div className='w-full py-8 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'>
       <Container>
-        {/* Header */}
+      
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
@@ -227,10 +227,10 @@ function AllPostsContent() {
             </button>
           </div>
           
-          {/* Controls */}
+         
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">
-              {/* Sort Options */}
+              
               <div className="flex items-center gap-2">
                 <SortAsc className="w-4 h-4 text-slate-400" />
                 <select
@@ -245,7 +245,7 @@ function AllPostsContent() {
                 </select>
               </div>
 
-              {/* Search indicator */}
+             
               {searchTerm && (
                 <div className="flex items-center gap-2 text-sm text-slate-400">
                   <Search className="w-4 h-4" />
@@ -254,7 +254,7 @@ function AllPostsContent() {
               )}
             </div>
 
-            {/* View Mode Toggle */}
+            
             <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
@@ -282,7 +282,7 @@ function AllPostsContent() {
           </div>
         </div>
 
-        {/* Loading State */}
+       
         {loading && (
           <div className={`grid gap-6 ${
             viewMode === 'grid' 
@@ -295,7 +295,7 @@ function AllPostsContent() {
           </div>
         )}
 
-        {/* Posts Display */}
+       
         {!loading && (
           <>
             {displayPosts.length === 0 ? (
@@ -318,7 +318,7 @@ function AllPostsContent() {
                     {searchTerm ? (
                       <button
                         onClick={() => {
-                          // Refresh the page to clear search
+                          
                           window.location.reload();
                         }}
                         className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
@@ -355,7 +355,7 @@ function AllPostsContent() {
                   ))}
                 </div>
 
-                {/* Load More Button */}
+                
                 {hasMore && (
                   <div className="text-center mt-12">
                     <button 
@@ -375,7 +375,7 @@ function AllPostsContent() {
                   </div>
                 )}
 
-                {/* Load More Progress */}
+              
                 {loadingMore && (
                   <div className={`grid gap-6 mt-6 ${
                     viewMode === 'grid' 
@@ -392,7 +392,7 @@ function AllPostsContent() {
           </>
         )}
 
-        {/* Stats Footer */}
+       
         {!loading && displayPosts.length > 0 && (
           <div className="mt-12 pt-8 border-t border-slate-800">
             <div className="text-center text-slate-400">
@@ -414,7 +414,7 @@ function AllPostsContent() {
   );
 }
 
-// Main component wrapped with error boundary
+
 function AllPosts() {
   return (
     <ErrorBoundary>

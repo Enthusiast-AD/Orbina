@@ -71,14 +71,14 @@ export default function Profile() {
     if (!userData?.$id) return
     
     try {
-      // Get published posts count
+      
       const posts = await appwriteService.getPosts()
       const userPublishedPosts = posts?.documents?.filter(
         (post) => post.userId === userData.$id && post.status === "active"
       ) || []
       setPublishedCount(userPublishedPosts.length)
 
-      // Get bookmarks count
+      
       const userBookmarks = await bookmarksService.getUserBookmarks(userData.$id)
       setBookmarksCount(userBookmarks.length)
     } catch (error) {
@@ -199,7 +199,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile Tabs */}
+    
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex space-x-1">
           <button
@@ -249,13 +249,13 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Main Content */}
+      
       <div className="max-w-6xl mx-auto px-6 pb-8">
         {activeTab === "profile" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Profile Info */}
+          
             <div className="lg:col-span-2 space-y-6">
-              {/* Profile Header Card */}
+             
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
                 <div className="flex items-start gap-6">
                   <div className="relative">

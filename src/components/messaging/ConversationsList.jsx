@@ -24,7 +24,7 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
     }
   }, [currentUser])
 
-  // Optimized real-time updates - debounced refresh
+  
   useEffect(() => {
     if (!currentUser) return
 
@@ -32,9 +32,9 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
       userId: currentUser.$id,
       callback: (response) => {
         if (response.events.includes("databases.*.collections.*.documents.*.create")) {
-          // Debounce the refresh to prevent excessive updates
+         
           const now = Date.now()
-          if (now - lastUpdateRef.current > 1000) { // Only refresh once per second
+          if (now - lastUpdateRef.current > 1000) { 
             lastUpdateRef.current = now
             setTimeout(() => {
               if (!isRefreshing) {
@@ -59,7 +59,7 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
       const conversationsList = await messagesService.getConversationsList(currentUser.$id)
       setConversations(conversationsList)
 
-      // Fetch profiles for all partners
+      
       const profilePromises = conversationsList.map(async (conv) => {
         try {
           const profile = await profileService.getProfile(conv.partnerId)
@@ -80,7 +80,7 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
     }
   }
 
-  // Optimized refresh that doesn't show loading state
+  
   const fetchConversationsOptimized = async () => {
     if (isRefreshing) return
     
@@ -88,12 +88,11 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
     try {
       const conversationsList = await messagesService.getConversationsList(currentUser.$id)
       
-      // Only update if there are actual changes
+      
       const hasChanges = JSON.stringify(conversationsList) !== JSON.stringify(conversations)
       if (hasChanges) {
         setConversations(conversationsList)
         
-        // Only fetch new profiles if needed
         const newPartnerIds = conversationsList
           .map(conv => conv.partnerId)
           .filter(id => !partnersProfiles[id])
@@ -181,7 +180,7 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
           )}
         </div>
 
-        {/* Search */}
+        
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
           <input
@@ -194,7 +193,7 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
         </div>
       </div>
 
-      {/* Conversations List */}
+      
       <div className="flex-1 overflow-y-auto">
         {filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-8 text-center">
@@ -238,11 +237,11 @@ export default function ConversationsList({ onSelectConversation, selectedPartne
                           </div>
                         )}
                       </div>
-                      {/* Online indicator */}
+                      
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900"></div>
                     </div>
 
-                    {/* Conversation Details */}
+                   
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="font-semibold text-white truncate">

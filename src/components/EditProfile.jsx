@@ -46,9 +46,9 @@ export default function EditProfile() {
       
       setIsLoading(true);
       try {
-        console.log("Fetching profile for user:", userData.$id);
+        // console.log("Fetching profile for user:", userData.$id);
         const existingProfile = await profileService.getProfile(userData.$id);
-        console.log("Fetched profile:", existingProfile);
+        // console.log("Fetched profile:", existingProfile);
         
         if (existingProfile) {
           setProfileData(existingProfile);
@@ -70,13 +70,13 @@ export default function EditProfile() {
             setValue(key, formData[key]);
           });
 
-          // Set preview image if exists
+          
           if (existingProfile.profileImage) {
             setPreviewUrl(profileService.getProfileImageView(existingProfile.profileImage));
           }
         } else {
-          console.log("No existing profile found, will create new one");
-          // Set default values for new profile
+          // console.log("No existing profile found, will create new one");
+          
           const defaultData = {
             userName: userData.name || "",
             bio: "",
@@ -103,7 +103,7 @@ export default function EditProfile() {
     fetchProfile();
   }, [userData, setValue]);
 
-  // Handle image preview
+  
   useEffect(() => {
     if (imageFile && imageFile[0]) {
       const fileReader = new FileReader()
@@ -124,18 +124,18 @@ export default function EditProfile() {
     setIsSubmitting(true)
     
     try {
-      console.log("Submitting profile update:", data);
+      // console.log("Submitting profile update:", data);
       
-      // Handle image upload only if changed
-      let imageId = profileData?.profileImage // Keep existing image by default
+      
+      let imageId = profileData?.profileImage 
       
       if (isImageChanged) {
         if (data.image && data.image[0]) {
           try {
-            console.log("Uploading new image");
+            // console.log("Uploading new image");
             const file = await profileService.uploadProfileImage(data.image[0])
             if (file) {
-              // Delete old image if it exists and upload was successful
+              
               if (profileData?.profileImage) {
                 await profileService.deleteProfileImage(profileData.profileImage)
               }
@@ -154,7 +154,7 @@ export default function EditProfile() {
         }
       }
 
-      // Prepare payload
+      
       const payload = {
         userId: userData.$id,
         userName: data.userName || "",
@@ -167,27 +167,27 @@ export default function EditProfile() {
         profileImage: imageId,
       }
 
-      console.log("Profile payload:", payload);
+      // console.log("Profile payload:", payload);
 
-      // Update or create profile
+      
       let result;
       if (profileData) {
-        console.log("Updating existing profile");
+        // console.log("Updating existing profile");
         result = await profileService.updateProfile(payload);
       } else {
-        console.log("Creating new profile");
+        // console.log("Creating new profile");
         result = await profileService.createProfile(payload);
       }
 
       if (result) {
-        console.log("Profile saved successfully:", result);
+        // console.log("Profile saved successfully:", result);
         
-        // Update Redux store
+        
         dispatch(setProfile(result))
         dispatch(updateProfileUserName(result.userName))
         dispatch(updateUserName(result.userName))
         
-        // Clear cache
+        
         profileService.removeFromFailedAttempts(userData.$id)
         profileCacheUtils.clearSpecificProfile(userData.$id)
         
@@ -211,10 +211,10 @@ export default function EditProfile() {
   const removeImage = () => {
     setPreviewUrl(null)
     setValue("image", null)
-    setIsImageChanged(true) // Mark as changed to remove existing image
+    setIsImageChanged(true)
   }
 
-  // Show loading state
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
@@ -226,12 +226,12 @@ export default function EditProfile() {
     )
   }
 
-  // Check if anything has changed
+  
   const hasChanges = isDirty || isImageChanged
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Header */}
+      
       <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -279,10 +279,10 @@ export default function EditProfile() {
         </div>
       </div>
 
-      {/* Main Content */}
+     
       <div className="max-w-4xl mx-auto px-6 py-8">
         <form onSubmit={handleSubmit(submit)} className="space-y-8">
-          {/* Profile Image Section */}
+          
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
             <h2 className="text-xl font-semibold text-white mb-6">Profile Picture</h2>
             <div className="flex items-start gap-6">
@@ -330,7 +330,7 @@ export default function EditProfile() {
             </div>
           </div>
 
-          {/* Basic Information */}
+          
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
             <h2 className="text-xl font-semibold text-white mb-6">Basic Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -364,7 +364,7 @@ export default function EditProfile() {
             </div>
           </div>
 
-          {/* Social Links */}
+          
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
             <h2 className="text-xl font-semibold text-white mb-6">Social Links</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -407,7 +407,7 @@ export default function EditProfile() {
             </div>
           </div>
 
-          {/* Account Information (Read-only) */}
+          
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
             <h2 className="text-xl font-semibold text-white mb-6">Account Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

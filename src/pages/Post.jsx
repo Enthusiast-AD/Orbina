@@ -116,7 +116,7 @@ export default function Post() {
     }
   }
 
-  // Enhanced reading progress tracker
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
@@ -294,7 +294,7 @@ export default function Post() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Enhanced Reading Progress Bar */}
+     
       <div className="fixed top-0 left-0 w-full h-1 bg-slate-800/50 z-50">
         <div
           className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 transition-all duration-300 ease-out"
@@ -302,7 +302,7 @@ export default function Post() {
         />
       </div>
 
-      {/* Sticky Header */}
+    
       <div className="sticky top-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 z-40">
         <Container>
           <div className="flex items-center justify-between py-4">
@@ -315,7 +315,7 @@ export default function Post() {
                 Back
               </button>
 
-              {/* Progress indicator in header */}
+              
               <div className="hidden md:flex items-center gap-2 text-sm text-slate-400">
                 <div className="w-20 h-1 bg-slate-700 rounded-full overflow-hidden">
                   <div
@@ -328,7 +328,7 @@ export default function Post() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Enhanced Share Button */}
+           
               <div className="relative">
                 <button
                   onClick={() => setShowShareMenu(!showShareMenu)}
@@ -338,7 +338,7 @@ export default function Post() {
                   <Share2 className="w-4 h-4" />
                 </button>
 
-                {/* Share Menu */}
+              
                 {showShareMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50">
                     <div className="p-2">
@@ -393,9 +393,9 @@ export default function Post() {
 
       <Container>
         <article className="max-w-4xl mx-auto py-8">
-          {/* Hero Section */}
+         
           <div className="relative mb-12">
-            {/* Featured Image - Fixed aspect ratio */}
+            
             <div className="relative mb-8 rounded-2xl overflow-hidden">
               {!imageError && post.featuredImage ? (
                 <div className="aspect-[1.91/1] bg-slate-800 rounded-xl overflow-hidden relative">
@@ -407,7 +407,7 @@ export default function Post() {
                     onError={() => setImageError(true)}
                   />
                   
-                  {/* Author Controls Overlay */}
+                  
                   {isAuthor && (
                     <div className="absolute top-6 right-6 flex gap-3">
                       <Link to={`/edit-post/${post.$id}`}>
@@ -433,7 +433,7 @@ export default function Post() {
                     <p className="text-slate-400 text-lg">No featured image</p>
                   </div>
                   
-                  {/* Author Controls Overlay for no-image state */}
+                  
                   {isAuthor && (
                     <div className="absolute top-6 right-6 flex gap-3">
                       <Link to={`/edit-post/${post.$id}`}>
@@ -455,13 +455,13 @@ export default function Post() {
               )}
             </div>
 
-            {/* Article Header */}
+           
             <header className="text-center mb-8">
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
                 {post.title}
               </h1>
 
-              {/* Article Meta */}
+             
               <div className="flex flex-wrap items-center justify-center gap-6 text-slate-300 mb-8">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-purple-400" />
@@ -477,7 +477,7 @@ export default function Post() {
                 </div>
               </div>
 
-              {/* Author Card */}
+            
               <Link
                 to={`/profile/${post.userId}`}
                 className="inline-flex items-center gap-4 p-4 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 group"
@@ -511,7 +511,7 @@ export default function Post() {
               </Link>
             </header>
 
-            {/* Enhanced Engagement Bar */}
+            
             <div className="flex items-center justify-center gap-4 p-6 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700/50 mb-8">
               <button
                 onClick={handleLike}
@@ -545,7 +545,7 @@ export default function Post() {
             </div>
           </div>
 
-          {/* Enhanced Article Content */}
+         
           <div className="relative">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-slate-700/30 shadow-2xl">
               <div className="prose prose-invert prose-lg md:prose-xl max-w-none 
@@ -570,7 +570,7 @@ export default function Post() {
             </div>
           </div>
 
-          {/* Enhanced Author Profile Section */}
+         
           {authorProfile && (
             <div className="mt-16 p-8 bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-slate-700/50">
               <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
@@ -614,7 +614,7 @@ export default function Post() {
                     <p className="text-slate-300 leading-relaxed mb-4 text-lg">{authorProfile.bio}</p>
                   )}
 
-                  {/* Author Social Links */}
+                  
                   <div className="flex flex-wrap gap-3">
                     {["website", "twitter", "github", "linkedIn"].map((platform) => {
                       const value = authorProfile[platform]
@@ -653,10 +653,10 @@ export default function Post() {
             </div>
           )}
 
-          {/* Enhanced Article Footer */}
+          
           <footer className="mt-12 pt-8 border-t border-slate-700/50">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              {/* Publication Info */}
+             
               <div className="text-slate-400">
                 <p className="text-sm mb-1">
                   <span className="font-medium">Published:</span> {formatDate(post.$createdAt)}
@@ -666,7 +666,7 @@ export default function Post() {
                 </p>
               </div>
 
-              {/* Tags/Categories */}
+              
               <div className="flex flex-wrap gap-2">
                 <span className="px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full text-sm border border-purple-500/30 font-medium">
                   Article
@@ -683,7 +683,7 @@ export default function Post() {
         </article>
       </Container>
 
-      {/* Enhanced Scroll to Top Button */}
+      
       {showScrollTop && (
         <button
           onClick={scrollToTop}
@@ -694,7 +694,7 @@ export default function Post() {
         </button>
       )}
 
-      {/* Click outside handler for share menu */}
+    
       {showShareMenu && (
         <div
           className="fixed inset-0 z-30"
@@ -702,7 +702,7 @@ export default function Post() {
         />
       )}
 
-      {/* Enhanced Content Styles */}
+   
       <style jsx global>{`
         .article-content {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

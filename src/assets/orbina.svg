@@ -1,35 +1,31 @@
 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Inspired by Apple's simplicity, Google's playfulness, and Microsoft's geometry -->
-  
-  <!-- Base shadow for depth (Apple-style subtlety) -->
+
+
   <ellipse cx="100" cy="170" rx="60" ry="15" fill="#000" opacity="0.06"/>
   
-  <!-- Main orbital structure (inspired by Chrome/Firefox circular motifs) -->
   <g transform="rotate(-15 100 100)">
-    <!-- Outer orbit ring -->
+   
     <circle cx="100" cy="100" r="75" stroke="url(#orbit-outer)" stroke-width="12" fill="none" opacity="0.8"/>
-    <!-- Middle orbit ring -->
+    
     <circle cx="100" cy="100" r="55" stroke="url(#orbit-middle)" stroke-width="8" fill="none" opacity="0.7"/>
-    <!-- Inner orbit ring -->
+    
     <circle cx="100" cy="100" r="35" stroke="url(#orbit-inner)" stroke-width="5" fill="none" opacity="0.6"/>
   </g>
   
-  <!-- Central core (inspired by Spotify's central dot, but more sophisticated) -->
+  
   <circle cx="100" cy="100" r="28" fill="url(#core-gradient)" filter="url(#core-glow)"/>
   
-  <!-- Orbiting elements (inspired by Slack's dynamic elements) -->
+
   <circle cx="145" cy="55" r="7" fill="url(#satellite1)" opacity="0.9"/>
   <circle cx="55" cy="145" r="5" fill="url(#satellite2)" opacity="0.8"/>
   <circle cx="155" cy="145" r="4" fill="url(#satellite3)" opacity="0.7"/>
   
-  <!-- Hidden 'O' in negative space (inspired by FedEx's hidden arrow concept) -->
   <circle cx="100" cy="100" r="15" fill="none" stroke="#fff" stroke-width="3" opacity="0.4"/>
-  
-  <!-- Central highlight (Apple-style gloss) -->
+ 
   <ellipse cx="108" cy="88" rx="12" ry="6" fill="#fff" opacity="0.25" transform="rotate(-25 108 88)"/>
   
   <defs>
-    <!-- Gradients inspired by modern tech palettes -->
+    
     <linearGradient id="orbit-outer" x1="25" y1="25" x2="175" y2="175" gradientUnits="userSpaceOnUse">
       <stop stop-color="#667EEA"/>
       <stop offset="0.5" stop-color="#764BA2"/>
@@ -67,7 +63,7 @@
       <stop offset="100%" stop-color="#EA5455"/>
     </radialGradient>
     
-    <!-- Subtle glow effect (inspired by modern UI design) -->
+   
     <filter id="core-glow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
       <feMerge> 

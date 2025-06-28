@@ -28,7 +28,6 @@ import messagesService from "../appwrite/messages";
 import likesService from "../appwrite/likes";
 import { Container, PostCard } from '../components';
 
-// Error Boundary Component
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -67,7 +66,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Loading skeleton component
+
 const PostSkeleton = () => (
   <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 animate-pulse">
     <div className="h-48 bg-slate-700"></div>
@@ -80,7 +79,7 @@ const PostSkeleton = () => (
   </div>
 );
 
-// Optimized Posts Grid with lazy loading
+
 const PostsGrid = React.memo(({ posts, isLoading, hasMore, onLoadMore, showLoadMore = true }) => {
   if (isLoading && posts.length === 0) {
     return (
@@ -120,7 +119,7 @@ const PostsGrid = React.memo(({ posts, isLoading, hasMore, onLoadMore, showLoadM
 function HomeContent() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
-  const [allPosts, setAllPosts] = useState([]); // Store all posts for filtering
+  const [allPosts, setAllPosts] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -141,11 +140,11 @@ function HomeContent() {
 
   const POSTS_PER_PAGE = authStatus ? 12 : 4;
 
-  // Memoized filtered posts with proper sorting and filtering
+
   const filteredPosts = useMemo(() => {
     let postsToFilter = [...allPosts];
     
-    // Apply search filter first
+    
     if (searchTerm) {
       postsToFilter = postsToFilter.filter((post) =>
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -154,12 +153,12 @@ function HomeContent() {
       );
     }
 
-    // Apply category filter
+    
     if (filter === 'trending') {
-      // Sort by creation date (newest first) for trending
+      
       postsToFilter = postsToFilter
         .filter(post => {
-          // Show posts from last 7 days as "trending"
+          
           const postDate = new Date(post.$createdAt);
           const sevenDaysAgo = new Date();
           sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -167,20 +166,20 @@ function HomeContent() {
         })
         .sort((a, b) => new Date(b.$createdAt) - new Date(a.$createdAt));
     } else {
-      // For 'all', sort by creation date (newest first)
+      
       postsToFilter = postsToFilter.sort((a, b) => new Date(b.$createdAt) - new Date(a.$createdAt));
     }
 
     return postsToFilter;
   }, [allPosts, searchTerm, filter]);
 
-  // Get posts to display based on pagination
+  
   const displayPosts = useMemo(() => {
     const endIndex = (currentPage + 1) * POSTS_PER_PAGE;
     return filteredPosts.slice(0, endIndex);
   }, [filteredPosts, currentPage, POSTS_PER_PAGE]);
 
-  // Fetch posts with proper sorting
+
   const fetchPosts = useCallback(async (reset = false) => {
     try {
       if (reset) {
@@ -188,17 +187,16 @@ function HomeContent() {
         setCurrentPage(0);
       }
 
-      // Fetch all posts and sort by creation date (newest first)
+      
       const allPostsData = await appwriteService.getPosts();
       if (allPostsData && allPostsData.documents) {
-        // Sort by creation date descending (newest first)
+        
         const sortedPosts = allPostsData.documents.sort((a, b) => 
           new Date(b.$createdAt) - new Date(a.$createdAt)
         );
         
         setAllPosts(sortedPosts);
         
-        // Check if there are more posts to load
         const totalFilteredPosts = sortedPosts.length;
         const currentDisplayCount = (currentPage + 1) * POSTS_PER_PAGE;
         setHasMore(currentDisplayCount < totalFilteredPosts);
@@ -212,13 +210,12 @@ function HomeContent() {
     }
   }, [currentPage, POSTS_PER_PAGE]);
 
-  // Load more posts
   const handleLoadMore = useCallback(() => {
     if (!loadingMore && hasMore) {
       setLoadingMore(true);
       setCurrentPage(prev => prev + 1);
       
-      // Check if we have more posts after incrementing page
+      
       const newPage = currentPage + 1;
       const totalDisplayAfterLoad = (newPage + 1) * POSTS_PER_PAGE;
       setHasMore(totalDisplayAfterLoad < filteredPosts.length);
@@ -226,22 +223,20 @@ function HomeContent() {
     }
   }, [currentPage, loadingMore, hasMore, filteredPosts.length, POSTS_PER_PAGE]);
 
-  // Handle filter change
   const handleFilterChange = useCallback((newFilter) => {
     setFilter(newFilter);
-    setCurrentPage(0); // Reset pagination when filter changes
+    setCurrentPage(0); 
   }, []);
 
-  // Fetch user statistics with caching
+
   const fetchUserStats = useCallback(async () => {
     if (!userData?.$id) return;
 
-    // Check for cached stats
     const cacheKey = `userStats_${userData.$id}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
       const { data, timestamp } = JSON.parse(cached);
-      // Use cache if less than 5 minutes old
+      
       if (Date.now() - timestamp < 5 * 60 * 1000) {
         setUserStats(data);
         return;
@@ -283,7 +278,6 @@ function HomeContent() {
 
       setUserStats(stats);
 
-      // Cache the results
       sessionStorage.setItem(cacheKey, JSON.stringify({
         data: stats,
         timestamp: Date.now()
@@ -295,19 +289,19 @@ function HomeContent() {
     }
   }, [userData?.$id]);
 
-  // Initial load
+
   useEffect(() => {
     fetchPosts(true);
   }, []);
 
-  // Fetch user stats
+
   useEffect(() => {
     if (authStatus && userData) {
       fetchUserStats();
     }
   }, [authStatus, userData, fetchUserStats]);
 
-  // Listen for message read events
+
   useEffect(() => {
     const handleMessagesRead = () => {
       if (authStatus && userData) {
@@ -351,13 +345,13 @@ function HomeContent() {
     <div className='w-full min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'>
       <Container>
         <div className="py-8">
-          {/* Enhanced Hero Section for Non-Authenticated Users */}
+         
           {!authStatus && (
             <div className="mb-12">
-              {/* Main Hero */}
+             
               <div className="text-center mb-8">
                 <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm rounded-3xl p-12 border border-slate-600/50 relative overflow-hidden">
-                  {/* Background decoration */}
+                 
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-pink-600/5"></div>
                   <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
                   <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl"></div>
@@ -386,7 +380,7 @@ function HomeContent() {
                       and building a community around great content.
                     </p>
 
-                    {/* Quick stats for motivation */}
+                  
                     <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto mb-8">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-white">10K+</div>
@@ -422,7 +416,7 @@ function HomeContent() {
                 </div>
               </div>
 
-              {/* Feature showcase */}
+             
               <div className="grid md:grid-cols-3 gap-6 mb-8">
                 <div className="group bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:transform hover:scale-105">
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-4 group-hover:rotate-6 transition-transform">
@@ -457,10 +451,10 @@ function HomeContent() {
             </div>
           )}
 
-          {/* Enhanced User Dashboard for Authenticated Users */}
+          
           {authStatus && userData && (
             <div className="mb-8">
-              {/* Personalized Welcome */}
+              
               <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 mb-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-blue-600/5"></div>
                 <div className="relative z-10 flex items-center justify-between">
@@ -480,7 +474,7 @@ function HomeContent() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    {/* Messages Button with Animation */}
+                    
                     <button
                       onClick={() => navigate('/messages')}
                       className="relative p-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-300 transform hover:scale-110 shadow-lg"
@@ -494,7 +488,7 @@ function HomeContent() {
                       )}
                     </button>
 
-                    {/* New Post Button */}
+                   
                     <button
                       onClick={() => navigate('/add-post')}
                       className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
@@ -506,7 +500,7 @@ function HomeContent() {
                 </div>
               </div>
 
-              {/* Enhanced Statistics Dashboard */}
+             
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="group bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
@@ -565,7 +559,7 @@ function HomeContent() {
                 </div>
               </div>
 
-              {/* Quick Actions Bar */}
+              
               <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 mb-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -591,7 +585,6 @@ function HomeContent() {
             </div>
           )}
 
-          {/* Content Header with Enhanced Filters */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-bold text-white">
@@ -648,7 +641,7 @@ function HomeContent() {
             )}
           </div>
 
-          {/* Enhanced Posts Display */}
+          
           {displayPosts.length === 0 && !loading ? (
             <div className="flex w-full py-16 items-center justify-center">
               <div className="text-center max-w-md">
@@ -741,7 +734,7 @@ function HomeContent() {
                         </button>
                       </div>
 
-                      {/* Feature highlights */}
+                   
                       <div className="grid md:grid-cols-3 gap-6 max-w-2xl mx-auto">
                         <div className="flex flex-col items-center gap-2">
                           <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
@@ -774,7 +767,7 @@ function HomeContent() {
   );
 }
 
-// Main component wrapped with error boundary
+
 function Home() {
   return (
     <ErrorBoundary>

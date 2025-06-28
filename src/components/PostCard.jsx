@@ -7,7 +7,7 @@ import appwriteService from "../appwrite/config"
 import profileService from "../appwrite/profile"
 import { cleanDisplayContent } from '../utils/contentParser'
 
-// Create a cache for profiles to avoid repeated requests
+
 const profileCache = new Map();
 const failedProfiles = new Set();
 
@@ -19,18 +19,17 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
   const [profileLoading, setProfileLoading] = useState(false)
   const hasFetchedProfile = useRef(false)
 
-  // Fetch author profile data with caching and error handling
+ 
   useEffect(() => {
     const fetchAuthorProfile = async () => {
       if (!userId || hasFetchedProfile.current || profileLoading) return;
-      
-      // Check if this profile already failed
+
       if (failedProfiles.has(userId)) {
         setAuthorProfile(null);
         return;
       }
 
-      // Check cache first
+ 
       if (profileCache.has(userId)) {
         setAuthorProfile(profileCache.get(userId));
         return;
@@ -43,17 +42,17 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
         const profile = await profileService.getProfile(userId);
         if (profile) {
           setAuthorProfile(profile);
-          profileCache.set(userId, profile); // Cache successful result
+          profileCache.set(userId, profile);
         } else {
           setAuthorProfile(null);
-          failedProfiles.add(userId); // Mark as failed to avoid retries
-          profileCache.set(userId, null); // Cache null result
+          failedProfiles.add(userId); 
+          profileCache.set(userId, null); 
         }
       } catch (error) {
         console.error(`Failed to fetch profile for user ${userId}:`, error.message);
         setAuthorProfile(null);
-        failedProfiles.add(userId); // Mark as failed
-        profileCache.set(userId, null); // Cache null result
+        failedProfiles.add(userId);
+        profileCache.set(userId, null);
       } finally {
         setProfileLoading(false);
       }
@@ -62,19 +61,19 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     fetchAuthorProfile();
   }, [userId, profileLoading]);
 
-  // Extract plain text from HTML content for preview
+  
   const getPlainTextPreview = (htmlContent, maxLength = 120) => {
     if (!htmlContent) return "No preview available...";
 
     try {
-      // Parse and clean the content first
+     
       const parsedContent = cleanDisplayContent(htmlContent);
       
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = parsedContent;
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
       
-      // Clean up any remaining HTML entities
+      
       const cleanText = plainText
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
@@ -88,7 +87,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
-  // Calculate estimated reading time
+ 
   const calculateReadingTime = (content) => {
     if (!content) return 1;
     try {
@@ -101,7 +100,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
-  // Format date
+ 
   const formatDate = (dateString) => {
   if (!dateString) return "Recently";
   try {
@@ -112,23 +111,23 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    // Just now (less than 1 minute)
+    
     if (diffMinutes < 1) return "Just now";
     
-    // Minutes ago (less than 1 hour)
+    
     if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes === 1 ? '' : 's'} ago`;
     
-    // Hours ago (less than 24 hours)
+   
     if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
     
-    // Days ago (less than 7 days)
+   
     if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays} days ago`;
     
-    // Weeks ago (less than 30 days)
+    
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} week${Math.ceil(diffDays / 7) === 1 ? '' : 's'} ago`;
     
-    // More than 30 days - show actual date
+   
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -139,14 +138,14 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
   }
 };
 
-  // Get author display name with fallback
+  
   const getAuthorName = () => {
     if (authorProfile?.userName) return authorProfile.userName;
     if (userName) return userName;
     return "Anonymous Author";
   };
 
-  // Get author initials for fallback avatar
+
   const getAuthorInitials = (name) => {
     if (!name || name === "Anonymous Author") return "AA";
     try {
@@ -161,13 +160,13 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
-  // Handle author click - prevent event bubbling to post link
+  
   const handleAuthorClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  // Get safe image URL
+ 
   const getImageUrl = (imageId) => {
     if (!imageId) return null;
     try {
@@ -177,7 +176,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
-  // Get safe profile image URL
+  
   const getProfileImageUrl = (imageId) => {
     if (!imageId) return null;
     try {
@@ -190,13 +189,13 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
-  // List view layout
+ 
   if (viewMode === "list") {
     return (
       <Link to={`/post/${$id}`} className="block group">
         <article className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/10">
           <div className="flex gap-6">
-            {/* Featured Image - Fixed aspect ratio */}
+            
             <div className="w-48 h-32 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0">
               {!imageError && featuredImage ? (
                 <img
@@ -213,7 +212,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
               )}
             </div>
 
-            {/* Content */}
+          
             <div className="flex-1 min-w-0">
               <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-purple-300 transition-colors">
                 {title}
@@ -225,7 +224,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {/* Author Avatar */}
+                  
                   <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-transparent flex-shrink-0">
                     {!authorImageError && authorProfile?.profileImage ? (
                       <img
@@ -262,7 +261,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     );
   }
 
-  // Grid view layout (default) - Updated with consistent aspect ratio
+  
   return (
     <Link to={`/post/${$id}`} className="block group">
       <article
@@ -270,7 +269,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Featured Image - Consistent 1.91:1 aspect ratio */}
+        
         <div className="aspect-[1.91/1] bg-slate-700 overflow-hidden relative">
           {!imageError && featuredImage ? (
             <img
@@ -291,10 +290,10 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
             </div>
           )}
 
-          {/* Overlay gradient */}
+         
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Status badge */}
+         
           {status && (
             <div className="absolute top-3 left-3">
               <span
@@ -309,7 +308,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
             </div>
           )}
 
-          {/* Reading time */}
+         
           <div className="absolute top-3 right-3">
             <div className="flex items-center gap-1 px-2 py-1 bg-slate-900/70 backdrop-blur-sm rounded-full text-xs text-slate-300">
               <Clock className="w-3 h-3" />
@@ -318,20 +317,19 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
           </div>
         </div>
 
-        {/* Content */}
+      
         <div className="p-6">
-          {/* Title */}
+        
           <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-purple-300 transition-colors duration-300">
             {title}
           </h3>
 
-          {/* Content Preview */}
+         
           <p className="text-slate-400 mb-4 line-clamp-3 leading-relaxed">{getPlainTextPreview(content)}</p>
 
-          {/* Author and Date */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              {/* Author Avatar */}
+            
               <Link
                 to={`/profile/${userId}`}
                 onClick={handleAuthorClick}
@@ -354,7 +352,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
                 </div>
               </Link>
 
-              {/* Author Info */}
+             
               <div className="min-w-0 flex-1">
                 <Link
                   to={`/profile/${userId}`}
@@ -371,7 +369,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
               </div>
             </div>
 
-            {/* Read More Arrow */}
+          
             <div
               className={`flex items-center gap-1 text-purple-400 transition-all duration-300 flex-shrink-0 ${
                 isHovered ? "translate-x-1" : ""

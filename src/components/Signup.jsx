@@ -26,12 +26,12 @@ function SignUp() {
     try {
       const account = await authService.createAccount(data);
       if (account) {
-        // Automatically fetch user data after signup
+       
         const userData = await authService.getCurrentUser();
         if (userData) {
           dispatch(login({ userData }));
           
-          // Clear any failed profile attempts for this new user
+          
           profileCacheUtils.clearSpecificProfile(userData.$id);
           
           toast.success('Welcome! Account created successfully!');
@@ -46,7 +46,7 @@ function SignUp() {
     }
   };
 
-  // Password strength checker (keeping the enhanced functionality)
+
   const getPasswordStrength = (password) => {
     if (!password) return { strength: 0, text: '', color: '' };
     
@@ -87,7 +87,7 @@ function SignUp() {
         )}
 
         <form onSubmit={handleSubmit(create)} className="mt-8 space-y-6">
-          {/* Full Name Field */}
+      
           <div>
             <Input
               label="Full Name"
@@ -106,7 +106,7 @@ function SignUp() {
             )}
           </div>
 
-          {/* Email Field */}
+         
           <div>
             <Input
               label="Email"
@@ -126,7 +126,7 @@ function SignUp() {
             )}
           </div>
 
-          {/* Password Field with Enhanced Features */}
+          
           <div>
             <div className="relative">
               <Input
@@ -151,7 +151,7 @@ function SignUp() {
               </button>
             </div>
 
-            {/* Password Strength Indicator */}
+           
             {password && (
               <div className="mt-2 space-y-2">
                 <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ function SignUp() {
                   </span>
                 </div>
                 
-                {/* Password Requirements */}
+                
                 <div className="space-y-1">
                   <div className={`flex items-center gap-2 text-xs ${
                     password.length >= 8 ? 'text-green-400' : 'text-gray-400'
@@ -205,7 +205,7 @@ function SignUp() {
             )}
           </div>
 
-          {/* Submit Button with Loading State */}
+          
           <Button 
             type="submit" 
             disabled={isLoading}

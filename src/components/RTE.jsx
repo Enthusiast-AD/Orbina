@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 
 export default function RTE({ name, control, label, defaultValue = "", className = "" }) {
-  const [mode, setMode] = useState('edit') // 'edit' or 'preview'
+  const [mode, setMode] = useState('edit') 
   const textareaRef = useRef(null)
 
   const insertAtCursor = useCallback((before, after = '', currentContent, setContent) => {
@@ -38,7 +38,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
 
     setContent(newContent)
 
-    // Set cursor position after the inserted text
+    
     setTimeout(() => {
       const newPosition = start + before.length + selectedText.length
       textarea.focus()
@@ -81,12 +81,12 @@ export default function RTE({ name, control, label, defaultValue = "", className
     }
   }, [insertAtCursor])
 
-  // Convert markdown-like syntax to HTML for preview
+  
   const convertToHTML = useCallback((text) => {
     if (!text) return ''
 
     return text
-      // Headers
+      
       .replace(/^### (.*$)/gm, '<h3>$1</h3>')
       .replace(/^## (.*$)/gm, '<h2>$1</h2>')
       .replace(/^# (.*$)/gm, '<h1>$1</h1>')

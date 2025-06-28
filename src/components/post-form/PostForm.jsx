@@ -41,7 +41,7 @@ export default function PostForm({ post }) {
 
   const watchedImage = watch("image")
 
-  // Convert blob to File object
+  
   const blobToFile = useCallback((blob, fileName) => {
     const file = new File([blob], fileName, {
       type: blob.type,
@@ -50,7 +50,7 @@ export default function PostForm({ post }) {
     return file
   }, [])
 
-  // Optimized image processing
+  
   const processImage = useCallback((file) => {
     return new Promise((resolve, reject) => {
       try {
@@ -60,10 +60,10 @@ export default function PostForm({ post }) {
 
         img.onload = () => {
           try {
-            // Store original dimensions
+            
             setOriginalImageDimensions({ width: img.width, height: img.height })
 
-            // Target dimensions (1200x630 for optimal blog post ratio)
+            
             const targetWidth = 1200
             const targetHeight = 630
             const targetRatio = targetWidth / targetHeight
@@ -73,41 +73,41 @@ export default function PostForm({ post }) {
             let sourceX = 0
             let sourceY = 0
 
-            // Calculate crop dimensions to maintain aspect ratio
+            
             const sourceRatio = sourceWidth / sourceHeight
 
             if (sourceRatio > targetRatio) {
-              // Image is wider than target ratio - crop width
+              
               sourceWidth = sourceHeight * targetRatio
               sourceX = (img.width - sourceWidth) / 2
             } else {
-              // Image is taller than target ratio - crop height
+              
               sourceHeight = sourceWidth / targetRatio
               sourceY = (img.height - sourceHeight) / 2
             }
 
-            // Set canvas dimensions
+            
             canvas.width = targetWidth
             canvas.height = targetHeight
 
-            // Draw cropped and resized image
+            
             ctx.drawImage(
               img,
               sourceX, sourceY, sourceWidth, sourceHeight,
               0, 0, targetWidth, targetHeight
             )
 
-            // Convert to blob with optimized quality
+            
             canvas.toBlob((blob) => {
               if (blob) {
-                // Convert blob to File object with original filename
+                
                 const fileName = file.name.replace(/\.[^/.]+$/, "") + "_optimized.jpg"
                 const processedFile = blobToFile(blob, fileName)
                 resolve(processedFile)
               } else {
                 reject(new Error("Failed to process image"))
               }
-            }, 'image/jpeg', 0.85) // 85% quality for good balance
+            }, 'image/jpeg', 0.85) 
           } catch (error) {
             reject(error)
           }
@@ -124,12 +124,12 @@ export default function PostForm({ post }) {
     })
   }, [blobToFile])
 
-  // Handle image preview with optimization
+ 
   React.useEffect(() => {
     if (watchedImage && watchedImage[0]) {
       const file = watchedImage[0]
       
-      // Validate file
+      
       if (!file.type.startsWith('image/')) {
         setImageError("Please select a valid image file")
         setProcessedImageFile(null)
@@ -147,12 +147,12 @@ export default function PostForm({ post }) {
       setImageError(false)
       setOriginalImageFile(file)
 
-      // Process and preview image
+      
       processImage(file)
         .then((processedFile) => {
           setProcessedImageFile(processedFile)
           
-          // Create preview URL
+          
           const reader = new FileReader()
           reader.onload = () => setImagePreview(reader.result)
           reader.readAsDataURL(processedFile)
@@ -161,7 +161,7 @@ export default function PostForm({ post }) {
           console.error("Error processing image:", error)
           setImageError("Failed to process image. Using original file.")
           
-          // Fallback to original file
+          
           setProcessedImageFile(file)
           const reader = new FileReader()
           reader.onload = () => setImagePreview(reader.result)
@@ -175,20 +175,19 @@ export default function PostForm({ post }) {
 
     try {
       if (post) {
-        // Update existing post
+        
         let file = null
         if (processedImageFile) {
           try {
-            console.log("Uploading processed image:", processedImageFile)
+            // console.log("Uploading processed image:", processedImageFile)
             file = await appwriteService.uploadFile(processedImageFile)
             if (file && post.featuredImage) {
-              // Delete old image after successful upload
+             
               await appwriteService.deleteFile(post.featuredImage)
             }
           } catch (uploadError) {
             console.error("Error uploading processed image:", uploadError)
             
-            // Fallback to original file if available
             if (originalImageFile) {
               console.log("Fallback: Uploading original image:", originalImageFile)
               file = await appwriteService.uploadFile(originalImageFile)
@@ -210,7 +209,7 @@ export default function PostForm({ post }) {
           navigate(`/post/${dbPost.$id}`)
         }
       } else {
-        // Create new post
+        
         if (!processedImageFile && !originalImageFile) {
           setImageError("Featured image is required")
           return
@@ -218,14 +217,14 @@ export default function PostForm({ post }) {
 
         let file = null
         try {
-          console.log("Uploading processed image for new post:", processedImageFile)
+          // console.log("Uploading processed image for new post:", processedImageFile)
           file = await appwriteService.uploadFile(processedImageFile || originalImageFile)
         } catch (uploadError) {
           console.error("Error uploading processed image:", uploadError)
           
-          // Fallback to original file if available
+          
           if (originalImageFile && processedImageFile !== originalImageFile) {
-            console.log("Fallback: Uploading original image for new post:", originalImageFile)
+            // console.log("Fallback: Uploading original image for new post:", originalImageFile)
             file = await appwriteService.uploadFile(originalImageFile)
           } else {
             throw uploadError
@@ -327,12 +326,12 @@ export default function PostForm({ post }) {
         </div>
       </div>
 
-      {/* Main Content */}
+     
       <div className="max-w-7xl mx-auto px-6 py-8">
         <form onSubmit={handleSubmit(submit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
+         
           <div className="lg:col-span-2 space-y-6">
-            {/* Title Section */}
+            
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
                 <FileText className="w-5 h-5 text-purple-400" />
@@ -372,7 +371,7 @@ export default function PostForm({ post }) {
               </div>
             </div>
 
-            {/* Content Editor */}
+           
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
                 <FileText className="w-5 h-5 text-purple-400" />
@@ -385,9 +384,9 @@ export default function PostForm({ post }) {
             </div>
           </div>
 
-          {/* Right Column - Settings & Preview */}
+          
           <div className="space-y-6">
-            {/* Featured Image */}
+            
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
                 <ImageIcon className="w-5 h-5 text-purple-400" />
@@ -413,7 +412,7 @@ export default function PostForm({ post }) {
                       <X className="w-4 h-4" />
                     </button>
                     
-                    {/* Image Info */}
+                   
                     <div className="mt-2 p-3 bg-slate-700/50 rounded-lg">
                       <div className="flex items-center gap-2 text-sm text-slate-300">
                         <Crop className="w-4 h-4 text-green-400" />
@@ -463,7 +462,7 @@ export default function PostForm({ post }) {
                   <p className="text-red-400 text-sm">{errors.image.message}</p>
                 )}
 
-                {/* Image Guidelines */}
+                
                 <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                   <h4 className="text-blue-300 font-medium text-sm mb-2">📸 Image Guidelines</h4>
                   <ul className="text-blue-200 text-xs space-y-1">
@@ -475,7 +474,7 @@ export default function PostForm({ post }) {
               </div>
             </div>
 
-            {/* Post Settings */}
+            
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
                 <Settings className="w-5 h-5 text-purple-400" />
@@ -494,7 +493,6 @@ export default function PostForm({ post }) {
                   </select>
                 </div>
 
-                {/* Author Info */}
                 <div className="pt-4 border-t border-slate-700/50">
                   <p className="text-sm text-slate-400 mb-2">Author</p>
                   <div className="flex items-center gap-3">
@@ -510,7 +508,7 @@ export default function PostForm({ post }) {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            
             <div className="space-y-3">
               <Button
                 type="submit"

@@ -1,4 +1,4 @@
-// Utility to manage profile cache
+
 export const profileCacheUtils = {
   clearCache: () => {
     if (typeof window !== 'undefined') {

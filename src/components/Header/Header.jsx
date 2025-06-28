@@ -121,7 +121,7 @@ function Header() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
+            
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"

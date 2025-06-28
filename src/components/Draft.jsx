@@ -21,7 +21,7 @@ export default function Draft() {
 
     setIsLoading(true)
     try {
-      // Fetch ALL posts with batch loading to ensure no pagination limits
+      
       let allPostsData = []
       let hasMore = true
       let offset = 0
@@ -43,12 +43,12 @@ export default function Draft() {
         }
       }
 
-      // Filter for user's draft posts (inactive status)
+      
       const userDrafts = allPostsData.filter(post => 
         post.userId === userData.$id && post.status === "inactive"
       )
       
-      // Sort by updated date (most recent first)
+      
       const sortedDrafts = userDrafts.sort((a, b) => 
         new Date(b.$updatedAt || b.$createdAt) - new Date(a.$updatedAt || a.$createdAt)
       )
@@ -166,7 +166,7 @@ export default function Draft() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Your Drafts</h2>
@@ -183,7 +183,7 @@ export default function Draft() {
         </button>
       </div>
 
-      {/* Search */}
+      
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
         <input
@@ -195,7 +195,7 @@ export default function Draft() {
         />
       </div>
 
-      {/* Drafts List */}
+      
       {filteredDrafts.length === 0 ? (
         <div className="text-center py-12">
           <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />

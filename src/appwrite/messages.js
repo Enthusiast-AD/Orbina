@@ -58,7 +58,6 @@ export class MessagesService {
                 ]
             );
             
-            // Reverse to show oldest first
             return {
                 ...result,
                 documents: result.documents.reverse()
@@ -71,7 +70,6 @@ export class MessagesService {
 
     async getConversationsList(userId, limit = 20) {
         try {
-            // Get all messages where user is sender or receiver
             const result = await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteMessagesCollectionId,
@@ -85,7 +83,6 @@ export class MessagesService {
                 ]
             );
 
-            // Group messages by conversation partner
             const conversationsMap = new Map();
             
             result.documents.forEach(message => {
@@ -98,14 +95,12 @@ export class MessagesService {
                         unreadCount: 0
                     });
                 }
-                
-                // Count unread messages (where current user is receiver and message is unread)
+            
                 if (message.receiverId === userId && !message.isRead) {
                     conversationsMap.get(partnerId).unreadCount++;
                 }
             });
 
-            // Convert to array and sort by last message time
             const conversations = Array.from(conversationsMap.values()).sort(
                 (a, b) => new Date(b.lastMessage.$createdAt) - new Date(a.lastMessage.$createdAt)
             );
@@ -144,8 +139,6 @@ export class MessagesService {
                     Query.equal("isRead", false)
                 ]
             );
-
-            // Mark each unread message as read
             const updatePromises = unreadMessages.documents.map(message =>
                 this.markAsRead({ messageId: message.$id })
             );
@@ -214,7 +207,6 @@ export class MessagesService {
         }
     }
 
-    // Real-time subscription helper
     subscribeToConversation({ userId1, userId2, callback }) {
         try {
             const channel = `databases.${conf.appwriteDatabaseId}.collections.${conf.appwriteMessagesCollectionId}.documents`;
@@ -226,7 +218,6 @@ export class MessagesService {
         }
     }
 
-    // Real-time subscription for user's messages
     subscribeToUserMessages({ userId, callback }) {
         try {
             const channel = `databases.${conf.appwriteDatabaseId}.collections.${conf.appwriteMessagesCollectionId}.documents`;

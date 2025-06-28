@@ -34,10 +34,10 @@ const CallActions = ({
     setIsCallActive(true);
     setCallType(type);
     
-    // Simulate call initiation
+    
     toast.success(`Calling ${userName}...`);
     
-    // Simulate call connection after 3 seconds
+    
     setTimeout(() => {
       toast.success(`Connected to ${userName}`);
     }, 3000);
