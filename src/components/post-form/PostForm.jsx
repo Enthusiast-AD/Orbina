@@ -8,6 +8,7 @@ import { Button, RTE } from "../../components"
 import appwriteService from "../../appwrite/config"
 import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
+import toast from "react-hot-toast"
 
 export default function PostForm({ post }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -16,8 +17,8 @@ export default function PostForm({ post }) {
   )
   const [imageError, setImageError] = useState(false)
   const [originalImageDimensions, setOriginalImageDimensions] = useState(null)
-  const [processedImageFile, setProcessedImageFile] = useState(null) // Store the processed file
-  const [originalImageFile, setOriginalImageFile] = useState(null) // Store original file as backup
+  const [processedImageFile, setProcessedImageFile] = useState(null)
+  const [originalImageFile, setOriginalImageFile] = useState(null)
 
   const {
     register,
@@ -41,7 +42,6 @@ export default function PostForm({ post }) {
 
   const watchedImage = watch("image")
 
-  
   const blobToFile = useCallback((blob, fileName) => {
     const file = new File([blob], fileName, {
       type: blob.type,
@@ -50,7 +50,6 @@ export default function PostForm({ post }) {
     return file
   }, [])
 
-  
   const processImage = useCallback((file) => {
     return new Promise((resolve, reject) => {
       try {
@@ -60,10 +59,8 @@ export default function PostForm({ post }) {
 
         img.onload = () => {
           try {
-            
             setOriginalImageDimensions({ width: img.width, height: img.height })
 
-            
             const targetWidth = 1200
             const targetHeight = 630
             const targetRatio = targetWidth / targetHeight
@@ -73,41 +70,34 @@ export default function PostForm({ post }) {
             let sourceX = 0
             let sourceY = 0
 
-            
             const sourceRatio = sourceWidth / sourceHeight
 
             if (sourceRatio > targetRatio) {
-              
               sourceWidth = sourceHeight * targetRatio
               sourceX = (img.width - sourceWidth) / 2
             } else {
-              
               sourceHeight = sourceWidth / targetRatio
               sourceY = (img.height - sourceHeight) / 2
             }
 
-            
             canvas.width = targetWidth
             canvas.height = targetHeight
 
-            
             ctx.drawImage(
               img,
               sourceX, sourceY, sourceWidth, sourceHeight,
               0, 0, targetWidth, targetHeight
             )
 
-            
             canvas.toBlob((blob) => {
               if (blob) {
-                
                 const fileName = file.name.replace(/\.[^/.]+$/, "") + "_optimized.jpg"
                 const processedFile = blobToFile(blob, fileName)
                 resolve(processedFile)
               } else {
                 reject(new Error("Failed to process image"))
               }
-            }, 'image/jpeg', 0.85) 
+            }, 'image/jpeg', 0.85)
           } catch (error) {
             reject(error)
           }
@@ -124,72 +114,67 @@ export default function PostForm({ post }) {
     })
   }, [blobToFile])
 
- 
   React.useEffect(() => {
     if (watchedImage && watchedImage[0]) {
       const file = watchedImage[0]
-      
       
       if (!file.type.startsWith('image/')) {
         setImageError("Please select a valid image file")
         setProcessedImageFile(null)
         setOriginalImageFile(null)
+        toast.error("Please select a valid image file")
         return
       }
 
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         setImageError("Image size should be less than 10MB")
         setProcessedImageFile(null)
         setOriginalImageFile(null)
+        toast.error("Image size should be less than 10MB")
         return
       }
 
       setImageError(false)
       setOriginalImageFile(file)
 
-      
-      processImage(file)
-        .then((processedFile) => {
-          setProcessedImageFile(processedFile)
-          
-          
-          const reader = new FileReader()
-          reader.onload = () => setImagePreview(reader.result)
-          reader.readAsDataURL(processedFile)
-        })
-        .catch((error) => {
-          console.error("Error processing image:", error)
-          setImageError("Failed to process image. Using original file.")
-          
-          
-          setProcessedImageFile(file)
-          const reader = new FileReader()
-          reader.onload = () => setImagePreview(reader.result)
-          reader.readAsDataURL(file)
-        })
+      toast.promise(
+        processImage(file),
+        {
+          loading: 'Processing image...',
+          success: 'Image processed successfully!',
+          error: 'Failed to process image'
+        }
+      ).then((processedFile) => {
+        setProcessedImageFile(processedFile)
+        const reader = new FileReader()
+        reader.onload = () => setImagePreview(reader.result)
+        reader.readAsDataURL(processedFile)
+      }).catch((error) => {
+        console.error("Error processing image:", error)
+        setImageError("Failed to process image. Using original file.")
+        setProcessedImageFile(file)
+        const reader = new FileReader()
+        reader.onload = () => setImagePreview(reader.result)
+        reader.readAsDataURL(file)
+      })
     }
   }, [watchedImage, processImage])
 
   const submit = async (data) => {
     setIsSubmitting(true)
 
-    try {
+    const submitPromise = async () => {
       if (post) {
-        
         let file = null
         if (processedImageFile) {
           try {
-            // console.log("Uploading processed image:", processedImageFile)
             file = await appwriteService.uploadFile(processedImageFile)
             if (file && post.featuredImage) {
-             
               await appwriteService.deleteFile(post.featuredImage)
             }
           } catch (uploadError) {
             console.error("Error uploading processed image:", uploadError)
-            
             if (originalImageFile) {
-              console.log("Fallback: Uploading original image:", originalImageFile)
               file = await appwriteService.uploadFile(originalImageFile)
               if (file && post.featuredImage) {
                 await appwriteService.deleteFile(post.featuredImage)
@@ -207,24 +192,19 @@ export default function PostForm({ post }) {
 
         if (dbPost) {
           navigate(`/post/${dbPost.$id}`)
+          return "Post updated successfully!"
         }
       } else {
-        
         if (!processedImageFile && !originalImageFile) {
-          setImageError("Featured image is required")
-          return
+          throw new Error("Featured image is required")
         }
 
         let file = null
         try {
-          // console.log("Uploading processed image for new post:", processedImageFile)
           file = await appwriteService.uploadFile(processedImageFile || originalImageFile)
         } catch (uploadError) {
           console.error("Error uploading processed image:", uploadError)
-          
-          
           if (originalImageFile && processedImageFile !== originalImageFile) {
-            // console.log("Fallback: Uploading original image for new post:", originalImageFile)
             file = await appwriteService.uploadFile(originalImageFile)
           } else {
             throw uploadError
@@ -241,39 +221,68 @@ export default function PostForm({ post }) {
 
           if (dbPost) {
             navigate(`/post/${dbPost.$id}`)
+            return "Post published successfully!"
           }
         } else {
           throw new Error("Failed to upload image")
         }
       }
+    }
+
+    try {
+      await toast.promise(
+        submitPromise(),
+        {
+          loading: post ? 'Updating post...' : 'Publishing post...',
+          success: (message) => message,
+          error: (error) => `Failed to ${post ? 'update' : 'create'} post: ${error.message}`
+        }
+      )
     } catch (error) {
       console.error("Error submitting post:", error)
-      setImageError(`Failed to ${post ? 'update' : 'create'} post: ${error.message}`)
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const slugTransform = useCallback((value) => {
-    if (value && typeof value === "string")
-      return value
+    if (value && typeof value === "string") {
+      const transformed = value
         .trim()
         .toLowerCase()
         .replace(/[^a-zA-Z\d\s]+/g, "-")
         .replace(/\s/g, "-")
+        .slice(0, 35)
 
+      return transformed
+    }
     return ""
   }, [])
 
   React.useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name === "title") {
-        setValue("slug", slugTransform(value.title), { shouldValidate: true })
+        const newSlug = slugTransform(value.title)
+        setValue("slug", newSlug, { shouldValidate: true })
+        
+        if (newSlug.length >= 35) {
+          toast.warning("Slug truncated to 35 characters for optimal compatibility")
+        }
       }
     })
 
     return () => subscription.unsubscribe()
   }, [watch, slugTransform, setValue])
+
+  const handleSlugInput = (e) => {
+    const inputValue = e.currentTarget.value
+    const transformedSlug = slugTransform(inputValue)
+    setValue("slug", transformedSlug, { shouldValidate: true })
+    
+    if (inputValue.length > 35) {
+      toast.warning("Slug cannot exceed 35 characters")
+    }
+  }
 
   const removeImage = () => {
     setImagePreview(null)
@@ -282,13 +291,13 @@ export default function PostForm({ post }) {
     setOriginalImageDimensions(null)
     setValue("image", null)
     setImageError(false)
+    toast.success("Image removed")
   }
 
   const hasImage = processedImageFile || originalImageFile
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -326,12 +335,9 @@ export default function PostForm({ post }) {
         </div>
       </div>
 
-     
       <div className="max-w-7xl mx-auto px-6 py-8">
         <form onSubmit={handleSubmit(submit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-         
           <div className="lg:col-span-2 space-y-6">
-            
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
                 <FileText className="w-5 h-5 text-purple-400" />
@@ -353,25 +359,33 @@ export default function PostForm({ post }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Slug *</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Slug * 
+                    <span className="text-slate-400 text-xs ml-2">
+                      ({watch("slug")?.length || 0}/35 characters)
+                    </span>
+                  </label>
                   <input
                     type="text"
                     placeholder="post-url-slug"
+                    maxLength={35}
                     className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
                       errors.slug ? "border-red-500" : "border-slate-600"
                     }`}
-                    {...register("slug", { required: "Slug is required" })}
-                    onInput={(e) => {
-                      setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true })
-                    }}
+                    {...register("slug", { 
+                      required: "Slug is required",
+                      maxLength: { value: 35, message: "Slug cannot exceed 35 characters" }
+                    })}
+                    onInput={handleSlugInput}
                   />
                   {errors.slug && <p className="text-red-400 text-sm mt-1">{errors.slug.message}</p>}
-                  <p className="text-slate-400 text-xs mt-1">URL-friendly version of the title</p>
+                  <p className="text-slate-400 text-xs mt-1">
+                    URL-friendly version of the title (max 35 characters)
+                  </p>
                 </div>
               </div>
             </div>
 
-           
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
                 <FileText className="w-5 h-5 text-purple-400" />
@@ -384,9 +398,7 @@ export default function PostForm({ post }) {
             </div>
           </div>
 
-          
           <div className="space-y-6">
-            
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
                 <ImageIcon className="w-5 h-5 text-purple-400" />
@@ -412,7 +424,6 @@ export default function PostForm({ post }) {
                       <X className="w-4 h-4" />
                     </button>
                     
-                   
                     <div className="mt-2 p-3 bg-slate-700/50 rounded-lg">
                       <div className="flex items-center gap-2 text-sm text-slate-300">
                         <Crop className="w-4 h-4 text-green-400" />
@@ -462,7 +473,6 @@ export default function PostForm({ post }) {
                   <p className="text-red-400 text-sm">{errors.image.message}</p>
                 )}
 
-                
                 <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                   <h4 className="text-blue-300 font-medium text-sm mb-2">📸 Image Guidelines</h4>
                   <ul className="text-blue-200 text-xs space-y-1">
@@ -474,7 +484,6 @@ export default function PostForm({ post }) {
               </div>
             </div>
 
-            
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
                 <Settings className="w-5 h-5 text-purple-400" />
@@ -508,7 +517,6 @@ export default function PostForm({ post }) {
               </div>
             </div>
 
-            
             <div className="space-y-3">
               <Button
                 type="submit"

@@ -12,9 +12,9 @@
   [![Appwrite](https://img.shields.io/badge/Appwrite-Backend-red.svg)](https://appwrite.io/)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3.0-38B2AC.svg)](https://tailwindcss.com/)
   [![Vite](https://img.shields.io/badge/Vite-4.4.5-646CFF.svg)](https://vitejs.dev/)
-  [![Live](https://img.shields.io/badge/Live%20Demo-Orbina-brightgreen)](https://orbina.netlify.app)
+  [![Live](https://img.shields.io/badge/Live%20Demo-Orbina-brightgreen)](https://orbina.net)
 
-  [🌐 Live Demo](https://orbina.net) • [🐛 Report Bug](https://github.com/Enthusiast-AD/blogApp/issues) • [💡 Request Feature](https://github.com/Enthusiast-AD/blogApp/issues)
+  [🌐 Live Demo](https://orbina.net) • [🐛 Report Bug](https://github.com/Enthusiast-AD/Orbina/issues) • [💡 Request Feature](https://github.com/Enthusiast-AD/Orbina/issues)
 </div>
 
 ---

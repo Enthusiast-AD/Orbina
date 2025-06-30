@@ -16,7 +16,7 @@ export class ProfileService {
 
     async createProfile({userName, bio = "", location = "", website = "", profileImage = null, userId, twitter = "", github = "", linkedIn = ""}) {
         try {
-            console.log("Creating profile for user:", userId);
+            // console.log("Creating profile for user:", userId);
             
             return await this.databases.createDocument(
                 conf.appwriteDatabaseId,
@@ -43,7 +43,7 @@ export class ProfileService {
     
     async updateProfile({userName, bio = "", location = "", website = "", profileImage = null, userId, twitter = "", github = "", linkedIn = ""}) {
         try {
-            console.log("Updating profile for user:", userId);
+            // console.log("Updating profile for user:", userId);
             
             const existingProfile = await this.getProfile(userId);
             
@@ -77,7 +77,7 @@ export class ProfileService {
     
     async getProfile(userId) {
         try {
-            console.log("Fetching profile for user:", userId);
+            // console.log("Fetching profile for user:", userId);
             
             const result = await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
@@ -100,7 +100,7 @@ export class ProfileService {
     async uploadProfileImage(file) {
         try {
             return await this.bucket.createFile(
-                conf.appwriteProfileImageBucketId,
+                conf.appwriteBucketId ,
                 ID.unique(),
                 file
             );
@@ -113,7 +113,7 @@ export class ProfileService {
     async deleteProfileImage(fileId) {
         try {
             await this.bucket.deleteFile(
-                conf.appwriteProfileImageBucketId,
+                conf.appwriteBucketId,
                 fileId
             );
             return true;
@@ -125,7 +125,7 @@ export class ProfileService {
 
 getProfileImageView(fileId) {
     try {
-        const bucketId = conf.appwriteProfileImageBucketId || conf.appwriteBucketId;
+        const bucketId = conf.appwriteBucketId ;
         
         if (!bucketId) {
             console.log("No bucket ID configured");
