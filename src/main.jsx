@@ -18,6 +18,13 @@ import UserProfile from "./pages/UserProfile.jsx"
 import Messages from "./pages/Messages.jsx"
 import NotFound from "./pages/NotFound.jsx"
 
+// Admin imports
+import AdminLayout from "./components/admin/AdminLayout.jsx"
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx"
+import AdminPosts from "./pages/admin/AdminPosts.jsx"
+import AdminUsers from "./pages/admin/AdminUsers.jsx"
+import AdminAnalytics from "./pages/admin/AdminAnalytics.jsx"
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -111,6 +118,29 @@ const router = createBrowserRouter([
       {
         path: "*",
         element: <NotFound />,
+      },
+    ],
+  },
+  // Admin routes
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />,
+      },
+      {
+        path: "posts",
+        element: <AdminPosts />,
+      },
+      {
+        path: "users",
+        element: <AdminUsers />,
+      },
+      {
+        path: "analytics",
+        element: <AdminAnalytics />,
       },
     ],
   },

@@ -5,15 +5,23 @@ import { Container, LogoutBtn } from "../index"
 import { Link } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import {  Menu, X, User } from "lucide-react"
+import { Menu, X, User, Shield } from "lucide-react"
 import orbina from "../../assets/orbina.svg"
-import Search  from "./Search"
+import Search from "./Search"
+
+const ADMIN_EMAILS = [
+  "ansh@orbina.net",
+  "admin@orbina.net",
+  "enthusiast.ad@gmail.com"
+]
 
 function Header() {
   const authStatus = useSelector((state) => state.auth.status)
   const userData = useSelector((state) => state.auth.userData)
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const isAdmin = userData && ADMIN_EMAILS.includes(userData.email?.toLowerCase())
 
   const navItems = [
     {
@@ -31,6 +39,7 @@ function Header() {
       slug: "/add-post",
       active: authStatus,
     },
+    // You could add more nav items here
   ]
 
   const authItems = [
@@ -46,8 +55,6 @@ function Header() {
     },
   ]
 
-  
-
   return (
     <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 sticky top-0 z-50">
       <Container>
@@ -55,7 +62,7 @@ function Header() {
           {/* Left Section - Logo & Navigation */}
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
-              <img src={orbina} alt="Orbina Logo" height={40} width={40}/>
+              <img src={orbina} alt="Orbina Logo" height={40} width={40} />
               <div className="text-2xl font-bold text-white">Orbina</div>
             </Link>
 
@@ -78,11 +85,9 @@ function Header() {
 
           {/* Center Section - Search */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
-            
-              <div className="relative">
-                <Search/>
-              </div>
-            
+            <div className="relative">
+              <Search />
+            </div>
           </div>
 
           {/* Right Section - Auth & Profile */}
@@ -96,8 +101,17 @@ function Header() {
                     className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200 cursor-pointer active:bg-slate-800/50"
                   >
                     <User className="w-4 h-4 " />
-                    <span >Profile</span>
+                    <span>Profile</span>
                   </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => navigate("/admin")}
+                      className="flex items-center space-x-2 px-3 py-2 text-yellow-300 hover:text-white hover:bg-yellow-600/60 rounded-lg transition-colors duration-200 cursor-pointer font-semibold"
+                    >
+                      <Shield className="w-4 h-4" />
+                      <span>Admin Panel</span>
+                    </button>
+                  )}
                   <LogoutBtn />
                 </>
               ) : (
@@ -121,7 +135,6 @@ function Header() {
               )}
             </div>
 
-            
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
@@ -136,11 +149,9 @@ function Header() {
           <div className="md:hidden border-t border-slate-700/50 bg-slate-900/95 backdrop-blur-md">
             <div className="px-4 py-4 space-y-4">
               {/* Mobile Search */}
-              
-                <div className="relative">
-                  <Search />
-                </div>
-              
+              <div className="relative">
+                <Search />
+              </div>
 
               {/* Mobile Navigation */}
               <div className="space-y-2">
@@ -174,6 +185,18 @@ function Header() {
                       <User className="w-4 h-4" />
                       <span>Profile</span>
                     </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          navigate("/admin")
+                          setIsMobileMenuOpen(false)
+                        }}
+                        className="flex items-center space-x-2 w-full px-3 py-2 text-yellow-300 hover:text-white hover:bg-yellow-600/60 rounded-lg transition-colors duration-200 font-semibold"
+                      >
+                        <Shield className="w-4 h-4" />
+                        <span>Admin Panel</span>
+                      </button>
+                    )}
                     <div className="px-3">
                       <LogoutBtn />
                     </div>
