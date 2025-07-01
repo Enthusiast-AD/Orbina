@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login as authLogin } from '../store/authSlice';
+import { setProfile } from '../store/profileSlice';
 import { Button, Input, Logo } from './index';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import authService from '../appwrite/auth';
+import profileService from '../appwrite/profile';
 import orbina from '../assets/orbina.svg';
 import toast from 'react-hot-toast';
 
@@ -19,10 +21,22 @@ function Login() {
     try {
       const session = await authService.login(data);
       if (session) {
-        // Automatically fetch user data after login
+        // Get user data
         const userData = await authService.getCurrentUser();
         if (userData) {
           dispatch(authLogin({ userData }));
+          
+          // Load profile if exists
+          try {
+            const profile = await profileService.getProfile(userData.$id);
+            if (profile) {
+              dispatch(setProfile(profile));
+            }
+          } catch (profileError) {
+            console.error('Error loading profile:', profileError);
+            // Don't show error as login was successful
+          }
+          
           toast.success('Login successful!');
           navigate('/');
         }
@@ -38,7 +52,7 @@ function Login() {
       <div className="backdrop-blur-md bg-white/10 shadow-xl rounded-2xl p-10 w-full max-w-md border border-white/10">
         <div className="flex justify-center mb-2">
           <span className="w-full max-w-[100px] flex justify-center gap-0.5 items-center">
-            <img src={orbina} alt="Orbina Logo"  height={40} width={40}/>
+            <img src={orbina} alt="Orbina Logo" height={40} width={40}/>
             <Logo width="100%" />
           </span>
         </div>

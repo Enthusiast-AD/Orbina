@@ -14,44 +14,81 @@ export class ProfileService {
         this.bucket = new Storage(this.client);
     }
 
-    async createProfile({userName, bio = "", location = "", website = "", profileImage = null, userId, twitter = "", github = "", linkedIn = ""}) {
+    // Auto-create profile during signup
+    async createProfile({
+        userId,
+        userName,
+        bio = "",
+        location = "",
+        website = "",
+        twitter = "",
+        github = "",
+        linkedIn = "",
+        profileImage = null
+    }) {
         try {
-            // console.log("Creating profile for user:", userId);
-            
-            return await this.databases.createDocument(
+            // Check if profile already exists
+            const existingProfile = await this.getProfile(userId);
+            if (existingProfile) {
+                console.log('Profile already exists for user:', userId);
+                return existingProfile;
+            }
+
+            const profile = await this.databases.createDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
-                ID.unique(), 
+                ID.unique(),
                 {
+                    userId,
                     userName,
                     bio,
                     location,
                     website,
-                    profileImage,
-                    userId, 
                     twitter,
                     github,
                     linkedIn,
+                    profileImage
                 }
             );
+            
+            console.log('Profile created successfully:', profile);
+            return profile;
         } catch (error) {
-            console.log("Appwrite service :: createProfile :: error", error);
+            console.error("Error creating profile:", error);
             throw error;
         }
     }
 
-    
-    async updateProfile({userName, bio = "", location = "", website = "", profileImage = null, userId, twitter = "", github = "", linkedIn = ""}) {
+    async updateProfile({
+        userId,
+        userName,
+        bio,
+        location,
+        website,
+        twitter,
+        github,
+        linkedIn,
+        profileImage
+    }) {
         try {
-            // console.log("Updating profile for user:", userId);
-            
+            // Get existing profile
             const existingProfile = await this.getProfile(userId);
-            
             if (!existingProfile) {
-                console.log("Profile not found, creating new one");
-                return await this.createProfile({userName, bio, location, website, profileImage, userId, twitter, github, linkedIn});
+                // If no profile exists, create one
+                return await this.createProfile({
+                    userId,
+                    userName,
+                    bio,
+                    location,
+                    website,
+                    twitter,
+                    github,
+                    linkedIn,
+                    profileImage
+                });
             }
 
+            // Update existing profile
             return await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
@@ -61,51 +98,42 @@ export class ProfileService {
                     bio,
                     location,
                     website,
-                    profileImage,
-                    userId,
                     twitter,
                     github,
                     linkedIn,
+                    profileImage
                 }
             );
         } catch (error) {
-            console.log("Appwrite service :: updateProfile :: error", error);
+            console.error("Error updating profile:", error);
             throw error;
         }
     }
 
-    
     async getProfile(userId) {
         try {
-            // console.log("Fetching profile for user:", userId);
-            
-            const result = await this.databases.listDocuments(
+            const profiles = await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteProfileCollectionId,
                 [Query.equal("userId", userId)]
             );
-
-            if (result.documents && result.documents.length > 0) {
-                return result.documents[0]; 
-            }
             
-            return null;
+            return profiles.documents.length > 0 ? profiles.documents[0] : null;
         } catch (error) {
-            console.log("❌ Appwrite service :: getProfile :: error", error);
+            console.error("Error fetching profile:", error);
             return null;
         }
     }
 
-    
     async uploadProfileImage(file) {
         try {
             return await this.bucket.createFile(
-                conf.appwriteBucketId ,
+                conf.appwriteBucketId,
                 ID.unique(),
                 file
             );
         } catch (error) {
-            console.log("Appwrite service :: uploadProfileImage :: error", error);
+            console.error("Error uploading profile image:", error);
             throw error;
         }
     }
@@ -118,33 +146,24 @@ export class ProfileService {
             );
             return true;
         } catch (error) {
-            console.log("Appwrite service :: deleteProfileImage :: error", error);
+            console.error("Error deleting profile image:", error);
             return false;
         }
     }
 
-getProfileImageView(fileId) {
-    try {
-        const bucketId = conf.appwriteBucketId ;
-        
-        if (!bucketId) {
-            console.log("No bucket ID configured");
+    getProfileImageView(fileId) {
+        try {
+            return this.bucket.getFileView(
+                conf.appwriteBucketId,
+                fileId
+            );
+        } catch (error) {
+            console.error("Error getting profile image view:", error);
             return null;
         }
-
-        if (!fileId) {
-            console.log("No fileId provided for profile image");
-            return null;
-        }
-
-        return this.bucket.getFileView(bucketId, fileId);
-    } catch (error) {
-        console.log("Appwrite service :: getProfileImageView :: error", error);
-        return null;
     }
-}
 
-    
+    // Helper method to remove failed attempts from cache
     removeFromFailedAttempts(userId) {
         try {
             if (typeof window !== 'undefined') {
@@ -153,17 +172,7 @@ getProfileImageView(fileId) {
                 localStorage.setItem('profileFailedAttempts', JSON.stringify(filtered));
             }
         } catch (error) {
-            console.log("Error cleaning failed attempts:", error);
-        }
-    }
-
-
-    async profileExists(userId) {
-        try {
-            const profile = await this.getProfile(userId);
-            return profile !== null;
-        } catch (error) {
-            return false;
+            console.error("Error removing from failed attempts:", error);
         }
     }
 }

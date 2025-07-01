@@ -7,11 +7,22 @@ import appwriteService from "../appwrite/config"
 import profileService from "../appwrite/profile"
 import { cleanDisplayContent } from '../utils/contentParser'
 
-
 const profileCache = new Map();
 const failedProfiles = new Set();
 
-function PostCard({ $id, title, featuredImage, content, userName, userId, $createdAt, status = "active", viewMode = "grid" }) {
+function PostCard({ 
+  $id, 
+  title, 
+  featuredImage, 
+  content, 
+  userName, 
+  userId, 
+  $createdAt, 
+  status = "active", 
+  viewMode = "grid",
+  views = 0,
+  showStats = true 
+}) {
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [authorProfile, setAuthorProfile] = useState(null)
@@ -19,7 +30,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
   const [profileLoading, setProfileLoading] = useState(false)
   const hasFetchedProfile = useRef(false)
 
- 
+  // Fetch author profile
   useEffect(() => {
     const fetchAuthorProfile = async () => {
       if (!userId || hasFetchedProfile.current || profileLoading) return;
@@ -29,7 +40,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
         return;
       }
 
- 
+      // Check cache first
       if (profileCache.has(userId)) {
         setAuthorProfile(profileCache.get(userId));
         return;
@@ -61,19 +72,33 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     fetchAuthorProfile();
   }, [userId, profileLoading]);
 
-  
+  // Format numbers for display (K, M format) with null safety
+  const formatNumber = (num) => {
+    // Handle null, undefined, or non-numeric values
+    if (num === null || num === undefined || isNaN(num)) {
+      return '0';
+    }
+    
+    const numValue = Number(num);
+    
+    if (numValue >= 1000000) return (numValue / 1000000).toFixed(1) + 'M';
+    if (numValue >= 1000) return (numValue / 1000).toFixed(1) + 'K';
+    return numValue.toString();
+  };
+
+  // Get plain text preview from HTML content
   const getPlainTextPreview = (htmlContent, maxLength = 120) => {
     if (!htmlContent) return "No preview available...";
 
     try {
-     
+      // Parse and clean content
       const parsedContent = cleanDisplayContent(htmlContent);
       
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = parsedContent;
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
       
-      
+      // Clean up HTML entities
       const cleanText = plainText
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
@@ -87,7 +112,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
- 
+  // Calculate reading time
   const calculateReadingTime = (content) => {
     if (!content) return 1;
     try {
@@ -100,52 +125,73 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
- 
-  const formatDate = (dateString) => {
-  if (!dateString) return "Recently";
-  try {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffMinutes = Math.ceil(diffTime / (1000 * 60));
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  // Enhanced relative time formatting
+  const getTimeAgo = (dateString) => {
+    if (!dateString) return "Recently";
+    
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      
+      // Convert to different time units
+      const diffSeconds = Math.floor(diffTime / 1000);
+      const diffMinutes = Math.floor(diffTime / (1000 * 60));
+      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const diffWeeks = Math.floor(diffDays / 7);
+      const diffMonths = Math.floor(diffDays / 30);
+      const diffYears = Math.floor(diffDays / 365);
 
-    
-    if (diffMinutes < 1) return "Just now";
-    
-    
-    if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes === 1 ? '' : 's'} ago`;
-    
-   
-    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
-    
-   
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    
-    
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} week${Math.ceil(diffDays / 7) === 1 ? '' : 's'} ago`;
-    
-   
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch (error) {
-    return "Recently";
-  }
-};
+      // Just now (less than 30 seconds)
+      if (diffSeconds < 30) return "Just now";
+      
+      // Seconds ago (30 seconds to 1 minute)
+      if (diffSeconds < 60) return `${diffSeconds} seconds ago`;
+      
+      // Minutes ago (1 minute to 1 hour)
+      if (diffMinutes < 60) {
+        return diffMinutes === 1 ? "1 minute ago" : `${diffMinutes} minutes ago`;
+      }
+      
+      // Hours ago (1 hour to 24 hours)
+      if (diffHours < 24) {
+        return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+      }
+      
+      // Days ago (1 day to 7 days)
+      if (diffDays < 7) {
+        if (diffDays === 1) return "1 day ago";
+        return `${diffDays} days ago`;
+      }
+      
+      // Weeks ago (1 week to 4 weeks)
+      if (diffWeeks < 4) {
+        return diffWeeks === 1 ? "1 week ago" : `${diffWeeks} weeks ago`;
+      }
+      
+      // Months ago (1 month to 12 months)
+      if (diffMonths < 12) {
+        return diffMonths === 1 ? "1 month ago" : `${diffMonths} months ago`;
+      }
+      
+      // Years ago
+      return diffYears === 1 ? "1 year ago" : `${diffYears} years ago`;
+      
+    } catch (error) {
+      console.error("Error calculating time ago:", error);
+      return "Recently";
+    }
+  };
 
-  
+  // Get author name with fallback
   const getAuthorName = () => {
     if (authorProfile?.userName) return authorProfile.userName;
     if (userName) return userName;
     return "Anonymous Author";
   };
 
-
+  // Get author initials
   const getAuthorInitials = (name) => {
     if (!name || name === "Anonymous Author") return "AA";
     try {
@@ -160,13 +206,13 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
-  
+  // Handle author profile click
   const handleAuthorClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
- 
+  // Get image URL with error handling
   const getImageUrl = (imageId) => {
     if (!imageId) return null;
     try {
@@ -176,7 +222,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
-  
+  // Get profile image URL
   const getProfileImageUrl = (imageId) => {
     if (!imageId) return null;
     try {
@@ -189,14 +235,17 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     }
   };
 
- 
+  // Ensure we have valid values with defaults
+  const safeViews = views || 0;
+
+  // List view mode
   if (viewMode === "list") {
     return (
       <Link to={`/post/${$id}`} className="block group">
         <article className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/10">
           <div className="flex gap-6">
-            
-            <div className="w-48 h-32 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0">
+            {/* Image */}
+            <div className="w-48 h-32 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0 relative">
               {!imageError && featuredImage ? (
                 <img
                   src={getImageUrl(featuredImage)}
@@ -210,9 +259,17 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
                   <ImageIcon className="w-8 h-8 text-slate-400" />
                 </div>
               )}
+              
+              {/* Views overlay for list view */}
+              {/* {showStats && (
+                <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-black/70 backdrop-blur-sm rounded-full text-white text-xs">
+                  <Eye className="w-3 h-3" />
+                  {formatNumber(safeViews)}
+                </div>
+              )} */}
             </div>
 
-          
+            {/* Content */}
             <div className="flex-1 min-w-0">
               <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-purple-300 transition-colors">
                 {title}
@@ -224,7 +281,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  
+                  {/* Author avatar */}
                   <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-transparent flex-shrink-0">
                     {!authorImageError && authorProfile?.profileImage ? (
                       <img
@@ -243,11 +300,17 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-white truncate">{getAuthorName()}</div>
                     <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <Calendar className="w-3 h-3" />
-                      <span>{formatDate($createdAt)}</span>
+                      <span>{getTimeAgo($createdAt)}</span>
                       <span>•</span>
                       <Clock className="w-3 h-3" />
                       <span>{calculateReadingTime(content)} min read</span>
+                      {showStats && (
+                        <>
+                          <span>•</span>
+                          <Eye className="w-3 h-3" />
+                          <span>{formatNumber(safeViews)} views</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -261,7 +324,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
     );
   }
 
-  
+  // Grid view mode (default)
   return (
     <Link to={`/post/${$id}`} className="block group">
       <article
@@ -269,7 +332,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        
+        {/* Featured Image */}
         <div className="aspect-[1.91/1] bg-slate-700 overflow-hidden relative">
           {!imageError && featuredImage ? (
             <img
@@ -290,10 +353,10 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
             </div>
           )}
 
-         
+          {/* Hover overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-         
+          {/* Status badge */}
           {status && (
             <div className="absolute top-3 left-3">
               <span
@@ -308,28 +371,34 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
             </div>
           )}
 
-         
-          <div className="absolute top-3 right-3">
+          {/* Reading time and views */}
+          <div className="absolute top-3 right-3 flex items-center gap-2">
             <div className="flex items-center gap-1 px-2 py-1 bg-slate-900/70 backdrop-blur-sm rounded-full text-xs text-slate-300">
               <Clock className="w-3 h-3" />
-              <span>{calculateReadingTime(content)} min read</span>
+              <span>{calculateReadingTime(content)} min</span>
             </div>
+            {showStats && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-slate-900/70 backdrop-blur-sm rounded-full text-xs text-slate-300">
+                <Eye className="w-3 h-3" />
+                <span>{formatNumber(safeViews)}</span>
+              </div>
+            )}
           </div>
         </div>
 
-      
+        {/* Card Content */}
         <div className="p-6">
-        
+          {/* Title */}
           <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-purple-300 transition-colors duration-300">
             {title}
           </h3>
 
-         
+          {/* Preview */}
           <p className="text-slate-400 mb-4 line-clamp-3 leading-relaxed">{getPlainTextPreview(content)}</p>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-            
+              {/* Author Avatar */}
               <Link
                 to={`/profile/${userId}`}
                 onClick={handleAuthorClick}
@@ -352,7 +421,7 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
                 </div>
               </Link>
 
-             
+              {/* Author Info */}
               <div className="min-w-0 flex-1">
                 <Link
                   to={`/profile/${userId}`}
@@ -363,13 +432,19 @@ function PostCard({ $id, title, featuredImage, content, userName, userId, $creat
                   {getAuthorName()}
                 </Link>
                 <div className="flex items-center gap-1 text-xs text-slate-400">
-                  <Calendar className="w-3 h-3" />
-                  <span>{formatDate($createdAt)}</span>
+                  <span>{getTimeAgo($createdAt)}</span>
+                  {/* {showStats && (
+                    <>
+                      <span className="mx-1">•</span>
+                      <Eye className="w-3 h-3" />
+                      <span>{formatNumber(safeViews)} views</span>
+                    </>
+                  )} */}
                 </div>
               </div>
             </div>
 
-          
+            {/* Read More Arrow */}
             <div
               className={`flex items-center gap-1 text-purple-400 transition-all duration-300 flex-shrink-0 ${
                 isHovered ? "translate-x-1" : ""

@@ -24,6 +24,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard.jsx"
 import AdminPosts from "./pages/admin/AdminPosts.jsx"
 import AdminUsers from "./pages/admin/AdminUsers.jsx"
 import AdminAnalytics from "./pages/admin/AdminAnalytics.jsx"
+import AdminMessages from "./pages/admin/AdminMessages.jsx"
+import AdminReports from "./pages/admin/AdminReports.jsx"
+import AdminSettings from "./pages/admin/AdminSettings.jsx"
 
 const router = createBrowserRouter([
   {
@@ -141,6 +144,18 @@ const router = createBrowserRouter([
       {
         path: "analytics",
         element: <AdminAnalytics />,
+      },
+      {
+        path: "messages",
+        element: <AdminMessages />,
+      },
+      {
+        path: "reports",
+        element: <AdminReports />,
+      },
+      {
+        path: "settings",
+        element: <AdminSettings />,
       },
     ],
   },

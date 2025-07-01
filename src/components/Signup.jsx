@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import authService from '../appwrite/auth';
+import profileService from '../appwrite/profile';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../store/authSlice';
+import { setProfile } from '../store/profileSlice';
 import { Button, Input } from './index';
 import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
@@ -24,17 +26,44 @@ function SignUp() {
     setIsLoading(true);
     
     try {
+      // Create account
       const account = await authService.createAccount(data);
       if (account) {
-       
+        // Get user data
         const userData = await authService.getCurrentUser();
         if (userData) {
+          // Dispatch login
           dispatch(login({ userData }));
           
+          // Create profile automatically
+          try {
+            const profileData = {
+              userId: userData.$id,
+              userName: data.name, // Use the name from signup form
+              bio: "",
+              location: "",
+              website: "",
+              twitter: "",
+              github: "",
+              linkedIn: "",
+              profileImage: null,
+            };
+            
+            const createdProfile = await profileService.createProfile(profileData);
+            if (createdProfile) {
+              dispatch(setProfile(createdProfile));
+              console.log('Profile created automatically:', createdProfile);
+            }
+          } catch (profileError) {
+            console.error('Error creating profile automatically:', profileError);
+            // Don't show error to user, as account creation was successful
+            // Profile can be created later when they visit profile page
+          }
           
+          // Clear profile cache
           profileCacheUtils.clearSpecificProfile(userData.$id);
           
-          toast.success('Welcome! Account created successfully!');
+          toast.success('Welcome to Orbina! Your account has been created successfully!');
           navigate("/");
         }
       }
@@ -46,7 +75,7 @@ function SignUp() {
     }
   };
 
-
+  // Password strength checker
   const getPasswordStrength = (password) => {
     if (!password) return { strength: 0, text: '', color: '' };
     
@@ -74,7 +103,6 @@ function SignUp() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 px-4 text-white">
       <div className="backdrop-blur-md bg-white/10 shadow-xl rounded-2xl p-10 w-full max-w-md border border-white/10">
-
         <h2 className="text-center text-3xl font-bold text-white">
           Create an Account
         </h2>
@@ -87,7 +115,7 @@ function SignUp() {
         )}
 
         <form onSubmit={handleSubmit(create)} className="mt-8 space-y-6">
-      
+          {/* Full Name */}
           <div>
             <Input
               label="Full Name"
@@ -106,7 +134,7 @@ function SignUp() {
             )}
           </div>
 
-         
+          {/* Email */}
           <div>
             <Input
               label="Email"
@@ -126,7 +154,7 @@ function SignUp() {
             )}
           </div>
 
-          
+          {/* Password */}
           <div>
             <div className="relative">
               <Input
@@ -151,7 +179,7 @@ function SignUp() {
               </button>
             </div>
 
-           
+            {/* Password strength indicator */}
             {password && (
               <div className="mt-2 space-y-2">
                 <div className="flex items-center gap-2">
@@ -170,7 +198,7 @@ function SignUp() {
                   </span>
                 </div>
                 
-                
+                {/* Password requirements */}
                 <div className="space-y-1">
                   <div className={`flex items-center gap-2 text-xs ${
                     password.length >= 8 ? 'text-green-400' : 'text-gray-400'
@@ -205,7 +233,7 @@ function SignUp() {
             )}
           </div>
 
-          
+          {/* Submit button */}
           <Button 
             type="submit" 
             disabled={isLoading}

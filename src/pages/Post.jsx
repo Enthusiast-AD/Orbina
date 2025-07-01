@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { cleanDisplayContent } from '../utils/contentParser'
+import { useViewTracking } from '../hooks/useViewTracking';
 import {
   ArrowLeft,
   Calendar,
@@ -49,6 +50,7 @@ export default function Post() {
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [copied, setCopied] = useState(false)
   const [estimatedReadTime, setEstimatedReadTime] = useState(0)
+  const [viewsCount, setViewsCount] = useState(0);
 
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -70,11 +72,14 @@ export default function Post() {
     }
   }, [post, userData])
 
+  useViewTracking(slug, userData?.$id, post);
+
   const fetchPost = async () => {
     try {
       const postData = await appwriteService.getPost(slug)
       if (postData) {
         setPost(postData)
+        setViewsCount(postData.views || 0) // Add this line
         setEstimatedReadTime(calculateReadingTime(postData.content))
         if (postData.userId) {
           fetchAuthorProfile(postData.userId)
@@ -279,6 +284,12 @@ export default function Post() {
     return baseUrls[platform] || value
   }
 
+  const formatNumber = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
@@ -294,7 +305,7 @@ export default function Post() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-     
+
       <div className="fixed top-0 left-0 w-full h-1 bg-slate-800/50 z-50">
         <div
           className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 transition-all duration-300 ease-out"
@@ -302,7 +313,7 @@ export default function Post() {
         />
       </div>
 
-    
+
       <div className="sticky top-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 z-40">
         <Container>
           <div className="flex items-center justify-between py-4">
@@ -315,7 +326,7 @@ export default function Post() {
                 Back
               </button>
 
-              
+
               <div className="hidden md:flex items-center gap-2 text-sm text-slate-400">
                 <div className="w-20 h-1 bg-slate-700 rounded-full overflow-hidden">
                   <div
@@ -328,7 +339,7 @@ export default function Post() {
             </div>
 
             <div className="flex items-center gap-3">
-           
+
               <div className="relative">
                 <button
                   onClick={() => setShowShareMenu(!showShareMenu)}
@@ -338,7 +349,7 @@ export default function Post() {
                   <Share2 className="w-4 h-4" />
                 </button>
 
-              
+
                 {showShareMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50">
                     <div className="p-2">
@@ -393,9 +404,9 @@ export default function Post() {
 
       <Container>
         <article className="max-w-4xl mx-auto py-8">
-         
+
           <div className="relative mb-12">
-            
+
             <div className="relative mb-8 rounded-2xl overflow-hidden">
               {!imageError && post.featuredImage ? (
                 <div className="aspect-[1.91/1] bg-slate-800 rounded-xl overflow-hidden relative">
@@ -406,8 +417,8 @@ export default function Post() {
                     loading="eager"
                     onError={() => setImageError(true)}
                   />
-                  
-                  
+
+
                   {isAuthor && (
                     <div className="absolute top-6 right-6 flex gap-3">
                       <Link to={`/edit-post/${post.$id}`}>
@@ -432,8 +443,8 @@ export default function Post() {
                     <ImageIcon className="w-20 h-20 mx-auto mb-4 text-slate-400" />
                     <p className="text-slate-400 text-lg">No featured image</p>
                   </div>
-                  
-                  
+
+
                   {isAuthor && (
                     <div className="absolute top-6 right-6 flex gap-3">
                       <Link to={`/edit-post/${post.$id}`}>
@@ -455,13 +466,13 @@ export default function Post() {
               )}
             </div>
 
-           
+
             <header className="text-center mb-8">
               <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
                 {post.title}
               </h1>
 
-             
+
               <div className="flex flex-wrap items-center justify-center gap-6 text-slate-300 mb-8">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-purple-400" />
@@ -473,11 +484,11 @@ export default function Post() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Eye className="w-5 h-5 text-green-400" />
-                  <span>Article</span>
+                  <span>{formatNumber(viewsCount)} views</span>
                 </div>
               </div>
 
-            
+
               <Link
                 to={`/profile/${post.userId}`}
                 className="inline-flex items-center gap-4 p-4 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 group"
@@ -511,7 +522,7 @@ export default function Post() {
               </Link>
             </header>
 
-            
+
             <div className="flex items-center justify-center gap-4 p-6 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700/50 mb-8">
               <button
                 onClick={handleLike}
@@ -545,7 +556,7 @@ export default function Post() {
             </div>
           </div>
 
-         
+
           <div className="relative">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-slate-700/30 shadow-2xl">
               <div className="prose prose-invert prose-lg md:prose-xl max-w-none 
@@ -570,7 +581,7 @@ export default function Post() {
             </div>
           </div>
 
-         
+
           {authorProfile && (
             <div className="mt-16 p-8 bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-slate-700/50">
               <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
@@ -614,7 +625,7 @@ export default function Post() {
                     <p className="text-slate-300 leading-relaxed mb-4 text-lg">{authorProfile.bio}</p>
                   )}
 
-                  
+
                   <div className="flex flex-wrap gap-3">
                     {["website", "twitter", "github", "linkedIn"].map((platform) => {
                       const value = authorProfile[platform]
@@ -653,10 +664,10 @@ export default function Post() {
             </div>
           )}
 
-          
+
           <footer className="mt-12 pt-8 border-t border-slate-700/50">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-             
+
               <div className="text-slate-400">
                 <p className="text-sm mb-1">
                   <span className="font-medium">Published:</span> {formatDate(post.$createdAt)}
@@ -666,7 +677,7 @@ export default function Post() {
                 </p>
               </div>
 
-              
+
               <div className="flex flex-wrap gap-2">
                 <span className="px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full text-sm border border-purple-500/30 font-medium">
                   Article
@@ -683,7 +694,7 @@ export default function Post() {
         </article>
       </Container>
 
-      
+
       {showScrollTop && (
         <button
           onClick={scrollToTop}
@@ -694,7 +705,7 @@ export default function Post() {
         </button>
       )}
 
-    
+
       {showShareMenu && (
         <div
           className="fixed inset-0 z-30"
@@ -702,7 +713,7 @@ export default function Post() {
         />
       )}
 
-   
+
       <style jsx global>{`
         .article-content {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
