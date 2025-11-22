@@ -130,21 +130,21 @@ export default function UserProfile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   if (!userProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">User Not Found</h1>
-          <p className="text-slate-400 mb-6">The user profile you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-4">User Not Found</h1>
+          <p className="text-muted-foreground mb-6">The user profile you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate("/")}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            className="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
           >
             Go Home
           </button>
@@ -154,14 +154,14 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen">
      
-      <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-lg transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
@@ -171,7 +171,7 @@ export default function UserProfile() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleMessage}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-lg transition-colors"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Message
@@ -180,8 +180,8 @@ export default function UserProfile() {
                   onClick={handleFollowToggle}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                     isFollowing
-                      ? "bg-slate-700 hover:bg-slate-600 text-white"
-                      : "bg-purple-600 hover:bg-purple-700 text-white"
+                      ? "bg-secondary hover:bg-secondary/80 text-foreground"
+                      : "bg-primary hover:bg-primary/90 text-primary-foreground"
                   }`}
                 >
                   {isFollowing ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
@@ -198,10 +198,10 @@ export default function UserProfile() {
           
           <div className="lg:col-span-1 space-y-6">
           
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
+            <div className="bg-card/50 backdrop-blur-sm rounded-xl p-6 border border-border">
               <div className="text-center">
                 <div className="relative inline-block mb-4">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-purple-500/30 bg-slate-700 mx-auto">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-primary/30 bg-muted mx-auto">
                     {!imageError && userProfile.profileImage ? (
                       <img
                         src={
@@ -214,26 +214,26 @@ export default function UserProfile() {
                         onError={() => setImageError(true)}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         <span className="text-2xl font-bold">{getInitials(userProfile.userName)}</span>
                       </div>
                     )}
                   </div>
-                  <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-800"></div>
+                  <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-card"></div>
                 </div>
 
-                <h1 className="text-2xl font-bold text-white mb-2">{userProfile.userName}</h1>
+                <h1 className="text-2xl font-bold text-foreground mb-2">{userProfile.userName}</h1>
 
                 {userProfile.location && (
-                  <div className="flex items-center justify-center gap-1 text-slate-400 mb-4">
+                  <div className="flex items-center justify-center gap-1 text-muted-foreground mb-4">
                     <MapPin className="w-4 h-4" />
                     <span>{userProfile.location}</span>
                   </div>
                 )}
 
-                {userProfile.bio && <p className="text-slate-300 leading-relaxed mb-4">{userProfile.bio}</p>}
+                {userProfile.bio && <p className="text-muted-foreground leading-relaxed mb-4">{userProfile.bio}</p>}
 
-                <div className="flex items-center justify-center gap-1 text-slate-400 text-sm">
+                <div className="flex items-center justify-center gap-1 text-muted-foreground text-sm">
                   <Calendar className="w-4 h-4" />
                   <span>Joined {new Date(userProfile.$createdAt || userProfile.createdAt).toLocaleDateString()}</span>
                 </div>
@@ -242,20 +242,20 @@ export default function UserProfile() {
 
          
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30 text-center">
-                <div className="text-2xl font-bold text-white">{userPosts.length}</div>
-                <div className="text-purple-300 text-sm">Posts</div>
+              <div className="bg-card/50 backdrop-blur-sm rounded-xl p-4 border border-primary/20 text-center">
+                <div className="text-2xl font-bold text-foreground">{userPosts.length}</div>
+                <div className="text-primary text-sm">Posts</div>
               </div>
-              <div className="bg-gradient-to-r from-red-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-4 border border-red-500/30 text-center">
-                <div className="text-2xl font-bold text-white">{totalLikes}</div>
-                <div className="text-red-300 text-sm">Likes Received</div>
+              <div className="bg-card/50 backdrop-blur-sm rounded-xl p-4 border border-primary/20 text-center">
+                <div className="text-2xl font-bold text-foreground">{totalLikes}</div>
+                <div className="text-primary text-sm">Likes Received</div>
               </div>
             </div>
 
            
             {(userProfile.website || userProfile.twitter || userProfile.github || userProfile.linkedin) && (
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white mb-4">Social Links</h3>
+              <div className="bg-card/50 backdrop-blur-sm rounded-xl p-6 border border-border">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Social Links</h3>
                 <div className="space-y-3">
                   {["website", "twitter", "github", "linkedin"].map((platform) => {
                     const value = userProfile[platform]
@@ -270,11 +270,11 @@ export default function UserProfile() {
                         href={link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-lg transition-colors group"
+                        className="flex items-center gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors group"
                       >
-                        <Icon className="w-5 h-5 text-slate-400 group-hover:text-white" />
-                        <span className="text-slate-300 group-hover:text-white capitalize flex-1">{platform}</span>
-                        <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-slate-300" />
+                        <Icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
+                        <span className="text-muted-foreground group-hover:text-foreground capitalize flex-1">{platform}</span>
+                        <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
                       </a>
                     )
                   })}
@@ -286,14 +286,14 @@ export default function UserProfile() {
          
           <div className="lg:col-span-2 space-y-6">
             
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50">
-              <div className="flex border-b border-slate-700/50">
+            <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border">
+              <div className="flex border-b border-border">
                 <button
                   onClick={() => setActiveTab("posts")}
                   className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
                     activeTab === "posts"
-                      ? "text-purple-400 border-b-2 border-purple-400"
-                      : "text-slate-400 hover:text-white"
+                      ? "text-primary border-b-2 border-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <BookOpen className="w-4 h-4" />
@@ -306,7 +306,7 @@ export default function UserProfile() {
                   <div>
                     {postsLoading ? (
                       <div className="flex items-center justify-center py-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                       </div>
                     ) : userPosts.length > 0 ? (
                       <div className="grid grid-cols-1 gap-6">
@@ -316,9 +316,9 @@ export default function UserProfile() {
                       </div>
                     ) : (
                       <div className="text-center py-12">
-                        <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold text-white mb-2">No posts yet</h3>
-                        <p className="text-slate-400">
+                        <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-foreground mb-2">No posts yet</h3>
+                        <p className="text-muted-foreground">
                           {isOwnProfile
                             ? "Start writing your first post!"
                             : "This user hasn't published any posts yet."}

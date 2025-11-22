@@ -14,6 +14,7 @@ import AuthLayout from "./AuthLayout"
 import Select from "./Select"
 import Profile from "./Profile";
 import EditProfile from "./EditProfile";
+import StatsCard from "./StatsCard";
 
 
 export {
@@ -32,5 +33,6 @@ export {
     AuthLayout,
     Select,
     Profile,
-    EditProfile, 
+    EditProfile,
+    StatsCard
 }

@@ -217,10 +217,10 @@ export default function EditProfile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500 mx-auto mb-4" />
-          <p className="text-slate-400">Loading profile data...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading profile data...</p>
         </div>
       </div>
     )
@@ -230,21 +230,21 @@ export default function EditProfile() {
   const hasChanges = isDirty || isImageChanged
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen">
       
-      <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate("/profile")}
-                className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                className="p-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white">Edit Profile</h1>
-                <p className="text-slate-400">
+                <h1 className="text-2xl font-bold text-foreground">Edit Profile</h1>
+                <p className="text-muted-foreground">
                   {hasChanges ? "You have unsaved changes" : "Update your profile information"}
                 </p>
               </div>
@@ -253,14 +253,14 @@ export default function EditProfile() {
               <Button
                 type="button"
                 onClick={handleCancel}
-                className="bg-slate-700 hover:bg-slate-600 text-white border-0"
+                className="bg-secondary hover:bg-secondary/80 text-secondary-foreground border-0"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSubmit(submit)}
                 disabled={isSubmitting}
-                className="bg-purple-600 hover:bg-purple-700 text-white border-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
@@ -283,11 +283,11 @@ export default function EditProfile() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         <form onSubmit={handleSubmit(submit)} className="space-y-8">
           
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-            <h2 className="text-xl font-semibold text-white mb-6">Profile Picture</h2>
+          <div className="bg-card backdrop-blur-sm p-6 border border-border">
+            <h2 className="text-xl font-semibold text-foreground mb-6">Profile Picture</h2>
             <div className="flex items-start gap-6">
               <div className="relative">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-purple-500/30 bg-slate-700">
+                <div className="w-32 h-32 overflow-hidden border-4 border-primary/30 bg-muted">
                   {previewUrl ? (
                     <img
                       src={previewUrl}
@@ -295,7 +295,7 @@ export default function EditProfile() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       <Upload className="w-8 h-8" />
                     </div>
                   )}
@@ -304,7 +304,7 @@ export default function EditProfile() {
                   <button
                     type="button"
                     onClick={removeImage}
-                    className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                    className="absolute -top-2 -right-2 w-8 h-8 bg-destructive hover:bg-destructive/90 flex items-center justify-center text-destructive-foreground transition-colors"
                     title="Remove image"
                   >
                     <X className="w-4 h-4" />
@@ -313,17 +313,17 @@ export default function EditProfile() {
               </div>
               <div className="flex-1">
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-300 mb-2 block">
+                  <span className="text-sm font-medium text-foreground mb-2 block">
                     {previewUrl ? "Change Image" : "Upload New Image"}
                   </span>
                   <input
                     type="file"
                     accept="image/*"
-                    className="block w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-purple-600 file:text-white hover:file:bg-purple-700 file:cursor-pointer cursor-pointer"
+                    className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer cursor-pointer"
                     {...register("image")}
                   />
                 </label>
-                <p className="text-xs text-slate-400 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   Recommended: Square image, at least 400x400px. JPG, PNG, or GIF (max 5MB)
                 </p>
               </div>
@@ -331,76 +331,76 @@ export default function EditProfile() {
           </div>
 
           
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-            <h2 className="text-xl font-semibold text-white mb-6">Basic Information</h2>
+          <div className="bg-card backdrop-blur-sm p-6 border border-border">
+            <h2 className="text-xl font-semibold text-foreground mb-6">Basic Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Display Name *</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Display Name *</label>
                 <input
                   type="text"
                   placeholder="Your display name"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   {...register("userName", { required: true })}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Location</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Location</label>
                 <input
                   type="text"
                   placeholder="Your location"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   {...register("location")}
                 />
               </div>
             </div>
             <div className="mt-6">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Bio</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Bio</label>
               <textarea
                 placeholder="Tell us about yourself..."
                 rows={4}
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
+                className="w-full px-4 py-3 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all resize-none"
                 {...register("bio")}
               />
             </div>
           </div>
 
           
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-            <h2 className="text-xl font-semibold text-white mb-6">Social Links</h2>
+          <div className="bg-card backdrop-blur-sm p-6 border border-border">
+            <h2 className="text-xl font-semibold text-foreground mb-6">Social Links</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Website</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Website</label>
                 <input
                   type="url"
                   placeholder="https://yourwebsite.com"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   {...register("website")}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Twitter</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Twitter</label>
                 <input
                   type="text"
                   placeholder="@yourhandle"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   {...register("twitter")}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">GitHub</label>
+                <label className="block text-sm font-medium text-foreground mb-2">GitHub</label>
                 <input
                   type="text"
                   placeholder="githubusername"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   {...register("github")}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">LinkedIn</label>
+                <label className="block text-sm font-medium text-foreground mb-2">LinkedIn</label>
                 <input
                   type="text"
                   placeholder="linkedinusername"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
                   {...register("linkedIn")}
                 />
               </div>
@@ -408,29 +408,29 @@ export default function EditProfile() {
           </div>
 
           
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-            <h2 className="text-xl font-semibold text-white mb-6">Account Information</h2>
+          <div className="bg-card backdrop-blur-sm p-6 border border-border">
+            <h2 className="text-xl font-semibold text-foreground mb-6">Account Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
                 <input
                   type="text"
                   value={userData?.name || ""}
                   disabled
-                  className="w-full px-4 py-3 bg-slate-700/30 border border-slate-600/50 rounded-lg text-slate-400 cursor-not-allowed"
+                  className="w-full px-4 py-3 bg-muted border border-input text-muted-foreground cursor-not-allowed"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
                 <input
                   type="email"
                   value={userData?.email || ""}
                   disabled
-                  className="w-full px-4 py-3 bg-slate-700/30 border border-slate-600/50 rounded-lg text-slate-400 cursor-not-allowed"
+                  className="w-full px-4 py-3 bg-muted border border-input text-muted-foreground cursor-not-allowed"
                 />
               </div>
             </div>
-            <p className="text-xs text-slate-400 mt-3">Account information cannot be changed from this page.</p>
+            <p className="text-xs text-muted-foreground mt-3">Account information cannot be changed from this page.</p>
           </div>
         </form>
       </div>

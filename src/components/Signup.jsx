@@ -101,17 +101,17 @@ function SignUp() {
   const passwordStrength = getPasswordStrength(password);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 px-4 text-white">
-      <div className="backdrop-blur-md bg-white/10 shadow-xl rounded-2xl p-10 w-full max-w-md border border-white/10">
-        <h2 className="text-center text-3xl font-bold text-white">
+    <div className="min-h-screen flex items-center justify-center px-4 text-foreground">
+      <div className="bg-card shadow-xl p-10 w-full max-w-md border border-border">
+        <h2 className="text-center text-3xl font-bold text-foreground">
           Create an Account
         </h2>
-        <p className="text-center text-gray-400 mt-1">
+        <p className="text-center text-muted-foreground mt-1">
           Join us and start publishing!
         </p>
 
         {error && (
-          <div className="text-red-400 text-center mt-4 font-medium">{error}</div>
+          <div className="text-destructive text-center mt-4 font-medium">{error}</div>
         )}
 
         <form onSubmit={handleSubmit(create)} className="mt-8 space-y-6">
@@ -120,7 +120,7 @@ function SignUp() {
             <Input
               label="Full Name"
               placeholder="Enter your full name"
-              className="focus:bg-gray-900 bg-gray-800 text-white placeholder-gray-400"
+              className="focus:bg-background bg-input text-foreground placeholder-muted-foreground"
               {...register("name", { 
                 required: "Name is required",
                 minLength: {
@@ -130,7 +130,7 @@ function SignUp() {
               })}
             />
             {errors.name && (
-              <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
             )}
           </div>
 
@@ -140,7 +140,7 @@ function SignUp() {
               label="Email"
               placeholder="Enter your email"
               type="email"
-              className="focus:bg-gray-900 bg-gray-800 text-white placeholder-gray-400"
+              className="focus:bg-background bg-input text-foreground placeholder-muted-foreground"
               {...register("email", {
                 required: "Email is required",
                 pattern: {
@@ -150,7 +150,7 @@ function SignUp() {
               })}
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
             )}
           </div>
 
@@ -161,7 +161,7 @@ function SignUp() {
                 label="Password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="focus:bg-gray-900 bg-gray-800 text-white placeholder-gray-400 pr-12"
+                className="focus:bg-background bg-input text-foreground placeholder-muted-foreground pr-12"
                 {...register("password", { 
                   required: "Password is required",
                   minLength: {
@@ -173,7 +173,7 @@ function SignUp() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-gray-400 hover:text-gray-300 transition-colors"
+                className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -183,10 +183,10 @@ function SignUp() {
             {password && (
               <div className="mt-2 space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-muted overflow-hidden">
                     <div 
                       className={`h-full transition-all duration-300 ${
-                        passwordStrength.strength <= 2 ? 'bg-red-500' :
+                        passwordStrength.strength <= 2 ? 'bg-destructive' :
                         passwordStrength.strength <= 3 ? 'bg-yellow-500' :
                         passwordStrength.strength <= 4 ? 'bg-blue-500' : 'bg-green-500'
                       }`}
@@ -201,26 +201,26 @@ function SignUp() {
                 {/* Password requirements */}
                 <div className="space-y-1">
                   <div className={`flex items-center gap-2 text-xs ${
-                    password.length >= 8 ? 'text-green-400' : 'text-gray-400'
+                    password.length >= 8 ? 'text-green-500' : 'text-muted-foreground'
                   }`}>
                     <CheckCircle className={`w-3 h-3 ${
-                      password.length >= 8 ? 'text-green-400' : 'text-gray-400'
+                      password.length >= 8 ? 'text-green-500' : 'text-muted-foreground'
                     }`} />
                     At least 8 characters
                   </div>
                   <div className={`flex items-center gap-2 text-xs ${
-                    /[A-Z]/.test(password) && /[a-z]/.test(password) ? 'text-green-400' : 'text-gray-400'
+                    /[A-Z]/.test(password) && /[a-z]/.test(password) ? 'text-green-500' : 'text-muted-foreground'
                   }`}>
                     <CheckCircle className={`w-3 h-3 ${
-                      /[A-Z]/.test(password) && /[a-z]/.test(password) ? 'text-green-400' : 'text-gray-400'
+                      /[A-Z]/.test(password) && /[a-z]/.test(password) ? 'text-green-500' : 'text-muted-foreground'
                     }`} />
                     Upper and lowercase letters
                   </div>
                   <div className={`flex items-center gap-2 text-xs ${
-                    /[0-9]/.test(password) ? 'text-green-400' : 'text-gray-400'
+                    /[0-9]/.test(password) ? 'text-green-500' : 'text-muted-foreground'
                   }`}>
                     <CheckCircle className={`w-3 h-3 ${
-                      /[0-9]/.test(password) ? 'text-green-400' : 'text-gray-400'
+                      /[0-9]/.test(password) ? 'text-green-500' : 'text-muted-foreground'
                     }`} />
                     At least one number
                   </div>
@@ -229,7 +229,7 @@ function SignUp() {
             )}
 
             {errors.password && (
-              <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
 
@@ -237,11 +237,11 @@ function SignUp() {
           <Button 
             type="submit" 
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
                 Creating Account...
               </div>
             ) : (
@@ -250,11 +250,11 @@ function SignUp() {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-blue-400 hover:underline font-semibold"
+            className="text-primary hover:underline font-semibold"
           >
             Sign In
           </Link>

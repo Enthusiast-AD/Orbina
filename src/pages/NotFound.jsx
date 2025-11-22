@@ -28,7 +28,7 @@ export default function NotFound() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center px-6">
       <div className="max-w-2xl mx-auto text-center">
         
         <div className="relative mb-8">
@@ -39,11 +39,11 @@ export default function NotFound() {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Page Not Found</h1>
-          <p className="text-lg text-slate-400 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Page Not Found</h1>
+          <p className="text-lg text-muted-foreground mb-2">
             Oops! The page you're looking for seems to have wandered off into the digital void.
           </p>
-          <p className="text-slate-500">Don't worry, even the best explorers sometimes take a wrong turn.</p>
+          <p className="text-muted-foreground">Don't worry, even the best explorers sometimes take a wrong turn.</p>
         </div>
 
    

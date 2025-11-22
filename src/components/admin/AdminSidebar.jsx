@@ -28,15 +28,15 @@ const AdminSidebar = () => {
     ];
 
     return (
-        <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
-            <div className="p-6 border-b border-slate-700">
+        <div className="w-64 bg-card border-r border-border flex flex-col">
+            <div className="p-6 border-b border-border">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                        <Shield className="w-5 h-5 text-white" />
+                    <div className="w-8 h-8 bg-primary rounded-none flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-primary-foreground" />
                     </div>
                     <div>
-                        <h1 className="text-white font-bold text-lg">Admin Panel</h1>
-                        <p className="text-slate-400 text-sm">Orbina Management</p>
+                        <h1 className="text-foreground font-bold text-lg">Admin Panel</h1>
+                        <p className="text-muted-foreground text-sm">Orbina Management</p>
                     </div>
                 </div>
             </div>
@@ -51,10 +51,10 @@ const AdminSidebar = () => {
                             <li key={item.path}>
                                 <Link
                                     to={item.path}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-none transition-all duration-200 ${
                                         isActive
-                                            ? 'bg-purple-600 text-white shadow-lg'
-                                            : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                                     }`}
                                 >
                                     <Icon className="w-5 h-5" />
@@ -66,10 +66,10 @@ const AdminSidebar = () => {
                 </ul>
             </nav>
 
-            <div className="p-4 border-t border-slate-700">
+            <div className="p-4 border-t border-border">
                 <Link
                     to="/"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition-all duration-200"
+                    className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-accent hover:text-foreground rounded-none transition-all duration-200"
                 >
                     <Globe className="w-5 h-5" />
                     <span>Back to Website</span>

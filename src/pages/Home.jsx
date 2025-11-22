@@ -105,17 +105,17 @@ function HomeContent() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Container>
           <div className="text-center">
-            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-red-400 text-xl">!</span>
+            <div className="w-16 h-16 bg-destructive/20 rounded-none flex items-center justify-center mx-auto mb-4">
+              <span className="text-destructive text-xl">!</span>
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">Something went wrong</h2>
-            <p className="text-slate-400 mb-4">{error}</p>
+            <h2 className="text-xl font-bold text-foreground mb-2">Something went wrong</h2>
+            <p className="text-muted-foreground mb-4">{error}</p>
             <button 
               onClick={handleRetry}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-none hover:bg-primary/90 transition-colors"
             >
               Try Again
             </button>
@@ -126,7 +126,7 @@ function HomeContent() {
   }
 
   return (
-    <div className='w-full min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'>
+    <div className='w-full min-h-screen'>
       {authStatus ? (
         <AuthenticatedHome 
           posts={posts}

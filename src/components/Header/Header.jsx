@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 import { Menu, X, User, Shield } from "lucide-react"
 import orbina from "../../assets/orbina.svg"
 import Search from "./Search"
+import ThemeToggle from "./ThemeToggle"
 
 const ADMIN_EMAILS = [
   "ansh@orbina.net",
@@ -56,24 +57,24 @@ function Header() {
   ]
 
   return (
-    <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 sticky top-0 z-50">
+    <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
       <Container>
         <nav className="flex items-center justify-between h-16">
           {/* Left Section - Logo & Navigation */}
           <div className="flex items-center space-x-8">
-            <Link to="/" className="flex items-center space-x-2">
-              <img src={orbina} alt="Orbina Logo" height={40} width={40} />
-              <div className="text-2xl font-bold text-white">Orbina</div>
+            <Link to="/" className="flex items-center space-x-2 group">
+              <img src={orbina} alt="Orbina Logo" height={40} width={40} className="transition-transform group-hover:scale-110 duration-300" />
+              <div className="text-2xl font-bold text-foreground tracking-tight">Orbina</div>
             </Link>
 
             {/* Desktop Navigation */}
-            <ul className="hidden md:flex items-center space-x-6">
+            <ul className="hidden md:flex items-center space-x-1">
               {navItems.map((item) =>
                 item.active ? (
                   <li key={item.name}>
                     <button
                       onClick={() => navigate(item.slug)}
-                      className="text-slate-300 hover:text-white font-medium transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-slate-800/50 cursor-pointer active:bg-slate-800/50"
+                      className="text-muted-foreground hover:text-foreground font-medium transition-all duration-200 px-4 py-2 hover:bg-accent cursor-pointer active:scale-95 rounded-none"
                     >
                       {item.name}
                     </button>
@@ -85,20 +86,23 @@ function Header() {
 
           {/* Center Section - Search */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative">
+            <div className="relative w-full">
               <Search />
             </div>
           </div>
 
           {/* Right Section - Auth & Profile */}
           <div className="flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             {/* Desktop Auth Section */}
             <div className="hidden md:flex items-center space-x-3">
               {authStatus ? (
                 <>
                   <button
                     onClick={() => navigate("/profile")}
-                    className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200 cursor-pointer active:bg-slate-800/50"
+                    className="flex items-center space-x-2 px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 cursor-pointer active:scale-95 rounded-none"
                   >
                     <User className="w-4 h-4 " />
                     <span>Profile</span>
@@ -106,7 +110,7 @@ function Header() {
                   {isAdmin && (
                     <button
                       onClick={() => navigate("/admin")}
-                      className="flex items-center space-x-2 px-3 py-2 text-yellow-300 hover:text-white hover:bg-yellow-600/60 rounded-lg transition-colors duration-200 cursor-pointer font-semibold"
+                      className="flex items-center space-x-2 px-3 py-2 text-primary hover:text-primary-foreground hover:bg-primary transition-all duration-200 cursor-pointer font-semibold rounded-none"
                     >
                       <Shield className="w-4 h-4" />
                       <span>Admin Panel</span>
@@ -121,10 +125,10 @@ function Header() {
                       <button
                         key={item.name}
                         onClick={() => navigate(item.slug)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer ${
+                        className={`px-4 py-2 font-medium transition-all duration-200 cursor-pointer active:scale-95 rounded-none ${
                           item.name === "Signup"
-                            ? "bg-blue-600 hover:bg-blue-700 text-white"
-                            : "text-slate-300 hover:text-white hover:bg-slate-800/50"
+                            ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
                         }`}
                       >
                         {item.name}
@@ -137,7 +141,7 @@ function Header() {
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors duration-200 rounded-none"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -146,7 +150,7 @@ function Header() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-700/50 bg-slate-900/95 backdrop-blur-md">
+          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
             <div className="px-4 py-4 space-y-4">
               {/* Mobile Search */}
               <div className="relative">
@@ -163,7 +167,7 @@ function Header() {
                         navigate(item.slug)
                         setIsMobileMenuOpen(false)
                       }}
-                      className="block w-full text-left px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+                      className="block w-full text-left px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors duration-200 rounded-none"
                     >
                       {item.name}
                     </button>
@@ -172,7 +176,7 @@ function Header() {
               </div>
 
               {/* Mobile Auth Section */}
-              <div className="pt-4 border-t border-slate-700/50 space-y-2">
+              <div className="pt-4 border-t border-border space-y-2">
                 {authStatus ? (
                   <>
                     <button
@@ -180,7 +184,7 @@ function Header() {
                         navigate("/profile")
                         setIsMobileMenuOpen(false)
                       }}
-                      className="flex items-center space-x-2 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+                      className="flex items-center space-x-2 w-full px-3 py-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors duration-200 rounded-none"
                     >
                       <User className="w-4 h-4" />
                       <span>Profile</span>
@@ -191,7 +195,7 @@ function Header() {
                           navigate("/admin")
                           setIsMobileMenuOpen(false)
                         }}
-                        className="flex items-center space-x-2 w-full px-3 py-2 text-yellow-300 hover:text-white hover:bg-yellow-600/60 rounded-lg transition-colors duration-200 font-semibold"
+                        className="flex items-center space-x-2 w-full px-3 py-2 text-primary hover:text-primary-foreground hover:bg-primary transition-colors duration-200 font-semibold rounded-none"
                       >
                         <Shield className="w-4 h-4" />
                         <span>Admin Panel</span>
@@ -211,10 +215,10 @@ function Header() {
                             navigate(item.slug)
                             setIsMobileMenuOpen(false)
                           }}
-                          className={`block w-full px-3 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                          className={`block w-full px-3 py-2 font-medium transition-colors duration-200 rounded-none ${
                             item.name === "Signup"
-                              ? "bg-purple-600 hover:bg-purple-700 text-white text-center"
-                              : "text-slate-300 hover:text-white hover:bg-slate-800/50 text-left"
+                              ? "bg-primary hover:bg-primary/90 text-primary-foreground text-center"
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent text-left"
                           }`}
                         >
                           {item.name}

@@ -292,10 +292,10 @@ export default function Post() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading article...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading article...</p>
         </div>
       </div>
     )
@@ -304,33 +304,33 @@ export default function Post() {
   if (!post) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen">
 
-      <div className="fixed top-0 left-0 w-full h-1 bg-slate-800/50 z-50">
+      <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
         <div
-          className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 transition-all duration-300 ease-out"
+          className="h-full bg-primary transition-all duration-300 ease-out"
           style={{ width: `${readingProgress}%` }}
         />
       </div>
 
 
-      <div className="sticky top-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 z-40">
+      <div className="sticky top-0 bg-background/95 backdrop-blur-md border-b border-border z-40">
         <Container>
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700 text-white rounded-lg transition-all duration-200 hover:scale-105"
+                className="flex items-center gap-2 px-4 py-2 bg-card hover:bg-accent text-foreground rounded-none transition-all duration-200 hover:translate-x-[-2px]"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </button>
 
 
-              <div className="hidden md:flex items-center gap-2 text-sm text-slate-400">
-                <div className="w-20 h-1 bg-slate-700 rounded-full overflow-hidden">
+              <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="w-20 h-1 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-purple-500 transition-all duration-300"
+                    className="h-full bg-primary transition-all duration-300"
                     style={{ width: `${readingProgress}%` }}
                   />
                 </div>
@@ -343,7 +343,7 @@ export default function Post() {
               <div className="relative">
                 <button
                   onClick={() => setShowShareMenu(!showShareMenu)}
-                  className="p-2 bg-slate-800/50 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-all duration-200 hover:scale-105"
+                  className="p-2 bg-card hover:bg-accent text-muted-foreground hover:text-foreground rounded-none transition-all duration-200"
                   title="Share this post"
                 >
                   <Share2 className="w-4 h-4" />
@@ -351,33 +351,33 @@ export default function Post() {
 
 
                 {showShareMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-none shadow-xl z-50">
                     <div className="p-2">
                       <button
                         onClick={() => handleShare('twitter')}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-left text-slate-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-none transition-colors"
                       >
                         <Twitter className="w-4 h-4" />
                         Twitter
                       </button>
                       <button
                         onClick={() => handleShare('facebook')}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-left text-slate-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-none transition-colors"
                       >
                         <Facebook className="w-4 h-4" />
                         Facebook
                       </button>
                       <button
                         onClick={() => handleShare('linkedin')}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-left text-slate-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-none transition-colors"
                       >
                         <Linkedin className="w-4 h-4" />
                         LinkedIn
                       </button>
-                      <hr className="my-2 border-slate-700" />
+                      <hr className="my-2 border-border" />
                       <button
                         onClick={() => handleShare('copy')}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-left text-slate-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-none transition-colors"
                       >
                         {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         {copied ? 'Copied!' : 'Copy Link'}
@@ -389,9 +389,9 @@ export default function Post() {
 
               <button
                 onClick={handleBookmark}
-                className={`p-2 rounded-lg transition-all duration-200 hover:scale-105 ${isBookmarked
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-500/25"
-                  : "bg-slate-800/50 hover:bg-slate-700 text-slate-300 hover:text-white"
+                className={`p-2 rounded-none transition-all duration-200 ${isBookmarked
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground"
                   }`}
                 title={isBookmarked ? "Remove bookmark" : "Bookmark this post"}
               >
@@ -407,9 +407,9 @@ export default function Post() {
 
           <div className="relative mb-12">
 
-            <div className="relative mb-8 rounded-2xl overflow-hidden">
+            <div className="relative mb-8 rounded-none overflow-hidden">
               {!imageError && post.featuredImage ? (
-                <div className="aspect-[1.91/1] bg-slate-800 rounded-xl overflow-hidden relative">
+                <div className="aspect-[1.91/1] bg-muted rounded-none overflow-hidden relative">
                   <img
                     src={appwriteService.getFileView(post.featuredImage)}
                     alt={post.title}
@@ -420,16 +420,16 @@ export default function Post() {
 
 
                   {isAuthor && (
-                    <div className="absolute top-6 right-6 flex gap-3">
+                    <div className="absolute top-6 right-6 flex gap-3 z-20">
                       <Link to={`/edit-post/${post.$id}`}>
-                        <Button className="bg-green-600/90 hover:bg-green-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105">
+                        <Button className="bg-green-600/90 hover:bg-green-600 backdrop-blur-sm text-white px-4 py-2 rounded-none flex items-center gap-2 transition-all duration-200 hover:translate-y-[-2px]">
                           <Edit3 className="w-4 h-4" />
                           Edit
                         </Button>
                       </Link>
                       <Button
                         onClick={deletePost}
-                        className="bg-red-600/90 hover:bg-red-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105"
+                        className="bg-destructive/90 hover:bg-destructive backdrop-blur-sm text-destructive-foreground px-4 py-2 rounded-none flex items-center gap-2 transition-all duration-200 hover:translate-y-[-2px]"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete
@@ -438,24 +438,24 @@ export default function Post() {
                   )}
                 </div>
               ) : (
-                <div className="aspect-[1.91/1] bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl overflow-hidden flex items-center justify-center relative">
+                <div className="aspect-[1.91/1] bg-muted rounded-none overflow-hidden flex items-center justify-center relative">
                   <div className="text-center">
-                    <ImageIcon className="w-20 h-20 mx-auto mb-4 text-slate-400" />
-                    <p className="text-slate-400 text-lg">No featured image</p>
+                    <ImageIcon className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground text-lg">No featured image</p>
                   </div>
 
 
                   {isAuthor && (
-                    <div className="absolute top-6 right-6 flex gap-3">
+                    <div className="absolute top-6 right-6 flex gap-3 z-20">
                       <Link to={`/edit-post/${post.$id}`}>
-                        <Button className="bg-green-600/90 hover:bg-green-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105">
+                        <Button className="bg-green-600/90 hover:bg-green-600 backdrop-blur-sm text-white px-4 py-2 rounded-none flex items-center gap-2 transition-all duration-200 hover:translate-y-[-2px]">
                           <Edit3 className="w-4 h-4" />
                           Edit
                         </Button>
                       </Link>
                       <Button
                         onClick={deletePost}
-                        className="bg-red-600/90 hover:bg-red-600 backdrop-blur-sm text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-105"
+                        className="bg-destructive/90 hover:bg-destructive backdrop-blur-sm text-destructive-foreground px-4 py-2 rounded-none flex items-center gap-2 transition-all duration-200 hover:translate-y-[-2px]"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete
@@ -468,22 +468,22 @@ export default function Post() {
 
 
             <header className="text-center mb-8">
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
                 {post.title}
               </h1>
 
 
-              <div className="flex flex-wrap items-center justify-center gap-6 text-slate-300 mb-8">
+              <div className="flex flex-wrap items-center justify-center gap-6 text-muted-foreground mb-8">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-purple-400" />
+                  <Calendar className="w-5 h-5 text-primary" />
                   <span>{formatDate(post.$createdAt)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-blue-400" />
+                  <Clock className="w-5 h-5 text-blue-500" />
                   <span>{estimatedReadTime} min read</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Eye className="w-5 h-5 text-green-400" />
+                  <Eye className="w-5 h-5 text-green-500" />
                   <span>{formatNumber(viewsCount)} views</span>
                 </div>
               </div>
@@ -491,9 +491,9 @@ export default function Post() {
 
               <Link
                 to={`/profile/${post.userId}`}
-                className="inline-flex items-center gap-4 p-4 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 group"
+                className="inline-flex items-center gap-4 p-4 bg-card backdrop-blur-sm rounded-none border border-border hover:border-primary transition-all duration-300 hover:translate-y-[-2px] group"
               >
-                <div className="w-16 h-16 rounded-full overflow-hidden border-3 border-purple-500/30 group-hover:border-purple-400 transition-colors duration-200">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-colors duration-200">
                   {!authorImageError && authorProfile?.profileImage ? (
                     <img
                       src={profileService.getProfileImageView(authorProfile.profileImage)}
@@ -502,18 +502,18 @@ export default function Post() {
                       onError={() => setAuthorImageError(true)}
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                      <span className="text-white font-medium text-lg">{getAuthorInitials(getAuthorName())}</span>
+                    <div className="w-full h-full bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground font-medium text-lg">{getAuthorInitials(getAuthorName())}</span>
                     </div>
                   )}
                 </div>
                 <div className="text-left">
-                  <p className="text-white font-semibold text-lg group-hover:text-purple-300 transition-colors duration-200">
+                  <p className="text-foreground font-semibold text-lg group-hover:text-primary transition-colors duration-200">
                     {getAuthorName()}
                   </p>
-                  <p className="text-slate-400 text-sm">Article Author</p>
+                  <p className="text-muted-foreground text-sm">Article Author</p>
                   {authorProfile?.location && (
-                    <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
+                    <div className="flex items-center gap-1 text-muted-foreground text-xs mt-1">
                       <MapPin className="w-3 h-3" />
                       <span>{authorProfile.location}</span>
                     </div>
@@ -523,12 +523,12 @@ export default function Post() {
             </header>
 
 
-            <div className="flex items-center justify-center gap-4 p-6 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700/50 mb-8">
+            <div className="flex items-center justify-center gap-4 p-6 bg-card rounded-none border border-border mb-8">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 ${isLiked
-                  ? "bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10 border border-red-500/30"
-                  : "bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-600"
+                className={`flex items-center gap-3 px-6 py-3 rounded-none font-medium transition-all duration-200 hover:translate-y-[-2px] ${isLiked
+                  ? "bg-red-500/10 text-red-500 border border-red-500/30"
+                  : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground border border-border"
                   }`}
               >
                 <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
@@ -537,9 +537,9 @@ export default function Post() {
 
               <button
                 onClick={handleBookmark}
-                className={`flex items-center gap-3 px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 ${isBookmarked
-                  ? "bg-purple-500/20 text-purple-400 shadow-lg shadow-purple-500/10 border border-purple-500/30"
-                  : "bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-600"
+                className={`flex items-center gap-3 px-6 py-3 rounded-none font-medium transition-all duration-200 hover:translate-y-[-2px] ${isBookmarked
+                  ? "bg-primary/10 text-primary border border-primary/30"
+                  : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground border border-border"
                   }`}
               >
                 <Bookmark className={`w-5 h-5 ${isBookmarked ? "fill-current" : ""}`} />
@@ -548,7 +548,7 @@ export default function Post() {
 
               <button
                 onClick={() => setShowShareMenu(!showShareMenu)}
-                className="flex items-center gap-3 px-6 py-3 bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg font-medium transition-all duration-200 hover:scale-105 border border-slate-600"
+                className="flex items-center gap-3 px-6 py-3 bg-card hover:bg-accent text-muted-foreground hover:text-foreground rounded-none font-medium transition-all duration-200 hover:translate-y-[-2px] border border-border"
               >
                 <Share2 className="w-5 h-5" />
                 <span>Share</span>
@@ -558,21 +558,21 @@ export default function Post() {
 
 
           <div className="relative">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-slate-700/30 shadow-2xl">
-              <div className="prose prose-invert prose-lg md:prose-xl max-w-none 
-             prose-headings:text-white prose-headings:font-bold prose-headings:leading-tight
+            <div className="bg-card backdrop-blur-sm rounded-none p-8 md:p-12 border border-border shadow-sm">
+              <div className="prose dark:prose-invert prose-lg md:prose-xl max-w-3xl mx-auto 
+             prose-headings:text-foreground prose-headings:font-bold prose-headings:leading-tight
              prose-h1:text-4xl prose-h1:mb-6 prose-h1:mt-8
-             prose-h2:text-3xl prose-h2:mb-5 prose-h2:mt-7 prose-h2:border-b prose-h2:border-slate-700 prose-h2:pb-2
+             prose-h2:text-3xl prose-h2:mb-5 prose-h2:mt-7 prose-h2:border-b prose-h2:border-border prose-h2:pb-2
              prose-h3:text-2xl prose-h3:mb-4 prose-h3:mt-6
-             prose-p:text-slate-200 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
-             prose-strong:text-white prose-strong:font-semibold
-             prose-em:text-slate-300 prose-em:italic
-             prose-code:text-purple-300 prose-code:bg-slate-800/80 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:font-mono
-             prose-pre:bg-slate-800/90 prose-pre:border prose-pre:border-slate-700 prose-pre:rounded-lg prose-pre:p-4
-             prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:bg-purple-500/5 prose-blockquote:pl-6 prose-blockquote:py-4 prose-blockquote:rounded-r-lg prose-blockquote:text-slate-300 prose-blockquote:italic
-             prose-ul:text-slate-200 prose-ol:text-slate-200
+             prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
+             prose-strong:text-foreground prose-strong:font-semibold
+             prose-em:text-muted-foreground prose-em:italic
+             prose-code:text-primary prose-code:bg-muted prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:font-mono
+             prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-none prose-pre:p-4
+             prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:pl-6 prose-blockquote:py-4 prose-blockquote:rounded-r-none prose-blockquote:text-muted-foreground prose-blockquote:italic
+             prose-ul:text-foreground prose-ol:text-foreground
              prose-li:mb-2 prose-li:leading-relaxed
-             prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-a:font-medium">
+             prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-a:font-medium">
                 <div
                   className="article-content leading-loose break-words"
                   dangerouslySetInnerHTML={{ __html: cleanDisplayContent(post.content) }}
@@ -583,14 +583,14 @@ export default function Post() {
 
 
           {authorProfile && (
-            <div className="mt-16 p-8 bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-slate-700/50">
-              <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <User className="w-6 h-6 text-purple-400" />
+            <div className="mt-16 p-8 bg-card backdrop-blur-sm rounded-none border border-border">
+              <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <User className="w-6 h-6 text-primary" />
                 About the Author
               </h3>
               <div className="flex flex-col md:flex-row items-start gap-6">
                 <Link to={`/profile/${post.userId}`} className="flex-shrink-0 group">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-purple-500/30 group-hover:border-purple-400 transition-all duration-300 group-hover:scale-105">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-border group-hover:border-primary transition-all duration-300 group-hover:scale-105">
                     {!authorImageError && authorProfile.profileImage ? (
                       <img
                         src={profileService.getProfileImageView(authorProfile.profileImage)}
@@ -599,8 +599,8 @@ export default function Post() {
                         onError={() => setAuthorImageError(true)}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                        <span className="text-white font-medium text-xl">{getAuthorInitials(getAuthorName())}</span>
+                      <div className="w-full h-full bg-primary flex items-center justify-center">
+                        <span className="text-primary-foreground font-medium text-xl">{getAuthorInitials(getAuthorName())}</span>
                       </div>
                     )}
                   </div>
@@ -609,20 +609,20 @@ export default function Post() {
                 <div className="flex-1">
                   <Link
                     to={`/profile/${post.userId}`}
-                    className="text-2xl font-bold text-white hover:text-purple-300 transition-colors duration-200 block mb-2"
+                    className="text-2xl font-bold text-foreground hover:text-primary transition-colors duration-200 block mb-2"
                   >
                     {getAuthorName()}
                   </Link>
 
                   {authorProfile.location && (
-                    <div className="flex items-center gap-2 text-slate-400 mb-3">
+                    <div className="flex items-center gap-2 text-muted-foreground mb-3">
                       <MapPin className="w-4 h-4" />
                       <span>{authorProfile.location}</span>
                     </div>
                   )}
 
                   {authorProfile.bio && (
-                    <p className="text-slate-300 leading-relaxed mb-4 text-lg">{authorProfile.bio}</p>
+                    <p className="text-muted-foreground leading-relaxed mb-4 text-lg">{authorProfile.bio}</p>
                   )}
 
 
@@ -640,7 +640,7 @@ export default function Post() {
                           href={link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-all duration-200 hover:scale-105 border border-slate-600/50 hover:border-slate-500"
+                          className="flex items-center gap-2 px-4 py-2 bg-card hover:bg-accent text-muted-foreground hover:text-foreground rounded-none transition-all duration-200 hover:translate-y-[-2px] border border-border"
                         >
                           <Icon className="w-4 h-4" />
                           <span className="capitalize text-sm font-medium">
@@ -653,7 +653,7 @@ export default function Post() {
 
                     <Link
                       to={`/profile/${post.userId}`}
-                      className="flex items-center gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 hover:text-purple-300 rounded-lg transition-all duration-200 hover:scale-105 border border-purple-500/30 hover:border-purple-400/50"
+                      className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary/80 rounded-none transition-all duration-200 hover:translate-y-[-2px] border border-primary/30"
                     >
                       <User className="w-4 h-4" />
                       <span className="text-sm font-medium">View Profile</span>
@@ -665,10 +665,10 @@ export default function Post() {
           )}
 
 
-          <footer className="mt-12 pt-8 border-t border-slate-700/50">
+          <footer className="mt-12 pt-8 border-t border-border">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
 
-              <div className="text-slate-400">
+              <div className="text-muted-foreground">
                 <p className="text-sm mb-1">
                   <span className="font-medium">Published:</span> {formatDate(post.$createdAt)}
                 </p>
@@ -679,13 +679,13 @@ export default function Post() {
 
 
               <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full text-sm border border-purple-500/30 font-medium">
+                <span className="px-3 py-1 bg-primary/10 text-primary rounded-none text-sm border border-primary/30 font-medium">
                   Article
                 </span>
-                <span className="px-3 py-1 bg-blue-600/20 text-blue-300 rounded-full text-sm border border-blue-500/30 font-medium">
+                <span className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-none text-sm border border-blue-500/30 font-medium">
                   Blog
                 </span>
-                <span className="px-3 py-1 bg-green-600/20 text-green-300 rounded-full text-sm border border-green-500/30 font-medium">
+                <span className="px-3 py-1 bg-green-500/10 text-green-500 rounded-none text-sm border border-green-500/30 font-medium">
                   {estimatedReadTime} min read
                 </span>
               </div>
@@ -698,7 +698,7 @@ export default function Post() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 p-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full shadow-2xl transition-all duration-300 z-40 hover:scale-110 group"
+          className="fixed bottom-8 right-8 p-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-none shadow-lg transition-all duration-300 z-40 hover:translate-y-[-2px] group"
           title="Scroll to top"
         >
           <ChevronUp className="w-6 h-6 group-hover:-translate-y-1 transition-transform duration-200" />
@@ -718,13 +718,13 @@ export default function Post() {
         .article-content {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           line-height: 1.7;
-          color: #e2e8f0;
+          color: hsl(var(--foreground));
         }
         
         .article-content p {
           margin: 1.25rem 0 !important;
           line-height: 1.7 !important;
-          color: #e2e8f0 !important;
+          color: hsl(var(--foreground)) !important;
           font-size: 1.125rem !important;
           font-weight: 400 !important;
         }
@@ -732,7 +732,7 @@ export default function Post() {
         .article-content h1 {
           font-size: 2.5rem !important;
           font-weight: 800 !important;
-          color: white !important;
+          color: hsl(var(--foreground)) !important;
           margin: 2rem 0 1.5rem 0 !important;
           line-height: 1.2 !important;
           letter-spacing: -0.025em !important;
@@ -741,10 +741,10 @@ export default function Post() {
         .article-content h2 {
           font-size: 2rem !important;
           font-weight: 700 !important;
-          color: white !important;
+          color: hsl(var(--foreground)) !important;
           margin: 1.75rem 0 1rem 0 !important;
           line-height: 1.3 !important;
-          border-bottom: 2px solid #374151 !important;
+          border-bottom: 2px solid hsl(var(--border)) !important;
           padding-bottom: 0.5rem !important;
           letter-spacing: -0.025em !important;
         }
@@ -752,67 +752,60 @@ export default function Post() {
         .article-content h3 {
           font-size: 1.5rem !important;
           font-weight: 600 !important;
-          color: white !important;
+          color: hsl(var(--foreground)) !important;
           margin: 1.5rem 0 0.75rem 0 !important;
           line-height: 1.4 !important;
         }
         
         .article-content strong {
           font-weight: 700 !important;
-          color: white !important;
-          background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
-          background-clip: text !important;
-          -webkit-background-clip: text !important;
-          -webkit-text-fill-color: transparent !important;
-          background-clip: text !important;
+          color: hsl(var(--foreground)) !important;
           font-size: inherit !important;
         }
         
         .article-content em {
           font-style: italic !important;
-          color: #cbd5e1 !important;
+          color: hsl(var(--muted-foreground)) !important;
           font-weight: 500 !important;
         }
         
         .article-content u {
           text-decoration: underline !important;
-          text-decoration-color: #8b5cf6 !important;
+          text-decoration-color: hsl(var(--primary)) !important;
           text-decoration-thickness: 2px !important;
           text-underline-offset: 3px !important;
-          color: #e2e8f0 !important;
+          color: hsl(var(--foreground)) !important;
         }
         
         .article-content del {
           text-decoration: line-through !important;
-          text-decoration-color: #ef4444 !important;
-          color: #94a3b8 !important;
+          text-decoration-color: hsl(var(--destructive)) !important;
+          color: hsl(var(--muted-foreground)) !important;
           opacity: 0.8 !important;
         }
         
         .article-content code {
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.25) 100%) !important;
-          color: #c084fc !important;
+          background: hsl(var(--muted)) !important;
+          color: hsl(var(--primary)) !important;
           padding: 0.375rem 0.75rem !important;
           border-radius: 0.375rem !important;
           font-family: 'Fira Code', 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace !important;
           font-size: 0.875rem !important;
           font-weight: 500 !important;
-          border: 1px solid rgba(139, 92, 246, 0.2) !important;
-          box-shadow: 0 1px 3px rgba(139, 92, 246, 0.1) !important;
+          border: 1px solid hsl(var(--border)) !important;
         }
         
         .article-content pre {
-          background: linear-gradient(135deg, #000000 0%, #111827 100%) !important;
-          color: #00ff41 !important;
+          background: hsl(var(--card)) !important;
+          color: hsl(var(--foreground)) !important;
           padding: 1.5rem !important;
-          border-radius: 0.75rem !important;
-          border: 1px solid #374151 !important;
+          border-radius: 0 !important;
+          border: 1px solid hsl(var(--border)) !important;
           overflow-x: auto !important;
           margin: 2rem 0 !important;
           font-family: 'Fira Code', 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace !important;
           font-size: 0.875rem !important;
           line-height: 1.6 !important;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
         }
         
         .article-content pre code {
@@ -826,22 +819,21 @@ export default function Post() {
         }
         
         .article-content blockquote {
-          border-left: 4px solid #8b5cf6 !important;
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.12) 100%) !important;
+          border-left: 4px solid hsl(var(--primary)) !important;
+          background: hsl(var(--primary) / 0.1) !important;
           padding: 1.5rem 2rem !important;
           margin: 2rem 0 !important;
-          border-radius: 0 0.75rem 0.75rem 0 !important;
+          border-radius: 0 !important;
           font-style: italic !important;
-          color: #cbd5e1 !important;
+          color: hsl(var(--muted-foreground)) !important;
           font-size: 1.1rem !important;
           position: relative !important;
-          box-shadow: 0 2px 4px rgba(139, 92, 246, 0.1) !important;
         }
         
         .article-content blockquote::before {
           content: '"' !important;
           font-size: 3rem !important;
-          color: #8b5cf6 !important;
+          color: hsl(var(--primary)) !important;
           position: absolute !important;
           top: -0.5rem !important;
           left: 1rem !important;
@@ -860,7 +852,7 @@ export default function Post() {
         
         .article-content ul li::before {
           content: '•' !important;
-          color: #8b5cf6 !important;
+          color: hsl(var(--primary)) !important;
           font-weight: bold !important;
           position: absolute !important;
           margin-left: -1.5rem !important;
@@ -879,13 +871,13 @@ export default function Post() {
         .article-content li {
           margin: 0.75rem 0 !important;
           line-height: 1.6 !important;
-          color: #e2e8f0 !important;
+          color: hsl(var(--foreground)) !important;
           font-size: 1.125rem !important;
           position: relative !important;
         }
         
         .article-content a {
-          color: #8b5cf6 !important;
+          color: hsl(var(--primary)) !important;
           text-decoration: none !important;
           font-weight: 500 !important;
           border-bottom: 2px solid transparent !important;
@@ -893,8 +885,8 @@ export default function Post() {
         }
         
         .article-content a:hover {
-          color: #a78bfa !important;
-          border-bottom-color: #a78bfa !important;
+          color: hsl(var(--primary) / 0.8) !important;
+          border-bottom-color: hsl(var(--primary) / 0.8) !important;
         }
         
         .article-content br {

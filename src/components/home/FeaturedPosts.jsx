@@ -29,7 +29,7 @@ const FeaturedPosts = ({ posts }) => {
       {/* Main Featured Post */}
       <div className="lg:col-span-2">
         <div 
-          className="group relative bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer transform hover:scale-[1.02]"
+          className="group relative bg-card/50 overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 cursor-pointer transform hover:scale-[1.02]"
           onClick={() => navigate(`/post/${mainPost.$id}`)}
         >
           {mainPost.featuredImage && (
@@ -46,7 +46,7 @@ const FeaturedPosts = ({ posts }) => {
               
               {/* Featured Badge */}
               <div className="absolute top-4 left-4">
-                <span className="flex items-center gap-1 px-3 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">
+                <span className="flex items-center gap-1 px-3 py-1 bg-yellow-500 text-black text-xs font-bold">
                   <Star className="w-3 h-3" />
                   FEATURED
                 </span>
@@ -54,11 +54,11 @@ const FeaturedPosts = ({ posts }) => {
 
               {/* Stats Overlay */}
               <div className="absolute bottom-4 right-4 flex items-center gap-3">
-                <div className="flex items-center gap-1 px-2 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-xs">
+                <div className="flex items-center gap-1 px-2 py-1 bg-black/50 backdrop-blur-sm text-white text-xs">
                   <Eye className="w-3 h-3" />
                   {formatNumber(mainPost.views || 0)}
                 </div>
-                <div className="flex items-center gap-1 px-2 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-xs">
+                <div className="flex items-center gap-1 px-2 py-1 bg-black/50 backdrop-blur-sm text-white text-xs">
                   <Heart className="w-3 h-3" />
                   {formatNumber(mainPost.likesCount || 0)}
                 </div>
@@ -67,23 +67,23 @@ const FeaturedPosts = ({ posts }) => {
           )}
           
           <div className="p-6">
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors line-clamp-2">
+            <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
               {mainPost.title}
             </h3>
-            <p className="text-slate-400 mb-4 line-clamp-3">
+            <p className="text-muted-foreground mb-4 line-clamp-3">
               {cleanContent(mainPost.content)}...
             </p>
             
             {/* Bottom Stats */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-sm text-slate-500">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   {new Date(mainPost.$createdAt).toLocaleDateString()}
                 </span>
                 <span>by {mainPost.userName}</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-slate-500">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Eye className="w-4 h-4" />
                   {formatNumber(mainPost.views || 0)} views
@@ -103,13 +103,13 @@ const FeaturedPosts = ({ posts }) => {
         {sidePosts.map((post, index) => (
           <div
             key={post.$id}
-            className="group bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 cursor-pointer transform hover:scale-[1.02]"
+            className="group bg-card/50 p-4 border border-border hover:border-primary/50 transition-all duration-300 cursor-pointer transform hover:scale-[1.02]"
             onClick={() => navigate(`/post/${post.$id}`)}
           >
             <div className="flex gap-3">
               {/* Small thumbnail for side posts */}
               {post.featuredImage && (
-                <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative">
+                <div className="flex-shrink-0 w-16 h-16 overflow-hidden relative">
                   <img
                     src={appwriteService.getFileView(post.featuredImage)}
                     alt={post.title}
@@ -120,7 +120,7 @@ const FeaturedPosts = ({ posts }) => {
                   />
                   {/* Mini stats overlay */}
                   <div className="absolute bottom-1 right-1 flex items-center gap-1">
-                    <div className="flex items-center gap-1 px-1 py-0.5 bg-black/70 rounded text-white text-xs">
+                    <div className="flex items-center gap-1 px-1 py-0.5 bg-black/70 text-white text-xs">
                       <Eye className="w-2 h-2" />
                       {formatNumber(post.views || 0)}
                     </div>
@@ -130,16 +130,16 @@ const FeaturedPosts = ({ posts }) => {
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1 mb-2">
-                  <Star className="w-3 h-3 text-yellow-400" />
-                  <span className="text-xs text-yellow-400 font-medium">FEATURED #{index + 2}</span>
+                  <Star className="w-3 h-3 text-yellow-500" />
+                  <span className="text-xs text-yellow-500 font-medium">FEATURED #{index + 2}</span>
                 </div>
-                <h4 className="text-white font-semibold mb-2 group-hover:text-purple-300 transition-colors line-clamp-2">
+                <h4 className="text-foreground font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
                   {post.title}
                 </h4>
-                <p className="text-slate-400 text-sm mb-3 line-clamp-2">
+                <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                   {cleanContent(post.content)}...
                 </p>
-                <div className="flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>by {post.userName}</span>
                   <div className="flex items-center gap-2">
                     <span className="flex items-center gap-1">

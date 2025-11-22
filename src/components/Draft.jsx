@@ -157,8 +157,8 @@ export default function Draft() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading your drafts...</p>
+          <div className="animate-spin h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your drafts...</p>
         </div>
       </div>
     )
@@ -169,14 +169,14 @@ export default function Draft() {
       
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">Your Drafts</h2>
-          <p className="text-slate-400 mt-1">
+          <h2 className="text-2xl font-bold text-foreground">Your Drafts</h2>
+          <p className="text-muted-foreground mt-1">
             {drafts.length} draft{drafts.length !== 1 ? "s" : ""} saved
           </p>
         </div>
         <button
           onClick={() => navigate("/add-post")}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
           New Draft
@@ -185,24 +185,24 @@ export default function Draft() {
 
       
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <input
           type="text"
           placeholder="Search drafts..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-3 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
       
       {filteredDrafts.length === 0 ? (
         <div className="text-center py-12">
-          <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-slate-300 mb-2">
+          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-foreground mb-2">
             {searchTerm ? "No drafts found" : "No drafts yet"}
           </h3>
-          <p className="text-slate-400 mb-6">
+          <p className="text-muted-foreground mb-6">
             {searchTerm
               ? "Try adjusting your search terms"
               : "Start writing your first blog post and save it as a draft"}
@@ -210,7 +210,7 @@ export default function Draft() {
           {!searchTerm && (
             <button
               onClick={() => navigate("/add-post")}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors"
             >
               <Plus className="w-4 h-4" />
               Create Your First Draft
@@ -222,20 +222,20 @@ export default function Draft() {
           {filteredDrafts.map((draft) => (
             <div
               key={draft.$id}
-              className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-colors"
+              className="bg-card p-6 border border-border hover:border-primary/50 transition-colors"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-xl font-semibold text-white truncate">{draft.title || "Untitled Draft"}</h3>
-                    <span className="px-2 py-1 text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-full">
+                    <h3 className="text-xl font-semibold text-foreground truncate">{draft.title || "Untitled Draft"}</h3>
+                    <span className="px-2 py-1 text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
                       Draft
                     </span>
                   </div>
 
-                  <p className="text-slate-300 mb-4 leading-relaxed">{truncateContent(draft.content)}</p>
+                  <p className="text-muted-foreground mb-4 leading-relaxed">{truncateContent(draft.content)}</p>
 
-                  <div className="flex items-center gap-4 text-sm text-slate-400">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
                       <span>Created {formatDate(draft.$createdAt)}</span>
@@ -250,28 +250,28 @@ export default function Draft() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handlePreviewDraft(draft.$id)}
-                    className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                    className="p-2 text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
                     title="Preview"
                   >
                     <Eye className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleEditDraft(draft.$id)}
-                    className="p-2 text-slate-400 hover:text-purple-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                    className="p-2 text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
                     title="Edit"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handlePublishDraft(draft.$id)}
-                    className="p-2 text-slate-400 hover:text-green-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                    className="p-2 text-muted-foreground hover:text-green-500 hover:bg-accent transition-colors"
                     title="Publish"
                   >
                     <Send className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteDraft(draft.$id)}
-                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                    className="p-2 text-muted-foreground hover:text-destructive hover:bg-accent transition-colors"
                     title="Delete"
                   >
                     <Trash2 className="w-4 h-4" />

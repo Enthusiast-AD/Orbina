@@ -28,21 +28,21 @@ const Modal = ({ isOpen, onClose, title, children, type = "default" }) => {
   if (!isOpen) return null
 
   const modalTypes = {
-    default: "border-slate-700 bg-slate-800",
-    danger: "border-red-500/30 bg-slate-800",
-    info: "border-blue-500/30 bg-slate-800"
+    default: "border-border bg-card",
+    danger: "border-destructive/30 bg-card",
+    info: "border-blue-500/30 bg-card"
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
-      <div className={`bg-slate-800 border ${modalTypes[type]} rounded-xl p-6 max-w-md w-full mx-4 animate-in zoom-in-95 duration-200`}>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+      <div className={`bg-card border ${modalTypes[type]} p-6 max-w-md w-full mx-4 animate-in zoom-in-95 duration-200`}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-1 hover:bg-accent rounded-none transition-colors"
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
         {children}
@@ -59,7 +59,7 @@ const ContextMenu = ({ isOpen, position, onClose, onDelete }) => {
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div 
-        className="fixed z-50 bg-slate-800 border border-slate-700 rounded-lg shadow-lg py-2 min-w-[150px] animate-in fade-in zoom-in-95 duration-150"
+        className="fixed z-50 bg-popover border border-border shadow-lg py-2 min-w-[150px] animate-in fade-in zoom-in-95 duration-150"
         style={{
           left: position.x,
           top: position.y,
@@ -67,7 +67,7 @@ const ContextMenu = ({ isOpen, position, onClose, onDelete }) => {
       >
         <button
           onClick={onDelete}
-          className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-red-600/20 transition-colors text-red-400"
+          className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-destructive/10 transition-colors text-destructive"
         >
           <Trash2 className="w-4 h-4" />
           Delete for everyone
@@ -449,28 +449,28 @@ export default function ChatInterface({ partnerId, onClose }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   return (
-    <div className={`flex flex-col h-full border border-slate-700 rounded-lg overflow-hidden transition-all duration-300 ${getThemeClasses()}`}>
+    <div className={`flex flex-col h-full border border-border overflow-hidden transition-all duration-300 ${getThemeClasses()}`}>
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-800/80 backdrop-blur-sm">
+      <div className="flex items-center justify-between p-4 border-b border-border bg-card/80 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
-            className="lg:hidden p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-accent rounded-none transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 text-slate-400" />
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </button>
           
           <button
             onClick={handleProfileClick}
-            className="flex items-center gap-3 hover:bg-slate-700/50 rounded-lg p-2 -m-2 transition-colors"
+            className="flex items-center gap-3 hover:bg-accent/50 rounded-none p-2 -m-2 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-500/30 bg-slate-700 flex-shrink-0">
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/30 bg-muted flex-shrink-0">
               {partnerProfile?.profileImage ? (
                 <img
                   src={profileService.getProfileImageView(partnerProfile.profileImage)}
@@ -478,15 +478,15 @@ export default function ChatInterface({ partnerId, onClose }) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                   <span className="text-sm font-medium">{getPartnerInitials()}</span>
                 </div>
               )}
             </div>
             
             <div>
-              <h3 className="text-white font-semibold text-left">{getPartnerName()}</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-foreground font-semibold text-left">{getPartnerName()}</h3>
+              <p className="text-xs text-muted-foreground">
                 {isTyping ? "Typing..." : "Click to view profile"}
               </p>
             </div>
@@ -496,39 +496,39 @@ export default function ChatInterface({ partnerId, onClose }) {
         <div className="flex items-center gap-2">
           <button 
             onClick={toggleSearch}
-            className={`p-2 hover:bg-slate-700 rounded-lg transition-colors ${showSearchBar ? 'bg-slate-700' : ''}`} 
+            className={`p-2 hover:bg-accent rounded-none transition-colors ${showSearchBar ? 'bg-accent' : ''}`} 
             title="Search Messages"
           >
-            <Search className="w-4 h-4 text-slate-400" />
+            <Search className="w-4 h-4 text-muted-foreground" />
           </button>
           
           <div className="relative">
             <button 
               onClick={() => setShowMoreMenu(!showMoreMenu)}
-              className="p-2 hover:bg-slate-700 rounded-lg transition-colors" 
+              className="p-2 hover:bg-accent rounded-none transition-colors" 
               title="More Options"
             >
-              <MoreVertical className="w-4 h-4 text-slate-400" />
+              <MoreVertical className="w-4 h-4 text-muted-foreground" />
             </button>
             
             {showMoreMenu && (
-              <div className="absolute right-0 top-12 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 animate-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 top-12 w-56 bg-popover border border-border shadow-xl z-50 animate-in slide-in-from-top-2 duration-200">
                 <button
                   onClick={() => {
                     handleProfileClick()
                     setShowMoreMenu(false)
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-700 transition-colors text-slate-300"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors text-foreground"
                 >
                   <User className="w-4 h-4" />
                   View Profile
                 </button>
                 
-                <div className="border-t border-slate-700">
+                <div className="border-t border-border">
                   <div className="px-4 py-3">
                     <div className="flex items-center gap-2 mb-3">
-                      <Palette className="w-4 h-4 text-slate-400" />
-                      <p className="text-sm text-slate-300 font-medium">Chat Theme</p>
+                      <Palette className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-sm text-foreground font-medium">Chat Theme</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       {[
@@ -541,10 +541,10 @@ export default function ChatInterface({ partnerId, onClose }) {
                         <button
                           key={theme.name}
                           onClick={() => handleThemeChange(theme.name)}
-                          className={`flex items-center gap-2 p-2 rounded text-xs capitalize transition-colors ${
+                          className={`flex items-center gap-2 p-2 rounded-none text-xs capitalize transition-colors ${
                             chatTheme === theme.name 
-                              ? 'bg-purple-600 text-white' 
-                              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-muted text-muted-foreground hover:bg-accent'
                           }`}
                         >
                           <div className={`w-3 h-3 rounded-full ${theme.color}`}></div>
@@ -555,13 +555,13 @@ export default function ChatInterface({ partnerId, onClose }) {
                   </div>
                 </div>
                 
-                <div className="border-t border-slate-700">
+                <div className="border-t border-border">
                   <button
                     onClick={() => {
                       setShowDeleteModal(true)
                       setShowMoreMenu(false)
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-red-600/20 transition-colors text-red-400"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-destructive/10 transition-colors text-destructive"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete Chat
@@ -575,28 +575,28 @@ export default function ChatInterface({ partnerId, onClose }) {
 
       {/* Search Bar */}
       {showSearchBar && (
-        <div className="p-4 border-b border-slate-700 bg-slate-800/50 animate-in slide-in-from-top-2 duration-200">
+        <div className="p-4 border-b border-border bg-card/50 animate-in slide-in-from-top-2 duration-200">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <input
               ref={searchInputRef}
               type="text"
               placeholder="Search messages..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-10 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-10 pr-10 py-2 bg-background border border-input rounded-none text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
           {searchTerm && (
-            <p className="text-xs text-slate-400 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Found {filteredMessages.length} message{filteredMessages.length !== 1 ? 's' : ''}
             </p>
           )}
@@ -612,13 +612,13 @@ export default function ChatInterface({ partnerId, onClose }) {
         {filteredMessages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">{getPartnerInitials()}</span>
               </div>
-              <h3 className="text-white font-semibold mb-2">
+              <h3 className="text-foreground font-semibold mb-2">
                 {searchTerm ? "No messages found" : "Start a conversation"}
               </h3>
-              <p className="text-slate-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 {searchTerm ? "Try a different search term" : `Send a message to ${getPartnerName()}`}
               </p>
             </div>
@@ -637,8 +637,8 @@ export default function ChatInterface({ partnerId, onClose }) {
                 {/* Avatar */}
                 <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ${showAvatar ? "opacity-100" : "opacity-0"}`}>
                   {isOwnMessage ? (
-                    <div className="w-full h-full bg-purple-600 flex items-center justify-center">
-                      <span className="text-white text-xs font-medium">
+                    <div className="w-full h-full bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs font-medium">
                         {currentUser?.name?.charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -651,8 +651,8 @@ export default function ChatInterface({ partnerId, onClose }) {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-slate-700 flex items-center justify-center">
-                          <span className="text-slate-400 text-xs font-medium">{getPartnerInitials()}</span>
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                          <span className="text-muted-foreground text-xs font-medium">{getPartnerInitials()}</span>
                         </div>
                       )}
                     </button>
@@ -662,10 +662,10 @@ export default function ChatInterface({ partnerId, onClose }) {
                 {/* Message Bubble */}
                 <div className={`max-w-[70%] ${isOwnMessage ? "items-end" : "items-start"} flex flex-col`}>
                   <div
-                    className={`px-4 py-2 rounded-2xl transition-all hover:shadow-lg cursor-pointer ${
+                    className={`px-4 py-2 rounded-none transition-all hover:shadow-lg cursor-pointer ${
                       isOwnMessage
-                        ? "bg-purple-600 text-white rounded-br-md"
-                        : "bg-slate-700 text-white rounded-bl-md"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-foreground"
                     }`}
                   >
                     {isFileMessage(message) ? (
@@ -679,7 +679,7 @@ export default function ChatInterface({ partnerId, onClose }) {
                         </div>
                         <button
                           onClick={() => downloadFile(message.fileId, message.fileName)}
-                          className="p-1 hover:bg-black/20 rounded transition-colors"
+                          className="p-1 hover:bg-black/20 rounded-none transition-colors"
                           title="Download file"
                         >
                           <Download className="w-4 h-4" />
@@ -691,7 +691,7 @@ export default function ChatInterface({ partnerId, onClose }) {
                   </div>
                   
                   
-                  <span className="text-xs text-slate-500 mt-1 px-2">
+                  <span className="text-xs text-muted-foreground mt-1 px-2">
                     {formatMessageTime(message.$createdAt)}
                     {isOwnMessage && (
                       <span className="ml-1">
@@ -708,22 +708,22 @@ export default function ChatInterface({ partnerId, onClose }) {
       </div>
 
      
-      <div className="p-4 border-t border-slate-700 bg-slate-800/80 backdrop-blur-sm">
+      <div className="p-4 border-t border-border bg-card/80 backdrop-blur-sm">
         
         {showEmojiPicker && (
-          <div className="mb-3 p-4 bg-slate-700 rounded-lg border border-slate-600 animate-in slide-in-from-bottom-2 duration-200">
+          <div className="mb-3 p-4 bg-popover rounded-none border border-border animate-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-slate-300">Add Emoji</span>
+              <span className="text-sm text-muted-foreground">Add Emoji</span>
               <button
                 onClick={() => setShowEmojiPicker(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             
             <div className="text-center mb-3">
-              <p className="text-xs text-slate-400">{getEmojiShortcut()}</p>
+              <p className="text-xs text-muted-foreground">{getEmojiShortcut()}</p>
             </div>
             
             <div className="grid grid-cols-8 gap-1 max-h-40 overflow-y-auto">
@@ -732,7 +732,7 @@ export default function ChatInterface({ partnerId, onClose }) {
                 <button
                   key={emoji}
                   onClick={() => addEmoji(emoji)}
-                  className="text-lg hover:bg-slate-600 rounded p-1 transition-colors"
+                  className="text-lg hover:bg-accent rounded-none p-1 transition-colors"
                 >
                   {emoji}
                 </button>
@@ -754,13 +754,13 @@ export default function ChatInterface({ partnerId, onClose }) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingFile}
-              className="p-2 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+              className="p-2 hover:bg-accent rounded-none transition-colors disabled:opacity-50"
               title="Attach File"
             >
               {uploadingFile ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               ) : (
-                <Paperclip className="w-4 h-4 text-slate-400" />
+                <Paperclip className="w-4 h-4 text-muted-foreground" />
               )}
             </button>
           </div>
@@ -777,7 +777,7 @@ export default function ChatInterface({ partnerId, onClose }) {
                 }
               }}
               placeholder="Type a message..."
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none max-h-20"
+              className="w-full px-4 py-2 bg-background border border-input rounded-none text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none max-h-20"
               rows="1"
               disabled={isSending}
             />
@@ -787,19 +787,19 @@ export default function ChatInterface({ partnerId, onClose }) {
             <button
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-accent rounded-none transition-colors"
               title="Add Emoji"
             >
-              <Smile className="w-4 h-4 text-slate-400" />
+              <Smile className="w-4 h-4 text-muted-foreground" />
             </button>
             
             <button
               type="submit"
               disabled={!newMessage.trim() || isSending}
-              className="p-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-not-allowed rounded-lg transition-colors"
+              className="p-2 bg-primary hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed rounded-none transition-colors"
               title="Send Message"
             >
-              <Send className="w-4 h-4 text-white" />
+              <Send className="w-4 h-4 text-primary-foreground" />
             </button>
           </div>
         </form>
@@ -812,16 +812,16 @@ export default function ChatInterface({ partnerId, onClose }) {
         type="danger"
       >
         <div className="space-y-4">
-          <p className="text-slate-300">
-            Are you sure you want to delete this entire conversation with <span className="font-semibold text-white">{getPartnerName()}</span>?
+          <p className="text-muted-foreground">
+            Are you sure you want to delete this entire conversation with <span className="font-semibold text-foreground">{getPartnerName()}</span>?
           </p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             This action cannot be undone. All messages, files, and chat history will be permanently deleted.
           </p>
           <div className="flex gap-3 pt-4">
             <button
               onClick={() => setShowDeleteModal(false)}
-              className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+              className="flex-1 px-4 py-2 bg-muted hover:bg-accent text-foreground rounded-none transition-colors"
             >
               Cancel
             </button>
@@ -830,7 +830,7 @@ export default function ChatInterface({ partnerId, onClose }) {
                 deleteChat()
                 setShowDeleteModal(false)
               }}
-              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+              className="flex-1 px-4 py-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-none transition-colors"
             >
               Delete Chat
             </button>

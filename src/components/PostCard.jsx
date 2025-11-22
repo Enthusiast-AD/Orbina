@@ -21,7 +21,8 @@ function PostCard({
   status = "active", 
   viewMode = "grid",
   views = 0,
-  showStats = true 
+  showStats = true,
+  className = ""
 }) {
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -242,10 +243,10 @@ function PostCard({
   if (viewMode === "list") {
     return (
       <Link to={`/post/${$id}`} className="block group">
-        <article className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/10">
+        <article className="bg-card backdrop-blur-sm p-6 border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10">
           <div className="flex gap-6">
             {/* Image */}
-            <div className="w-48 h-32 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0 relative">
+            <div className="w-48 h-32 overflow-hidden bg-muted flex-shrink-0 relative">
               {!imageError && featuredImage ? (
                 <img
                   src={getImageUrl(featuredImage)}
@@ -255,14 +256,14 @@ function PostCard({
                   loading="lazy"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-slate-700">
-                  <ImageIcon className="w-8 h-8 text-slate-400" />
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
                 </div>
               )}
               
               {/* Views overlay for list view */}
               {/* {showStats && (
-                <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-black/70 backdrop-blur-sm rounded-full text-white text-xs">
+                <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-background/70 backdrop-blur-sm text-foreground text-xs">
                   <Eye className="w-3 h-3" />
                   {formatNumber(safeViews)}
                 </div>
@@ -271,18 +272,18 @@ function PostCard({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-purple-300 transition-colors">
+              <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                 {title}
               </h3>
               
-              <p className="text-slate-400 mb-4 line-clamp-2 leading-relaxed">
+              <p className="text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
                 {getPlainTextPreview(content, 200)}
               </p>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {/* Author avatar */}
-                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-transparent flex-shrink-0">
+                  <div className="w-8 h-8 overflow-hidden border-2 border-transparent flex-shrink-0">
                     {!authorImageError && authorProfile?.profileImage ? (
                       <img
                         src={getProfileImageUrl(authorProfile.profileImage)}
@@ -291,15 +292,15 @@ function PostCard({
                         onError={() => setAuthorImageError(true)}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                        <span className="text-white text-xs font-medium">{getAuthorInitials(getAuthorName())}</span>
+                      <div className="w-full h-full bg-primary flex items-center justify-center">
+                        <span className="text-primary-foreground text-xs font-medium">{getAuthorInitials(getAuthorName())}</span>
                       </div>
                     )}
                   </div>
                   
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-white truncate">{getAuthorName()}</div>
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <div className="text-sm font-medium text-foreground truncate">{getAuthorName()}</div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{getTimeAgo($createdAt)}</span>
                       <span>•</span>
                       <Clock className="w-3 h-3" />
@@ -315,7 +316,7 @@ function PostCard({
                   </div>
                 </div>
 
-                <ArrowRight className="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+                <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform flex-shrink-0" />
               </div>
             </div>
           </div>
@@ -326,14 +327,14 @@ function PostCard({
 
   // Grid view mode (default)
   return (
-    <Link to={`/post/${$id}`} className="block group">
+    <Link to={`/post/${$id}`} className="block group h-full">
       <article
-        className="relative bg-slate-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-900/20 hover:-translate-y-1"
+        className="relative bg-card backdrop-blur-sm overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1 h-full flex flex-col"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Featured Image */}
-        <div className="aspect-[1.91/1] bg-slate-700 overflow-hidden relative">
+        <div className="aspect-[1.91/1] bg-muted overflow-hidden relative">
           {!imageError && featuredImage ? (
             <img
               src={getImageUrl(featuredImage)}
@@ -343,27 +344,27 @@ function PostCard({
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
+            <div className="w-full h-full flex items-center justify-center bg-muted">
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-2 bg-slate-600 rounded-full flex items-center justify-center">
-                  <ImageIcon className="w-8 h-8 text-slate-400" />
+                <div className="w-16 h-16 mx-auto mb-2 bg-accent flex items-center justify-center">
+                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <p className="text-slate-400 text-sm">No image</p>
+                <p className="text-muted-foreground text-sm">No image</p>
               </div>
             </div>
           )}
 
           {/* Hover overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {/* Status badge */}
           {status && (
             <div className="absolute top-3 left-3">
               <span
-                className={`px-2 py-1 text-xs font-medium rounded-full ${
+                className={`px-2 py-1 text-xs font-medium ${
                   status === "active"
-                    ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                    : "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                    ? "bg-green-500/10 text-green-500 border border-green-500/20"
+                    : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
                 }`}
               >
                 {status === "active" ? "Published" : "Draft"}
@@ -373,12 +374,12 @@ function PostCard({
 
           {/* Reading time and views */}
           <div className="absolute top-3 right-3 flex items-center gap-2">
-            <div className="flex items-center gap-1 px-2 py-1 bg-slate-900/70 backdrop-blur-sm rounded-full text-xs text-slate-300">
+            <div className="flex items-center gap-1 px-2 py-1 bg-background/70 backdrop-blur-sm text-xs text-foreground">
               <Clock className="w-3 h-3" />
               <span>{calculateReadingTime(content)} min</span>
             </div>
             {showStats && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-slate-900/70 backdrop-blur-sm rounded-full text-xs text-slate-300">
+              <div className="flex items-center gap-1 px-2 py-1 bg-background/70 backdrop-blur-sm text-xs text-foreground">
                 <Eye className="w-3 h-3" />
                 <span>{formatNumber(safeViews)}</span>
               </div>
@@ -387,16 +388,16 @@ function PostCard({
         </div>
 
         {/* Card Content */}
-        <div className="p-6">
+        <div className="p-6 flex flex-col flex-grow">
           {/* Title */}
-          <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-purple-300 transition-colors duration-300">
+          <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-300">
             {title}
           </h3>
 
           {/* Preview */}
-          <p className="text-slate-400 mb-4 line-clamp-3 leading-relaxed">{getPlainTextPreview(content)}</p>
+          <p className="text-muted-foreground mb-4 line-clamp-3 leading-relaxed flex-grow">{getPlainTextPreview(content)}</p>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-auto">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {/* Author Avatar */}
               <Link
@@ -405,7 +406,7 @@ function PostCard({
                 className="relative group/avatar flex-shrink-0"
                 title={`View ${getAuthorName()}'s profile`}
               >
-                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-transparent group-hover/avatar:border-purple-400 transition-colors duration-200">
+                <div className="w-8 h-8 overflow-hidden border-2 border-transparent group-hover/avatar:border-primary transition-colors duration-200">
                   {!authorImageError && authorProfile?.profileImage ? (
                     <img
                       src={getProfileImageUrl(authorProfile.profileImage)}
@@ -414,8 +415,8 @@ function PostCard({
                       onError={() => setAuthorImageError(true)}
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                      <span className="text-white text-xs font-medium">{getAuthorInitials(getAuthorName())}</span>
+                    <div className="w-full h-full bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs font-medium">{getAuthorInitials(getAuthorName())}</span>
                     </div>
                   )}
                 </div>
@@ -426,12 +427,12 @@ function PostCard({
                 <Link
                   to={`/profile/${userId}`}
                   onClick={handleAuthorClick}
-                  className="text-sm font-medium text-white hover:text-purple-300 transition-colors duration-200 cursor-pointer block truncate"
+                  className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-200 cursor-pointer block truncate"
                   title={`View ${getAuthorName()}'s profile`}
                 >
                   {getAuthorName()}
                 </Link>
-                <div className="flex items-center gap-1 text-xs text-slate-400">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <span>{getTimeAgo($createdAt)}</span>
                   {/* {showStats && (
                     <>
@@ -446,7 +447,7 @@ function PostCard({
 
             {/* Read More Arrow */}
             <div
-              className={`flex items-center gap-1 text-purple-400 transition-all duration-300 flex-shrink-0 ${
+              className={`flex items-center gap-1 text-primary transition-all duration-300 flex-shrink-0 ${
                 isHovered ? "translate-x-1" : ""
               }`}
             >

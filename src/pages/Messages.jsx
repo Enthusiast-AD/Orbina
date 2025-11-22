@@ -50,13 +50,13 @@ export default function Messages() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Please Log In</h1>
-          <p className="text-slate-400 mb-6">You need to be logged in to access messages.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-4">Please Log In</h1>
+          <p className="text-muted-foreground mb-6">You need to be logged in to access messages.</p>
           <button
             onClick={() => navigate("/login")}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            className="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground transition-colors"
           >
             Log In
           </button>
@@ -66,29 +66,29 @@ export default function Messages() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen">
       
-      <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
             </button>
-            <h1 className="text-2xl font-bold text-white">Messages</h1>
+            <h1 className="text-2xl font-bold text-foreground">Messages</h1>
           </div>
         </div>
       </div>
 
      
       <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 overflow-hidden h-[calc(100vh-200px)]">
+        <div className="bg-card backdrop-blur-sm border border-border overflow-hidden h-[calc(100vh-200px)]">
           <div className="flex h-full">
             
-            <div className={`${isMobile ? (showChat ? "hidden" : "w-full") : "w-80"} border-r border-slate-700 bg-slate-900/50`}>
+            <div className={`${isMobile ? (showChat ? "hidden" : "w-full") : "w-80"} border-r border-border bg-muted/30`}>
               <ConversationsList
                 onSelectConversation={handleSelectConversation}
                 selectedPartnerId={selectedPartnerId}
@@ -103,11 +103,11 @@ export default function Messages() {
                   onClose={handleCloseChat}
                 />
               ) : (
-                <div className="flex items-center justify-center h-full bg-slate-900">
+                <div className="flex items-center justify-center h-full bg-background/50">
                   <div className="text-center">
-                    <MessageCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-white mb-2">Select a conversation</h3>
-                    <p className="text-slate-400">Choose a conversation from the list to start messaging</p>
+                    <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-foreground mb-2">Select a conversation</h3>
+                    <p className="text-muted-foreground">Choose a conversation from the list to start messaging</p>
                   </div>
                 </div>
               )}

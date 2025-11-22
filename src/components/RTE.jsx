@@ -118,7 +118,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <label className='inline-block mb-3 pl-1 text-xl font-semibold text-gray-200'>
+        <label className='inline-block mb-3 pl-1 text-xl font-semibold text-foreground'>
           {label}
         </label>
       )}
@@ -140,17 +140,17 @@ export default function RTE({ name, control, label, defaultValue = "", className
           }
 
           return (
-            <div className="border border-slate-600 rounded-lg overflow-hidden bg-slate-900/50 backdrop-blur-sm shadow-xl">
+            <div className="border border-border overflow-hidden bg-card/50 backdrop-blur-sm shadow-xl">
               {/* Toolbar */}
-              <div className="flex flex-wrap items-center gap-1 p-3 border-b border-slate-600 bg-slate-800/50">
+              <div className="flex flex-wrap items-center gap-1 p-3 border-b border-border bg-muted/50">
                 {/* Mode Toggle */}
-                <div className="flex items-center gap-1 border-r border-slate-600 pr-3 mr-3">
+                <div className="flex items-center gap-1 border-r border-border pr-3 mr-3">
                   <button
                     type="button"
                     onClick={() => setMode('edit')}
-                    className={`p-2 rounded transition-colors ${mode === 'edit'
-                        ? 'bg-purple-600 text-white'
-                        : 'hover:bg-slate-700 text-slate-300 hover:text-white'
+                    className={`p-2 transition-colors ${mode === 'edit'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-accent text-muted-foreground hover:text-foreground'
                       }`}
                     title="Edit Mode"
                   >
@@ -159,9 +159,9 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => setMode('preview')}
-                    className={`p-2 rounded transition-colors ${mode === 'preview'
-                        ? 'bg-purple-600 text-white'
-                        : 'hover:bg-slate-700 text-slate-300 hover:text-white'
+                    className={`p-2 transition-colors ${mode === 'preview'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-accent text-muted-foreground hover:text-foreground'
                       }`}
                     title="Preview Mode"
                   >
@@ -170,11 +170,11 @@ export default function RTE({ name, control, label, defaultValue = "", className
                 </div>
 
                 {/* Text Formatting */}
-                <div className="flex items-center gap-1 border-r border-slate-600 pr-3 mr-3">
+                <div className="flex items-center gap-1 border-r border-border pr-3 mr-3">
                   <button
                     type="button"
                     onClick={() => formatText('bold', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Bold (**text**)"
                   >
                     <Bold className="w-4 h-4" />
@@ -182,7 +182,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('italic', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Italic (*text*)"
                   >
                     <Italic className="w-4 h-4" />
@@ -190,7 +190,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('underline', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Underline"
                   >
                     <Underline className="w-4 h-4" />
@@ -198,7 +198,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('strikethrough', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Strikethrough (~~text~~)"
                   >
                     <Strikethrough className="w-4 h-4" />
@@ -206,11 +206,11 @@ export default function RTE({ name, control, label, defaultValue = "", className
                 </div>
 
                 {/* Headings */}
-                <div className="flex items-center gap-1 border-r border-slate-600 pr-3 mr-3">
+                <div className="flex items-center gap-1 border-r border-border pr-3 mr-3">
                   <button
                     type="button"
                     onClick={() => formatText('h1', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Heading 1 (# text)"
                   >
                     <Heading1 className="w-4 h-4" />
@@ -218,7 +218,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('h2', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Heading 2 (## text)"
                   >
                     <Heading2 className="w-4 h-4" />
@@ -226,7 +226,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('h3', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Heading 3 (### text)"
                   >
                     <Heading3 className="w-4 h-4" />
@@ -234,11 +234,11 @@ export default function RTE({ name, control, label, defaultValue = "", className
                 </div>
 
                 {/* Lists and Elements */}
-                <div className="flex items-center gap-1 border-r border-slate-600 pr-3 mr-3">
+                <div className="flex items-center gap-1 border-r border-border pr-3 mr-3">
                   <button
                     type="button"
                     onClick={() => formatText('ul', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Bullet List (- item)"
                   >
                     <List className="w-4 h-4" />
@@ -246,7 +246,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('ol', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Numbered List (1. item)"
                   >
                     <ListOrdered className="w-4 h-4" />
@@ -254,7 +254,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('quote', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Quote (> text)"
                   >
                     <Quote className="w-4 h-4" />
@@ -262,7 +262,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('code', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Code Block (```code```)"
                   >
                     <Code className="w-4 h-4" />
@@ -274,7 +274,7 @@ export default function RTE({ name, control, label, defaultValue = "", className
                   <button
                     type="button"
                     onClick={() => formatText('link', currentValue, handleContentChange)}
-                    className="p-2 hover:bg-slate-700 text-slate-300 hover:text-white rounded transition-colors"
+                    className="p-2 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Insert Link ([text](url))"
                   >
                     <LinkIcon className="w-4 h-4" />
@@ -289,9 +289,9 @@ export default function RTE({ name, control, label, defaultValue = "", className
                     ref={textareaRef}
                     value={currentValue}
                     onChange={handleTextareaChange}
-                    className="w-full min-h-[450px] max-h-[600px] p-6 text-slate-200 bg-transparent border-none outline-none resize-none text-lg leading-relaxed font-mono"
+                    className="w-full min-h-[450px] max-h-[600px] p-6 text-foreground bg-transparent border-none outline-none resize-none text-lg leading-relaxed font-mono"
                     style={{
-                      caretColor: '#8b5cf6',
+                      caretColor: 'var(--primary)',
                       direction: 'ltr',
                       textAlign: 'left'
                     }}
@@ -311,7 +311,7 @@ You can use markdown syntax:
                   />
                 ) : (
                   <div
-                    className="min-h-[450px] max-h-[600px] overflow-y-auto p-6 text-slate-200"
+                    className="min-h-[450px] max-h-[600px] overflow-y-auto p-6 text-foreground"
                     dangerouslySetInnerHTML={{ __html: convertToHTML(currentValue) }}
                   />
                 )}
@@ -328,24 +328,22 @@ You can use markdown syntax:
                 }
                 
                 textarea::-webkit-scrollbar-track {
-                  background: #1f2937;
-                  border-radius: 4px;
+                  background: var(--muted);
                 }
                 
                 textarea::-webkit-scrollbar-thumb {
-                  background: #4b5563;
-                  border-radius: 4px;
+                  background: var(--muted-foreground);
                 }
                 
                 textarea::-webkit-scrollbar-thumb:hover {
-                  background: #6b7280;
+                  background: var(--foreground);
                 }
                 
                 /* Preview Styles */
                 .min-h-\\[450px\\] h1 {
                   font-size: 2.5rem;
                   font-weight: bold;
-                  color: white;
+                  color: var(--foreground);
                   margin: 1.5rem 0 1rem 0;
                   line-height: 1.2;
                 }
@@ -353,17 +351,17 @@ You can use markdown syntax:
                 .min-h-\\[450px\\] h2 {
                   font-size: 2rem;
                   font-weight: bold;
-                  color: white;
+                  color: var(--foreground);
                   margin: 1.25rem 0 0.75rem 0;
                   line-height: 1.3;
-                  border-bottom: 2px solid #374151;
+                  border-bottom: 2px solid var(--border);
                   padding-bottom: 0.5rem;
                 }
                 
                 .min-h-\\[450px\\] h3 {
                   font-size: 1.5rem;
                   font-weight: 600;
-                  color: white;
+                  color: var(--foreground);
                   margin: 1rem 0 0.5rem 0;
                   line-height: 1.4;
                 }
@@ -371,71 +369,69 @@ You can use markdown syntax:
                 .min-h-\\[450px\\] p {
                   margin: 0.75rem 0;
                   line-height: 1.6;
-                  color: #e2e8f0;
+                  color: var(--muted-foreground);
                 }
                 
                 .min-h-\\[450px\\] blockquote {
-                  border-left: 4px solid #8b5cf6;
-                  background: rgba(139, 92, 246, 0.1);
+                  border-left: 4px solid var(--primary);
+                  background: var(--accent);
                   padding: 1rem 1.5rem;
                   margin: 1.5rem 0;
-                  border-radius: 0 0.5rem 0.5rem 0;
                   font-style: italic;
-                  color: #cbd5e1;
+                  color: var(--muted-foreground);
                 }
                 
                 .min-h-\\[450px\\] pre {
-                  background: #000000;
-                  color: #00ff00;
+                  background: var(--card);
+                  color: var(--foreground);
                   padding: 1rem;
-                  border-radius: 0.5rem;
-                  border: 1px solid #374151;
+                  border: 1px solid var(--border);
                   overflow-x: auto;
                   margin: 1rem 0;
                 }
                 
                 .min-h-\\[450px\\] code {
-                  background: rgba(139, 92, 246, 0.2);
-                  color: #c084fc;
+                  background: var(--accent);
+                  color: var(--primary);
                   padding: 0.125rem 0.375rem;
-                  border-radius: 0.25rem;
                   font-size: 0.875rem;
                 }
                 
                 .min-h-\\[450px\\] strong {
                   font-weight: bold;
-                  color: white;
+                  color: var(--foreground);
                 }
                 
                 .min-h-\\[450px\\] em {
                   font-style: italic;
-                  color: #cbd5e1;
+                  color: var(--muted-foreground);
                 }
                 
                 .min-h-\\[450px\\] del {
                   text-decoration: line-through;
-                  color: #94a3b8;
+                  color: var(--muted-foreground);
                 }
                 
                 .min-h-\\[450px\\] a {
-                  color: #8b5cf6;
+                  color: var(--primary);
                   text-decoration: underline;
                 }
                 
                 .min-h-\\[450px\\] a:hover {
-                  color: #a78bfa;
+                  color: var(--primary);
+                  opacity: 0.8;
                 }
                 
                 .min-h-\\[450px\\] li {
                   margin: 0.5rem 0;
                   line-height: 1.5;
-                  color: #e2e8f0;
+                  color: var(--muted-foreground);
                   margin-left: 1.5rem;
                 }
                 
                 .min-h-\\[450px\\] li:before {
                   content: "• ";
-                  color: #8b5cf6;
+                  color: var(--primary);
                   font-weight: bold;
                   margin-right: 0.5rem;
                 }

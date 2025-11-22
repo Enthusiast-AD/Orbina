@@ -30,11 +30,7 @@ function Footer() {
   };
 
   return (
-    <footer className="bg-slate-900 border-t border-slate-800 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-900/5 to-blue-900/5"></div>
-      <div className="absolute top-0 left-1/4 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-0 right-1/4 w-24 h-24 bg-blue-500/5 rounded-full blur-xl"></div>
+    <footer className="bg-card border-t border-border relative overflow-hidden">
       
       <div className="relative z-10">
         {/* Main Footer Content */}
@@ -47,9 +43,9 @@ function Footer() {
                 <div className="w-8 h-8  flex items-center justify-center">
                   <img src={orbina} alt="Orbina Logo" width={40} height={40} />
                 </div>
-                <span className="text-2xl font-bold text-white">Orbina</span>
+                <span className="text-2xl font-bold text-foreground">Orbina</span>
               </div>
-              <p className="text-slate-400 mb-6 leading-relaxed">
+              <p className="text-muted-foreground mb-6 leading-relaxed">
                 Empowering writers to share their stories, connect with readers, 
                 and build a vibrant community around great content.
               </p>
@@ -60,86 +56,86 @@ function Footer() {
                   href="https://twitter.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-slate-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                  className="w-10 h-10 bg-accent hover:bg-primary flex items-center justify-center transition-all duration-300 hover:scale-110 group"
                 >
-                  <Twitter className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                  <Twitter className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
                 </a>
                 <a 
                   href="https://github.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-slate-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                  className="w-10 h-10 bg-accent hover:bg-primary flex items-center justify-center transition-all duration-300 hover:scale-110 group"
                 >
-                  <Github className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                  <Github className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
                 </a>
                 <a 
                   href="https://linkedin.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-slate-800 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                  className="w-10 h-10 bg-accent hover:bg-primary flex items-center justify-center transition-all duration-300 hover:scale-110 group"
                 >
-                  <Linkedin className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                  <Linkedin className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
                 </a>
                 <a 
                   href="https://instagram.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-slate-800 hover:bg-pink-600 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                  className="w-10 h-10 bg-accent hover:bg-primary flex items-center justify-center transition-all duration-300 hover:scale-110 group"
                 >
-                  <Instagram className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                  <Instagram className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
                 </a>
               </div>
             </div>
 
             {/* Quick Links */}
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-purple-400" />
+              <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-primary" />
                 Quick Links
               </h3>
               <ul className="space-y-3">
                 <li>
                   <Link 
                     to="/" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Home
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/all-posts" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     All Stories
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/add-post" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Write Story
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/messages" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Messages
                   </Link>
                 </li>
                 <li>
                   <Link 
                     to="/profile" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Profile
                   </Link>
                 </li>
@@ -148,53 +144,53 @@ function Footer() {
 
             {/* Community */}
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-400" />
+              <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
                 Community
               </h3>
               <ul className="space-y-3">
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Featured Writers
                   </a>
                 </li>
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Writing Guidelines
                   </a>
                 </li>
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Community Rules
                   </a>
                 </li>
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Events & Contests
                   </a>
                 </li>
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Discord Community
                   </a>
                 </li>
@@ -203,53 +199,53 @@ function Footer() {
 
             {/* Support & Legal */}
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-green-400" />
+              <h3 className="text-foreground font-semibold mb-4 flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-primary" />
                 Support & Legal
               </h3>
               <ul className="space-y-3 mb-6">
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Help Center
                   </a>
                 </li>
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Contact Us
                   </a>
                 </li>
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Privacy Policy
                   </a>
                 </li>
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Terms of Service
                   </a>
                 </li>
                 <li>
                   <a 
                     href="#" 
-                    className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                    <span className="w-1.5 h-1.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Cookie Policy
                   </a>
                 </li>
@@ -257,11 +253,11 @@ function Footer() {
 
               {/* Contact Info */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-slate-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="w-4 h-4" />
                   <span className="text-sm">ansh@orbina.net</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Globe className="w-4 h-4" />
                   <span className="text-sm">Available Worldwide</span>
                 </div>
@@ -274,14 +270,14 @@ function Footer() {
             
 
             {/* Newsletter Signup */}
-            <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-xl p-6 mb-8">
+            <div className="bg-accent/50 p-6 mb-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="text-center md:text-left">
-                  <h3 className="text-white font-semibold mb-1 flex items-center gap-2 justify-center md:justify-start">
-                    <Star className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-foreground font-semibold mb-1 flex items-center gap-2 justify-center md:justify-start">
+                    <Star className="w-5 h-5 text-primary" />
                     Stay Updated
                   </h3>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     Get the latest stories and writing tips delivered to your inbox.
                   </p>
                 </div>
@@ -289,9 +285,9 @@ function Footer() {
                   <input
                     type="email"
                     placeholder="Enter your email..."
-                    className="flex-1 md:w-64 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="flex-1 md:w-64 px-4 py-2 bg-background border border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent rounded-none"
                   />
-                  <button className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium transition-colors whitespace-nowrap">
+                  <button className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors whitespace-nowrap rounded-none">
                     Subscribe
                   </button>
                 </div>
@@ -301,10 +297,10 @@ function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-slate-800 bg-slate-950/50">
+        <div className="border-t border-border bg-card">
           <div className="max-w-7xl mx-auto px-6 py-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4 text-slate-400 text-sm">
+              <div className="flex items-center gap-4 text-muted-foreground text-sm">
                 <span>© {currentYear} Orbina. All rights reserved.</span>
                 <div className="flex items-center gap-1">
                   <span>Made with</span>
@@ -314,17 +310,17 @@ function Footer() {
               </div>
               
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-slate-400 text-sm">
-                  <Shield className="w-4 h-4 text-green-400" />
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  <Shield className="w-4 h-4 text-primary" />
                   <span>Secure & Private</span>
                 </div>
                 
                 <button
                   onClick={scrollToTop}
-                  className="w-10 h-10 bg-slate-800 hover:bg-purple-600 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                  className="w-10 h-10 bg-accent hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-all duration-300 hover:scale-110 group rounded-none"
                   title="Back to top"
                 >
-                  <ArrowUp className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                  <ArrowUp className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground" />
                 </button>
               </div>
             </div>

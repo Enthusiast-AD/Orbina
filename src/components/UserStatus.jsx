@@ -22,7 +22,7 @@ const UserStatus = ({
     <div className={`flex items-center gap-1 ${className}`}>
       <StatusIcon className={sizeClasses[size]} />
       {showText && (
-        <span className={`text-xs ${isOnline ? 'text-green-400' : 'text-gray-400'}`}>
+        <span className={`text-xs ${isOnline ? 'text-green-500' : 'text-muted-foreground'}`}>
           {statusText}
         </span>
       )}

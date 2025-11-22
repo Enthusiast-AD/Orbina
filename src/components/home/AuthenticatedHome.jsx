@@ -6,7 +6,7 @@ import {
   ArrowRight, Timer, Target, Grid3X3, ChevronRight, Star,
   Search, Pin, Zap, Award, Bell, Activity, RefreshCw
 } from 'lucide-react';
-import { Container, PostCard } from '../index';
+import { Container, PostCard, StatsCard } from '../index';
 import messagesService from '../../appwrite/messages';
 import likesService from '../../appwrite/likes';
 import appwriteService from '../../appwrite/config';
@@ -201,18 +201,17 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
       <div className="py-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 mb-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-blue-600/5"></div>
+          <div className="bg-card p-6 border border-border mb-6 relative">
             <div className="relative z-10 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Timer className="w-5 h-5 text-blue-400" />
-                  <span className="text-blue-400 font-medium">{getGreeting()}</span>
+                  <Timer className="w-5 h-5 text-primary" />
+                  <span className="text-primary font-medium">{getGreeting()}</span>
                 </div>
-                <h1 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-                  Welcome back, {userData.name}! <Award className="w-7 h-7 text-amber-400" />
+                <h1 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
+                  Welcome back, {userData.name}! <Award className="w-7 h-7 text-yellow-500" />
                 </h1>
-                <p className="text-slate-400">
+                <p className="text-muted-foreground">
                   Ready to discover amazing stories and share your thoughts?
                 </p>
               </div>
@@ -220,20 +219,20 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
                 <button
                   onClick={handleRefresh}
                   disabled={refreshing}
-                  className="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-all duration-300 transform hover:scale-110 shadow-lg"
+                  className="p-3 bg-secondary hover:bg-secondary/80 transition-all duration-300 hover:translate-y-[-2px] shadow-sm cursor-pointer border border-border"
                   title="Refresh"
                 >
-                  <RefreshCw className={`w-5 h-5 text-slate-300 ${refreshing ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-5 h-5 text-secondary-foreground ${refreshing ? 'animate-spin' : ''}`} />
                 </button>
                 
                 <button
                   onClick={() => navigate('/messages')}
-                  className="relative p-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-300 transform hover:scale-110 shadow-lg"
+                  className="relative p-3 bg-primary hover:bg-primary/90 transition-all duration-300 hover:translate-y-[-2px] shadow-sm cursor-pointer"
                   title="Messages"
                 >
-                  <MessageCircle className="w-5 h-5 text-white" />
+                  <MessageCircle className="w-5 h-5 text-primary-foreground" />
                   {userStats.unreadMessages > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center animate-pulse">
+                    <span className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-xs px-2 py-1 min-w-[20px] text-center animate-pulse">
                       {userStats.unreadMessages > 99 ? '99+' : userStats.unreadMessages}
                     </span>
                   )}
@@ -241,7 +240,7 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
 
                 <button
                   onClick={() => navigate('/add-post')}
-                  className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="flex items-center gap-2 px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-300 hover:translate-y-[-2px] shadow-sm cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   New Story
@@ -251,100 +250,56 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="group bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 cursor-pointer"
-                 onClick={() => navigate('/profile')}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-purple-600/30 rounded-lg group-hover:scale-110 transition-transform">
-                  <Heart className="w-5 h-5 text-purple-300" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="text-2xl font-bold text-white mb-1">
-                {statsLoading ? (
-                  <div className="animate-pulse bg-slate-700 h-8 w-8 rounded"></div>
-                ) : (
-                  userStats.totalLikes
-                )}
-              </div>
-              <div className="text-purple-300 text-xs">Total Likes</div>
-              <div className="text-purple-400 text-xs mt-1">From your stories</div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-blue-600/20 to-cyan-600/20 backdrop-blur-sm rounded-xl p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 cursor-pointer"
-                 onClick={() => navigate('/profile')}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-blue-600/30 rounded-lg group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-5 h-5 text-blue-300" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="text-2xl font-bold text-white mb-1">
-                {statsLoading ? (
-                  <div className="animate-pulse bg-slate-700 h-8 w-8 rounded"></div>
-                ) : (
-                  userStats.totalPosts
-                )}
-              </div>
-              <div className="text-blue-300 text-xs">Your Stories</div>
-              <div className="text-blue-400 text-xs mt-1">Keep writing!</div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-green-600/20 to-emerald-600/20 backdrop-blur-sm rounded-xl p-4 border border-green-500/30 hover:border-green-400/50 transition-all duration-300 cursor-pointer"
-                 onClick={() => navigate('/messages')}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-green-600/30 rounded-lg group-hover:scale-110 transition-transform">
-                  <MessageCircle className="w-5 h-5 text-green-300" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-green-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="text-2xl font-bold text-white mb-1">
-                {statsLoading ? (
-                  <div className="animate-pulse bg-slate-700 h-8 w-8 rounded"></div>
-                ) : (
-                  userStats.unreadMessages
-                )}
-              </div>
-              <div className="text-green-300 text-xs">New Messages</div>
-              <div className="text-green-400 text-xs mt-1">Stay connected</div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-orange-600/20 to-red-600/20 backdrop-blur-sm rounded-xl p-4 border border-orange-500/30 hover:border-orange-400/50 transition-all duration-300 cursor-pointer">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-orange-600/30 rounded-lg group-hover:scale-110 transition-transform">
-                  <Users className="w-5 h-5 text-orange-300" />
-                </div>
-                <ChevronRight className="w-4 h-4 text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="text-2xl font-bold text-white mb-1">
-                {statsLoading ? (
-                  <div className="animate-pulse bg-slate-700 h-8 w-8 rounded"></div>
-                ) : (
-                  userStats.totalUsers
-                )}
-              </div>
-              <div className="text-orange-300 text-xs">Community</div>
-              <div className="text-orange-400 text-xs mt-1">Growing daily</div>
-            </div>
+                    {/* Stats Overview */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <StatsCard
+              icon={Heart}
+              label="Total Likes"
+              value={statsLoading ? "..." : userStats.totalLikes}
+              color="bg-card border-border text-foreground hover:border-red-500"
+              trend="Lifetime"
+            />
+            <StatsCard
+              icon={BookOpen}
+              label="Stories Published"
+              value={statsLoading ? "..." : userStats.totalPosts}
+              color="bg-card border-border text-foreground hover:border-blue-500"
+              trend="Keep writing"
+            />
+            <StatsCard
+              icon={MessageCircle}
+              label="New Messages"
+              value={statsLoading ? "..." : userStats.unreadMessages}
+              color="bg-card border-border text-foreground hover:border-green-500"
+              trend="Stay connected"
+            />
+            <StatsCard
+              icon={Users}
+              label="Community"
+              value={statsLoading ? "..." : userStats.totalUsers}
+              color="bg-card border-border text-foreground hover:border-orange-500"
+              trend="Growing daily"
+            />
           </div>
 
+
           {/* Quick Actions */}
-          <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 mb-6">
+          <div className="bg-card p-4 border border-border mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Grid3X3 className="w-6 h-6 text-blue-400" />
-                <span className="text-white font-medium">Quick Actions</span>
+                <Grid3X3 className="w-6 h-6 text-primary" />
+                <span className="text-foreground font-medium">Quick Actions</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => navigate('/all-posts')}
-                  className="px-3 py-2 text-sm hover:bg-slate-600 text-white rounded-lg transition-colors"
+                  className="px-3 py-2 text-sm hover:bg-accent text-foreground transition-colors cursor-pointer"
                 >
                   Explore All
                 </button>
                 <button
                   onClick={() => navigate('/profile')}
-                  className="px-3 py-2 text-sm hover:bg-slate-600 text-white rounded-lg transition-colors"
+                  className="px-3 py-2 text-sm hover:bg-accent text-foreground transition-colors cursor-pointer"
                 >
                   My Profile
                 </button>
@@ -358,8 +313,8 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
           <div className="mb-8">
             {pinnedPosts.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Pin className="w-5 h-5 text-blue-400" />
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Pin className="w-5 h-5 text-primary" />
                   Pinned Posts
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -374,8 +329,8 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
 
             {featuredPosts.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-500" />
                   Featured Stories
                 </h3>
                 <FeaturedPosts posts={featuredPosts.slice(0, 6)} />
@@ -387,28 +342,28 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
         {/* Latest Stories Section */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-              <TrendingUp className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+              <TrendingUp className="w-6 h-6 text-green-500" />
               Latest Stories
             </h2>
             
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleFilterChange('all')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer ${
                   filter === 'all'
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                 }`}
               >
                 All Stories
               </button>
               <button
                 onClick={() => handleFilterChange('trending')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer ${
                   filter === 'trending'
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                 }`}
               >
                 <TrendingUp className="w-3 h-3 inline mr-1" />
@@ -419,7 +374,7 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
 
           <button
             onClick={() => navigate('/all-posts')}
-            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
           >
             <span className="text-sm">Explore More</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -430,13 +385,13 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
         {displayPosts.length === 0 && !loading ? (
           <div className="flex w-full py-16 items-center justify-center">
             <div className="text-center max-w-md">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Search className="w-10 h-10 text-purple-400" />
+              <div className="w-20 h-20 bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <Search className="w-10 h-10 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">
+              <h3 className="text-2xl font-bold text-foreground mb-3">
                 {posts.length === 0 ? 'No stories yet' : 'No matches found'}
               </h3>
-              <p className="text-slate-400 mb-6 leading-relaxed">
+              <p className="text-muted-foreground mb-6 leading-relaxed">
                 {posts.length === 0
                   ? 'Be the first to share your story with our community!'
                   : 'Try adjusting your search terms or explore different categories.'}
@@ -444,7 +399,7 @@ const AuthenticatedHome = ({ posts, featuredPosts, pinnedPosts, loading, userDat
               
               <button
                 onClick={() => navigate('/add-post')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg cursor-pointer"
               >
                 <Plus className="w-5 h-5" />
                 Share Your Story
